@@ -6,8 +6,8 @@ Bocetos aprobados de Fogonazo. Cada uno es el juego real con los cambios propues
 |---|---|---|---|---|---|
 | B-01 | Mapa, ventana de instalación y Ajustes | [a · mapa, 8 bits](B-01a-mapa-8bits.png), [b · mapa con avance, 16 bits](B-01b-mapa-16bits.png), [c · instalar, 8 bits](B-01c-instalar-8bits.png), [d · instalar, 16 bits](B-01d-instalar-16bits.png), [e · Samsung Internet, 8 bits](B-01e-samsung-8bits.png), [f · Ajustes al día, 8 bits](B-01f-ajustes-8bits.png), [g · versión nueva, 16 bits](B-01g-ajustes-version-nueva-16bits.png), [h · ya instalado, 16 bits](B-01h-instalado-16bits.png) | #2, #3 | 4/10/2026 | Vigente (0.1.0) |
 | B-02 | Tablero, componentes de 8 bits | [a · nivel 26](B-02a-componentes-8bits.png), [b · antes y después](B-02b-antes-y-despues-8bits.png) | #9 | 4/10/2026 | Vigente (0.2.0) |
-| B-03 | Tablero y manual: la antena | [a · tablero, 8 bits](B-03a-antena-8bits.png), [b · tablero, 16 bits](B-03b-antena-16bits.png), [c · manual, 8 bits](B-03c-manual-8bits.png), [d · manual, 16 bits](B-03d-manual-16bits.png) | #12, #13 | — | A aprobar |
-| B-04 | Ajustes: aviso de dónde vive el avance | [a · 8 bits](B-04a-ajustes-8bits.png), [b · 16 bits](B-04b-ajustes-16bits.png) | #8 | — | A aprobar |
+| B-03 | Tablero y manual: la antena | [a · tablero, 8 bits](B-03a-antena-8bits.png), [b · tablero, 16 bits](B-03b-antena-16bits.png), [c · manual, 8 bits](B-03c-manual-8bits.png), [d · manual, 16 bits](B-03d-manual-16bits.png) | #12, #13 | 4/10/2026 | Vigente (0.2.0) |
+| B-04 | Ajustes: aviso de dónde vive el avance | [a · 8 bits](B-04a-ajustes-8bits.png), [b · 16 bits](B-04b-ajustes-16bits.png) | #8 | 4/10/2026 | Vigente (0.2.0) |
 
 Cómo se capturó cada imagen de B-01 (`node herramientas/boceto.js docs/bocetos/<imagen> …`):
 
