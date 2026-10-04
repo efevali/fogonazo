@@ -14,6 +14,8 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **Textos** (3/10). Amenos, en voseo rioplatense, sin errores ni redundancias y técnicamente correctos. Se revisaron todos los textos del juego y de los 30 niveles.
 - **GitHub como única fuente de verdad** (4/10). El código, el método, las decisiones y lo pendiente viven en este repositorio, con el mismo método que Kasa. Reemplazó a la bitácora de claude.ai y a la carpeta `fuente/` del artefacto «Fogonazo», que queda como vista previa. Repositorio público.
 - **Lo pendiente de la bitácora no pasa al repositorio** (4/10). Evaluar el nivel 29, los niveles de válvulas con 5 colores y la dificultad de los niveles sin pedido de piezas queda para cuando se juegue; si algo aparece, entra como issue.
+- **Sin duplicados** (4/10). Se borró el artefacto «Fogonazo en 16 bits» de claude.ai: su contenido es el [muestrario](muestrario.html).
+- **Sin llave de prueba** (4/10). Los niveles se juegan en orden, también para probarlos. *Descartado:* una llave que destrabe todos los niveles, como la de Kasa.
 - **Versionado desde 0.1.0** (4/10). Las siete publicaciones del artefacto no se numeran; la primera versión del repositorio es la instalable.
 - **Licencia: pendiente** (#5). Hoy el repositorio no tiene licencia (rigen los derechos de autor por defecto).
 
