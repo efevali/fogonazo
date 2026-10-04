@@ -3,9 +3,54 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Jersey+25&family=Pixelify+Sans:wght@400;600&family=Silkscreen:wght@400;700&display=swap">
 <style>
-/* Layout: banco de trabajo. Tapete antiestático con grilla, la placa PCB en el centro,
-   instrumentos con displays de 7 segmentos (LED rojo) y VFD (verde agua) en el HUD.
-   Tema oscuro único, elegido a propósito. */
+/* ================================================================================================
+   GUÍA DE ESTILO DE FOGONAZO
+   Las reglas vigentes de interfaz, dibujos, sonido y música. Por qué se decidió cada una y qué se
+   descartó está en docs/decisiones.md; las reglas del juego, en docs/manifiesto.md.
+
+   Metáfora
+   - Banco de trabajo de electrónica: tapete antiestático gris azulado con grilla de fondo, la placa
+     PCB verde en el centro e instrumentos en el tablero. Movimientos en un display de 7 segmentos
+     rojo, puntos en un display fluorescente (VFD) verde agua y el avance de estrellas en un vúmetro
+     de LEDs. Tema oscuro único, a propósito: no hay modo claro.
+   - Pensado para el celular, en vertical.
+
+   Dos consolas: 8 bits (por defecto, no se saca) y 16 bits
+   - El selector «Gráficos: 8 bits / 16 bits» está en los Ajustes del mapa y en la pausa, y se guarda.
+     Cambia todo: dibujos, interfaz, tipografía, música y efectos. Todo cambio se resuelve en las dos.
+   - Dibujos: 8 bits, 16×16 con contorno negro y colores planos (sprites.js); 16 bits, 32×32 con luz
+     desde arriba a la izquierda, brillo, tramado y contorno de color (sprites16.js).
+   - Placa: 8 bits, celdas planas; 16 bits, degradé, pistas de cobre en las calles y vías doradas.
+   - Títulos: 8 bits, Silkscreen; 16 bits, Jersey 25 con relleno metálico (dorado el logo, plateado
+     el resto). Textos y botones: 8 bits, Pixelify Sans y Silkscreen; 16 bits, Jersey 15.
+   - Paneles y menús: 8 bits, planos con borde; 16 bits, bisel, tornillos en las esquinas y vidrio
+     sobre los displays. Botones: cobre plano en 8 bits, cromados con relieve en 16.
+   - Mapa: placas verdes con pads de cobre; en 16 bits, con textura de pistas y pads con volumen,
+     plateados al completarlos.
+   - Transiciones: ninguna en 8 bits; en 16, mosaico de medio segundo al empezar cada nivel.
+   - El cartel de fin de nivel lleva siempre su panel de fondo, también en 16 bits.
+
+   Detalles
+   - El contador de estrellas va en una fila propia bajo el título, con su barra de avance.
+   - Sin ligaduras tipográficas (Pixelify Sans une «fi» y «fl» en un signo que parece una «A»).
+   - «★», «▶» y «✓» son dibujos pixelados propios (las fuentes no los traen).
+   - Ícono del juego: el LED de 16 bits con un destello detrás, sobre la placa verde.
+
+   Sonido y música (audio.js): todo se sintetiza en el navegador, sin archivos de audio
+   - Tres temas, cada uno con dos arreglos de las mismas notas: Placa (el original; niveles por
+     movimientos; la menor, Am F C G, 104 ppm), Taller (mapa; do mayor, C G Am F, arpegio a
+     corcheas, 92 ppm) y Urgente (contrarreloj; la menor con final en mi mayor, Am F Dm E, 144 ppm).
+   - 8 bits: los instrumentos del tema original (bajo cuadrado, arpegio triangular, hi-hats de
+     ruido y melodía cuadrada, que entra cada dos vueltas en Placa y Taller).
+   - 16 bits: FM tipo Genesis (bajo slap, melodía tipo bronce, arpegio que alterna entre parlantes,
+     eco corto), pasada por una etapa que satura y baja la resolución. Va al 60 % del bus de música.
+   - Sonido de línea: el original en 8 bits; «Bip» (dos pulsos FM cortos) en 16.
+   - Los efectos de 16 bits están nivelados con los de 8. La música baja al terminar un nivel para
+     que se escuche la fanfarria. Volúmenes por defecto: efectos 70, música 35; «Silenciar todo».
+
+   Textos
+   - Amenos, en voseo rioplatense, sin errores ni redundancias y técnicamente correctos.
+   ================================================================================================ */
 :root {
   --mat: #1a252d;
   --mat-line: #22303a;
