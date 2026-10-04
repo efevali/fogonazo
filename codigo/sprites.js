@@ -12,16 +12,16 @@ const SPR = {
       '................',
       '................',
       '................',
-      '..LL1L....L4LL..',
-      '..BB1B2L3LB4BB..',
-      '..BB1B2B3BB4BB..',
-      '..BB1B2B3BB4BB..',
-      'ggBB1B2B3BB4BBgg',
-      'hhBB1B2B3BB4BBhh',
-      '..BB1B2B3BB4BB..',
-      '..BB1B2B3BB4BB..',
-      '..BB1B2D3DB4BB..',
-      '..DD1D....D4DD..',
+      '................',
+      '..L1L......L4L..',
+      '..B1BL2L3LLB4B..',
+      '..B1BB2B3BBB4B..',
+      'ggB1BB2B3BBB4Bgg',
+      'hhB1BB2B3BBB4Bhh',
+      '..B1BB2B3BBB4B..',
+      '..B1BD2D3DDB4B..',
+      '..D1D......D4D..',
+      '................',
       '................',
       '................',
       '................',
@@ -31,20 +31,20 @@ const SPR = {
     pal: { S: '#e9eef3', H: '#ffffff', s: '#97a3b0', D: '#1d3f8f', L: '#79a6ff', B: '#2f6ae0', W: '#bcd5ff', m: '#1d3f8f', d: '#132c66', g: LEGS.g },
     rows: [
       '................',
-      '...SHSSSSSSSS...',
-      '...ssssssssss...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBmmBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBmmBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBWWBD...',
-      '...dddddddddd...',
+      '....SHSSSSSS....',
+      '....ssssssss....',
+      '....DLBBBWWD....',
+      '....DLBBBWWD....',
+      '....DLBBBmmD....',
+      '....DLBBBWWD....',
+      '....DLBBBWWD....',
+      '....DLBBBmmD....',
+      '....DLBBBWWD....',
+      '....DLBBBWWD....',
+      '....dddddddd....',
       '......g..g......',
       '......g..g......',
-      '................',
+      '......g..g......',
       '................',
     ],
   },
@@ -52,20 +52,20 @@ const SPR = {
     pal: { L: '#ff8a7f', H: '#ffd9d3', B: '#e5322d', D: '#a51d1d', K: '#741313', R: '#c42a2a', g: LEGS.g },
     rows: [
       '................',
-      '......LLLL......',
-      '.....LHHBBB.....',
-      '....LHHBBBBD....',
-      '....LHBBBBBD....',
-      '....LHBBBBBD....',
-      '....LBBKKBBD....',
-      '....LBBKBBBD....',
-      '....LBBKKKBD....',
-      '....BBBBBBBD....',
-      '...RRRRRRRRRR...',
-      '.....g....g.....',
-      '.....g....g.....',
-      '.....g....g.....',
-      '.....g..........',
+      '.......LL.......',
+      '......LHBB......',
+      '.....LHBBBD.....',
+      '.....LHBBBD.....',
+      '.....LHBBBD.....',
+      '.....LBKKBD.....',
+      '.....LBKBBD.....',
+      '.....LBKKKD.....',
+      '.....BBBBBD.....',
+      '....RRRRRRRR....',
+      '......g..g......',
+      '......g..g......',
+      '......g..g......',
+      '......g.........',
       '................',
     ],
   },
@@ -74,18 +74,18 @@ const SPR = {
     rows: [
       '................',
       '................',
-      '...LLLLNNLLLL...',
-      '.ppBBBBBBBBBMpp.',
-      '.qqBoBBBBBBBMqq.',
-      '...BBBBBBBBBM...',
-      '.ppBBttttttBMpp.',
-      '.qqBBBBBBBBBMqq.',
-      '...BBttttBBBM...',
-      '.ppBBBBBBBBBMpp.',
-      '.qqBBBBBBBBBMqq.',
-      '...BBBBBBBBBM...',
-      '.ppBBBBBBBBBMpp.',
-      '.qqDDDDDDDDDDqq.',
+      '....LLLNNLLL....',
+      '..ppBBBBBBBMpp..',
+      '..qqBoBBBBBMqq..',
+      '....BBBBBBBM....',
+      '..ppBttttBBMpp..',
+      '..qqBBBBBBBMqq..',
+      '....BtttBBBM....',
+      '..ppBBBBBBBMpp..',
+      '..qqBBBBBBBMqq..',
+      '....BBBBBBBM....',
+      '..ppBBBBBBBMpp..',
+      '..qqDDDDDDDDqq..',
       '................',
       '................',
     ],
@@ -95,16 +95,16 @@ const SPR = {
     rows: [
       '................',
       '................',
-      '...LLLLLLLLLL...',
-      '..LHHHHHHHHHHL..',
-      '..LLeeeeeeeeLL..',
-      '..BeBBBBBBBBeB..',
-      '..BeBttBtttBeB..',
-      '..BeBBBBBBBBeB..',
-      '..BeBtttBttBeB..',
-      '..BBeeeeeeeeBB..',
-      '..DDDDDDDDDDDD..',
+      '....LLLLLLLL....',
+      '...LHHHHHHHHL...',
+      '...LLeeeeeeLL...',
+      '...BeBBBBBBeB...',
+      '...BeBtBttBeB...',
+      '...BeBBBBBBeB...',
+      '...BeBttBtBeB...',
+      '...BBeeeeeeBB...',
       '...DDDDDDDDDD...',
+      '....DDDDDDDD....',
       '.....g....g.....',
       '.....g....g.....',
       '.....g....g.....',
@@ -201,7 +201,7 @@ const SPR = {
 SPR.coil = (function () {
   const pal = { a: '#7fd487', b: '#36a456', c: '#1f6e36', u: '#ffc489', v: '#dd8a40', w: '#9a5320', l: '#dd8a40' };
   const rows = [];
-  const cx = 8, cy = 7, R = 6.9, r = 2.6, turns = 9;
+  const cx = 8, cy = 7, R = 6.0, r = 2.9, turns = 9;
   for (let y = 0; y < 16; y++) {
     let row = '';
     for (let x = 0; x < 16; x++) {
@@ -214,7 +214,7 @@ SPR.coil = (function () {
         const edge = d > R - 1.1 || d < r + 0.9;
         if (copper) row += f < 0.13 ? 'u' : (shade > 0.55 ? 'w' : 'v');
         else row += edge ? (shade > 0.2 ? 'c' : 'b') : (shade < -0.3 ? 'a' : 'b');
-      } else if ((x === 6 || x === 9) && y >= 13 && y <= 14) row += 'l';
+      } else if ((x === 6 || x === 9) && y >= 12 && y <= 14) row += 'l';
       else row += '.';
     }
     rows.push(row);
@@ -226,17 +226,17 @@ SPR.coil = (function () {
 SPR.ccap = (function () {
   const pal = { H: '#fff6cc', L: '#ffe27a', Y: '#f2c12e', D: '#bf8913', m: '#9c6e0c', g: LEGS.g };
   const rows = [];
-  const cx = 8, cy = 6.2, R = 5.6;
+  const cx = 8, cy = 5.8, R = 4.7;
   for (let y = 0; y < 16; y++) {
     let row = '';
     for (let x = 0; x < 16; x++) {
       const dx = x + 0.5 - cx, dy = y + 0.5 - cy, d = Math.hypot(dx, dy);
       if (d <= R) {
         const sh = (dx + dy) / R;
-        if (Math.hypot(dx + 2.2, dy + 2.2) < 1.3) row += 'H';
-        else if (y === 7 && x >= 6 && x <= 9) row += 'm';
+        if (Math.hypot(dx + 1.8, dy + 1.8) < 1.1) row += 'H';
+        else if (y === 6 && x >= 7 && x <= 8) row += 'm';
         else row += sh < -0.55 ? 'L' : sh > 0.45 ? 'D' : 'Y';
-      } else if ((x === 6 || x === 9) && y >= 12 && y <= 14) row += 'g';
+      } else if ((x === 6 || x === 9) && y >= 11 && y <= 14) row += 'g';
       else row += '.';
     }
     rows.push(row);
