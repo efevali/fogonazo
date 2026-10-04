@@ -6,5 +6,12 @@
   "scripts": {
     "armar": "node herramientas/armar.js",
     "probar": "node herramientas/probar.js"
+  },
+  "devDependencies": {
+    "@fontsource/jersey-15": "^5.3.0",
+    "@fontsource/jersey-25": "^5.3.0",
+    "@fontsource/pixelify-sans": "^5.3.0",
+    "@fontsource/silkscreen": "^5.3.0",
+    "playwright": "^1.63.0"
   }
 }

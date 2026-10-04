@@ -11,6 +11,10 @@ const easeOut = t => 1 - (1 - t) * (1 - t);
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fmt = n => Math.round(n).toLocaleString('es-AR');
 
+// Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
+// VERSION de sw.js: herramientas/version.js sube las dos juntas.
+const FOGONAZO_VERSION = { v: '0.0.0', fecha: '' };
+
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
   let r = '';
@@ -24,6 +28,8 @@ const IC = {
   play: ['##.....', '####...', '######.', '#######', '######.', '####...', '##.....'],
   clock: ['..#####..', '.#.....#.', '#...#...#', '#...#...#', '#...###.#', '#.......#', '#.......#', '.#.....#.', '..#####..'],
   check: ['........#', '.......##', '#.....##.', '##...##..', '.##.##...', '..###....', '...#.....'],
+  kebab: ['##', '##', '..', '..', '##', '##', '..', '..', '##', '##'],
+  share: ['....#....', '...###...', '..#.#.#..', '....#....', '....#....', '##..#..##', '#.......#', '#.......#', '#########'],
 };
 const svgStar = on => pixSvg(IC.star, on ? '#ffbf2e' : '#2c3a44');
 
@@ -106,6 +112,165 @@ const Cloud = {
     if (this.pending) { this.pending = false; this.push(); }
   },
 };
+
+// ------------------------------------------------------------ versión instalable (#1, #2, #3)
+/* Solo en el juego publicado (github.io) o al probarlo en la computadora (localhost). En la vista previa de
+   claude.ai no se registra el service worker, no aparece la tarjeta «Instalar» y la fila de versión va sin botón. */
+const publicado = () => /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+
+function toast(msg) {
+  let el = $('#toast');
+  if (el) el.remove();
+  el = document.createElement('div');
+  el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.remove(), 3200);
+}
+
+// Versión, búsqueda y actualización (#3)
+const APPV = { ok: false, reg: null, nueva: false, buscando: false, recargar: false, ultima: 0 };
+function versionRowHTML() {
+  const t = '<b>Versión ' + FOGONAZO_VERSION.v + '</b>', f = FOGONAZO_VERSION.fecha ? 'Del ' + FOGONAZO_VERSION.fecha + '.' : '';
+  if (!APPV.ok) return `<div class="verrow" id="verRow"><span class="vt">${t}<small>${f}</small></span></div>`;
+  if (APPV.nueva) return `<div class="verrow" id="verRow"><span class="vt">${t}<small>${f}</small><span class="ver-new"><i class="led-g" aria-hidden="true"></i>Hay una versión nueva</span></span><button class="btn small" data-v="up">Actualizar</button></div>`;
+  return `<div class="verrow" id="verRow"><span class="vt">${t}<small>${f} Es la más reciente.</small></span><button class="btn small ghost" data-v="buscar"${APPV.buscando ? ' disabled' : ''}>${APPV.buscando ? 'Buscando…' : 'Buscar'}</button></div>`;
+}
+// Actualiza la fila de Ajustes y el LED del engranaje sin volver a dibujar la pantalla
+function pintarVersion() {
+  const row = $('#verRow');
+  if (row) row.outerHTML = versionRowHTML();
+  const gear = $('#btnSettings');
+  if (gear) {
+    const led = gear.querySelector('.gear-led');
+    if (APPV.nueva && !led) gear.insertAdjacentHTML('beforeend', '<i class="gear-led" aria-hidden="true"></i>');
+    if (!APPV.nueva && led) led.remove();
+    gear.setAttribute('aria-label', APPV.nueva ? 'Ajustes: hay una versión nueva' : 'Ajustes');
+  }
+}
+function marcarNueva() { APPV.nueva = true; APPV.buscando = false; pintarVersion(); }
+function vigilarInstalacion(w) {
+  if (!w) return;
+  w.addEventListener('statechange', () => {
+    if (w.state === 'installed' && navigator.serviceWorker.controller) marcarNueva();
+    if (w.state === 'redundant' && APPV.buscando) { APPV.buscando = false; pintarVersion(); toast('No se pudo bajar la versión nueva. Probá de nuevo más tarde.'); }
+  });
+}
+function iniciarApp() {
+  if (!('serviceWorker' in navigator) || !publicado()) return;
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    APPV.ok = true; APPV.reg = reg; APPV.ultima = Date.now();
+    if (reg.waiting && navigator.serviceWorker.controller) APPV.nueva = true;
+    vigilarInstalacion(reg.installing);
+    reg.addEventListener('updatefound', () => vigilarInstalacion(reg.installing));
+    pintarVersion();
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (APPV.recargar) location.reload(); });
+  // Al volver al juego después de un rato (queda abierto en segundo plano), se fija si hay algo nuevo
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && APPV.reg && Date.now() - APPV.ultima > 30 * 60 * 1000) {
+      APPV.ultima = Date.now(); APPV.reg.update().catch(() => {});
+    }
+  });
+  // Que Android no borre el avance cuando le falta espacio
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+}
+function buscarVersion() {
+  if (!APPV.reg || APPV.buscando) return;
+  if (navigator.onLine === false) { toast('Sin conexión: no se pudo buscar.'); return; }
+  APPV.buscando = true; pintarVersion();
+  APPV.reg.update().then(() => {
+    APPV.ultima = Date.now();
+    const reg = APPV.reg;
+    if (reg.waiting && navigator.serviceWorker.controller) { marcarNueva(); return; }
+    if (reg.installing) return;   // la está bajando: vigilarInstalacion avisa cuando termina
+    APPV.buscando = false; pintarVersion(); toast('Ya tenés la versión más reciente.');
+  }).catch(() => { APPV.buscando = false; pintarVersion(); toast('Sin conexión: no se pudo buscar.'); });
+}
+function actualizarApp() {
+  const w = APPV.reg && APPV.reg.waiting;
+  if (!w) { location.reload(); return; }
+  APPV.recargar = true;
+  try { sessionStorage.setItem('fogonazo-actualizado', '1'); } catch (e) {}
+  w.postMessage('actualizar');
+  setTimeout(() => location.reload(), 3000);   // por si el teléfono no avisa el cambio
+}
+function avisoActualizado() {
+  let hecho = false;
+  try { hecho = sessionStorage.getItem('fogonazo-actualizado') === '1'; sessionStorage.removeItem('fogonazo-actualizado'); } catch (e) {}
+  if (hecho) toast('Listo: ya tenés la versión ' + FOGONAZO_VERSION.v + '.');
+}
+
+/* Instalación guiada (#2), solo cuando el juego se abre en el navegador. Tarjeta arriba del bloque del nivel
+   actual. «Instalar» abre el cuadro de instalación de Chrome si el navegador ya lo permite (Chrome lo habilita
+   después de un toque y unos segundos en la página); si todavía no, o en otro navegador, una ventana con los
+   pasos del menú ⋮ (o de Safari, en iPhone). Instalado, la tarjeta pasa a «Listo». Con el juego abierto desde
+   su ícono no aparece nunca. Se guarda el aviso de Chrome para que no muestre su propio cartel. */
+const INST = { aviso: null, listo: false };
+function enNavegador() {
+  try {
+    if (['standalone', 'fullscreen', 'minimal-ui'].some(m => matchMedia('(display-mode: ' + m + ')').matches)) return false;
+  } catch (e) {}
+  return !navigator.standalone;   // iPhone: abierto desde el ícono
+}
+function esIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+// Samsung Internet arma el paquete de la app con una versión vieja de Android, y Android 14 en adelante lo
+// bloquea (problema de Samsung, sin arreglo desde la página): desde ahí se ofrece seguir en Chrome.
+function esSamsung() { return /SamsungBrowser/i.test(navigator.userAgent); }
+function chromeIntent() { return 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end'; }
+function instalarHTML() {
+  if (!publicado() || !enNavegador()) return '';
+  if (INST.listo) return `<div class="inst ok" id="inst" role="status"><span class="inst-tick">${pixSvg(IC.check)}</span><span class="inst-t"><b>Listo: Fogonazo ya está entre tus apps</b><small>Abrilo desde tu pantalla de inicio. Así funciona sin conexión.</small></span></div>`;
+  return '<div class="inst" id="inst"><img class="inst-ic" src="iconos/icono-192.png" alt=""><span class="inst-t"><b>Instalá Fogonazo en tu teléfono</b><small>Queda entre tus apps y funciona sin conexión.</small></span><button class="btn small" id="btnInst">Instalar</button></div>';
+}
+function pintarInstalar() {
+  const el = $('#inst');
+  if (!el) return;
+  const html = instalarHTML();
+  if (html) el.outerHTML = html; else el.remove();
+  const b = $('#btnInst');
+  if (b) b.onclick = () => { Sound.ensure(); Sound.play('click'); instalar(); };
+}
+function marcarInstalado() {
+  INST.listo = true; INST.aviso = null;
+  if (UI.open && $('#card .inst-head')) UI.close();
+  pintarInstalar();
+}
+function ventanaInstalar(cuerpo, acciones, alMontar) {
+  UI.modal(`<span class="eyebrow">VERSIÓN INSTALABLE</span><div class="inst-head"><img class="inst-ic" src="iconos/icono-192.png" alt=""><h2>Instalar Fogonazo</h2></div>${cuerpo}${acciones}`, alMontar);
+}
+function abrirPasos() {
+  const K = `<span class="tecla" role="img" aria-label="el menú de tres puntos">${pixSvg(IC.kebab)}</span>`;
+  const cuerpo = esIOS()
+    ? `<ol class="pasos"><li><span class="n">1</span><span>Tocá <span class="tecla" role="img" aria-label="el botón Compartir">${pixSvg(IC.share)}</span> <b>Compartir</b>, en la barra de Safari.</span></li>` +
+      '<li><span class="n">2</span><span>Bajá y elegí <b>«Agregar a inicio»</b>.</span></li></ol>'
+    : `<ol class="pasos"><li><span class="n">1</span><span>Tocá ${K} arriba a la derecha de Chrome.</span></li>` +
+      '<li><span class="n">2</span><span>Elegí <b>«Instalar app»</b>. Si dice «Agregar a la pantalla principal», tocá esa y después <b>«Instalar»</b>.</span></li></ol>' +
+      `<div class="inst-nota">Si abriste el enlace desde otra app, como WhatsApp o Gmail, primero tocá ${K} y <b>«Abrir en Chrome»</b>.</div>`;
+  ventanaInstalar(cuerpo, '<button class="btn" id="mClose" data-focus>Entendido</button>', c => {
+    c.querySelector('#mClose').onclick = () => { Sound.play('click'); UI.close(); };
+  });
+}
+function abrirSamsung() {
+  ventanaInstalar('<p>Desde este navegador, Android bloquea la instalación. Abrí Fogonazo en Chrome e instalalo desde ahí: es un toque.</p>',
+    '<div class="stack"><button class="btn" id="mChrome" data-focus>Abrir en Chrome</button><button class="btn ghost" id="mClose">Ahora no</button></div>', c => {
+      c.querySelector('#mChrome').onclick = () => { UI.close(); location.href = chromeIntent(); };
+      c.querySelector('#mClose').onclick = () => { Sound.play('click'); UI.close(); };
+    });
+}
+function instalar() {
+  if (esSamsung()) { abrirSamsung(); return; }
+  const a = INST.aviso;
+  if (!a) { abrirPasos(); return; }
+  INST.aviso = null;   // el cuadro de Chrome se puede abrir una sola vez por aviso
+  try {
+    a.prompt();
+    Promise.resolve(a.userChoice).then(r => { if (r && r.outcome === 'accepted') marcarInstalado(); }).catch(() => {});
+  } catch (e) { abrirPasos(); }
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); INST.aviso = e; });
+window.addEventListener('appinstalled', marcarInstalado);
 
 // ------------------------------------------------------------ sprites en caché
 const Spr = {
@@ -908,8 +1073,14 @@ const UI = {
         if (un) btn.addEventListener('click', () => { Sound.ensure(); Sound.play('click'); Game.open(n); });
         nodes.appendChild(btn);
       }
+      if (bi === Math.floor((current - 1) / 5)) {
+        const inst = instalarHTML();
+        if (inst) wrap.insertAdjacentHTML('beforeend', inst);
+      }
       wrap.appendChild(card);
     });
+    const bInst = $('#btnInst');
+    if (bInst) bInst.onclick = () => { Sound.ensure(); Sound.play('click'); instalar(); };
     const cur = wrap.querySelector('.node.current');
     if (cur && this._scrolled !== current) { this._scrolled = current; cur.scrollIntoView({ block: 'center' }); }
   },
@@ -955,6 +1126,7 @@ const UI = {
     this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.styleControl()}${this.soundControls()}
       <button class="btn ghost" id="mHelp">Cómo se juega</button>
       <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
+      ${versionRowHTML()}
       <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
       this.wireSound(c); this.wireStyle(c);
       c.querySelector('#mClose').onclick = () => { Sound.play('click'); this.close(); };
@@ -1287,9 +1459,23 @@ function boot() {
   UI.show('map');
   UI.renderMap();
   Cloud.init();
+  iniciarApp();
+  avisoActualizado();
+  // Botones de la fila de versión de Ajustes («Buscar» y «Actualizar»), que se vuelve a dibujar sola
+  $('#card').addEventListener('click', e => {
+    const b = e.target.closest('[data-v]');
+    if (!b || b.disabled) return;
+    Sound.play('click');
+    if (b.dataset.v === 'up') actualizarApp(); else buscarVersion();
+  });
+  // Si ya está instalado y se abre la dirección en una pestaña, la tarjeta lo dice
+  if (publicado() && enNavegador() && typeof navigator.getInstalledRelatedApps === 'function') {
+    navigator.getInstalledRelatedApps().then(l => { if (l && l.length) marcarInstalado(); }).catch(() => {});
+  }
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
-window.__fogonazo = { Game, Save, UI, View, levelDef };
+// Para las pruebas y los bocetos (herramientas/boceto.js)
+window.__fogonazo = { Game, Save, UI, View, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;
