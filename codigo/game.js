@@ -13,7 +13,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.0.0', fecha: '' };
+const FOGONAZO_VERSION = { v: '0.1.0', fecha: '4/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
