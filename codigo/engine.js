@@ -4,7 +4,7 @@
 
 const W = 8, H = 8, N = W * H;
 // Tipos de pieza
-const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6 };
+const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6, ANT: 7 };
 
 function rngFrom(seed) {
   let s = seed >>> 0;

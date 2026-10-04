@@ -301,6 +301,21 @@ function pieceSprite(c, k, hp) {
   if (k === K.BURNT) return hp >= 2 ? 'burnt2' : 'burnt1';
   return PIECE_SPRITES[c];
 }
+// Antena: ondas en píxeles que salen de los dos costados de la pieza (las mismas en 8 y 16 bits).
+function antWaves(ctx, cx, cy, cell, t, alpha) {
+  const q = Math.max(2, Math.round(cell / 12)), o = Math.max(1, Math.round(q / 3));
+  for (let n = 0; n < 2; n++) {
+    const p = ((t / 900) + n * 0.5) % 1, r = cell * (0.36 + 0.2 * p);
+    const step = q / r, span = 0.72, pts = [];
+    for (const sg of [-1, 1]) for (let a = -span; a <= span + 1e-6; a += step) pts.push([Math.round(cx + sg * Math.cos(a) * r - q / 2), Math.round(cy + Math.sin(a) * r - q / 2)]);
+    ctx.globalAlpha = alpha * (0.4 + 0.6 * (1 - p));
+    ctx.fillStyle = '#062029';
+    for (const [x, y] of pts) ctx.fillRect(x - o, y - o, q + 2 * o, q + 2 * o);
+    ctx.fillStyle = '#e4fcff';
+    for (const [x, y] of pts) ctx.fillRect(x, y, q, q);
+  }
+  ctx.globalAlpha = alpha;
+}
 // ícono suelto (canvas) para HUD y modales
 function iconCanvas(kind, arg, css) {
   const px = Math.round(css * Math.min(3, window.devicePixelRatio || 1));
@@ -323,7 +338,8 @@ function iconCanvas(kind, arg, css) {
     g.addColorStop(0, 'rgba(255,240,140,0.95)'); g.addColorStop(1, 'rgba(255,200,40,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, px, px);
     put(PIECE_SPRITES[arg || 3]);
-  } else if (kind === 'score') put('battery');
+  } else if (kind === 'ant') { put(PIECE_SPRITES[arg === undefined ? 1 : arg]); antWaves(ctx, px / 2, px / 2, px, 300, 1); }
+  else if (kind === 'score') put('battery');
   return cv;
 }
 
@@ -717,6 +733,7 @@ const View = (() => {
         ctx.fillRect(Math.round(cx + Math.cos(a) * r - q / 2), Math.round(cy + Math.sin(a) * r - q / 2), q, q);
       }
     }
+    if (pv.k === K.ANT) antWaves(ctx, cx, cy, cell, t + pv.phase * 400, alpha);
     if (pv.k === K.TUBE) {
       const a = 0.28 + 0.12 * Math.sin(t / 90 + pv.phase) + 0.06 * Math.sin(t / 23);
       const gy = cy - h * 0.06;
@@ -1126,6 +1143,7 @@ const UI = {
     this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.styleControl()}${this.soundControls()}
       <button class="btn ghost" id="mHelp">Cómo se juega</button>
       <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
+      <p class="aviso-avance">El avance se guarda solo en este teléfono. Si borrás los datos de navegación de Chrome, destildá «Cookies y datos de sitios» para no perderlo.</p>
       ${versionRowHTML()}
       <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
       this.wireSound(c); this.wireStyle(c);
@@ -1143,7 +1161,8 @@ const UI = {
     const items = [
       ['lineH:2', '<b>Rayo</b> (4 en línea): barre la fila o la columna que marcan las flechas.'],
       ['bomb:3', '<b>Sobrecarga</b> (línea en L o T): explota y limpia alrededor.'],
-      ['battery', '<b>Batería</b> (5 en línea): intercambiala con un componente y se van todos los de ese tipo.'],
+      ['battery', '<b>Batería</b> (5 en línea): intercambiala con un componente y se van todos los de ese tipo; si la tocás, los del tipo que más hay.'],
+      ['ant:1', '<b>Antena</b> (cuadrado de 2 × 2): rompe sus cuatro vecinas y transmite a distancia para romper la pieza que más te sirve.'],
     ];
     const obs = [
       ['pads:1', '<b>Pad de cobre</b>: hacé una línea encima para soldarlo. Con remaches, dos veces.'],
@@ -1153,7 +1172,7 @@ const UI = {
     ];
     const li = arr => arr.map(([ic, t]) => `<div class="it" data-icon="${ic}"><span>${t}</span></div>`).join('');
     this.modal(`<span class="eyebrow">MANUAL</span><h2>Cómo se juega</h2>
-      <p>Deslizá un componente hacia una pieza vecina (o tocá una y después la otra). Si quedan 3 o más iguales en línea, se eliminan y caen piezas nuevas. Cumplí el pedido de cada nivel antes de quedarte sin movimientos o sin tiempo.</p>
+      <p>Deslizá un componente hacia una pieza vecina (o tocá una y después la otra). Si quedan 3 o más iguales en línea, se eliminan y caen piezas nuevas. Los especiales también se activan tocándolos: cuenta como un movimiento. Cumplí el pedido de cada nivel antes de quedarte sin movimientos o sin tiempo.</p>
       <div class="legend"><h3>Componentes</h3><div class="parts">${parts}</div>
       <h3>Especiales</h3>${li(items)}<p>Combiná dos especiales entre sí para efectos más grandes: dos baterías limpian toda la placa.</p>
       <h3>Obstáculos</h3>${li(obs)}
