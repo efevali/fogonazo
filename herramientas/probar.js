@@ -14,7 +14,7 @@ function checkBoard(g, where) {
     if (!p) { if (!E.shadowed(g, i)) throw new Error(where + ': celda vacía sin tapar ' + i); emptySeen++; continue; }
     if (ids.has(p.id)) throw new Error(where + ': id duplicado');
     ids.add(p.id);
-    if (p.k <= 3 && (p.c < 0 || p.c >= g.colors)) throw new Error(where + ': color inválido ' + JSON.stringify(p));
+    if ((p.k <= 3 || p.k === E.K.ANT) && (p.c < 0 || p.c >= g.colors)) throw new Error(where + ': color inválido ' + JSON.stringify(p));
   }
   if (!E.isStable(g)) throw new Error(where + ': la placa no quedó quieta');
 }

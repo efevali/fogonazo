@@ -2,7 +2,7 @@
 (function (root) {
 'use strict';
 
-const W = 8, H = 8, N = W * H;
+const W = 8, H = 10, N = W * H;
 // Tipos de pieza
 const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6, ANT: 7 };
 
@@ -22,11 +22,13 @@ const Y = i => (i / W) | 0;
 const I = (x, y) => y * W + x;
 const inB = (x, y) => x >= 0 && x < W && y >= 0 && y < H;
 
-function matchable(p) { return p !== null && p.k <= 3 && p.c >= 0; }
-function isSpecialK(k) { return k >= 1 && k <= 4; }
+// Piezas con color: las comunes, los rayos, la sobrecarga y la antena.
+function colored(k) { return k <= 3 || k === K.ANT; }
+function matchable(p) { return p !== null && colored(p.k) && p.c >= 0; }
+function isSpecialK(k) { return (k >= 1 && k <= 4) || k === K.ANT; }
 function fixed(p) { return p !== null && (p.k === K.BURNT || p.lock === 1); }
 function swappable(p) { return p !== null && p.k !== K.BURNT && p.lock !== 1; }
-function same(p, c) { return p !== null && p.k <= 3 && p.c === c && c >= 0; }
+function same(p, c) { return p !== null && colored(p.k) && p.c === c && c >= 0; }
 
 function mk(g, c, k) { return { id: g.nextId++, c, k: k || 0, hp: 0, lock: 0 }; }
 
@@ -41,9 +43,10 @@ function createGame(level, seed) {
     moves: level.moves || 0, movesUsed: 0, timeLeft: level.time || 0,
     goals: [], tubes: null, preview: false, over: false, won: false, scoreOnly: false,
   };
-  const L = level.layout || null;
+  // un diseño con menos filas que la placa se completa con filas libres arriba
+  const L = level.layout || null, off = L ? H - L.length : 0;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = L ? L[y][x] : '.';
+    const ch = L && y >= off ? L[y - off][x] : '.';
     const i = I(x, y);
     if (ch === 'x') g.hole[i] = 1;
     else if (ch === '1') g.pad[i] = 1;
@@ -73,6 +76,7 @@ function pickColorNoMatch(g, i) {
     const c = (g.rng() * g.colors) | 0;
     if (x >= 2 && same(g.p[I(x - 1, y)], c) && same(g.p[I(x - 2, y)], c)) continue;
     if (y >= 2 && same(g.p[I(x, y - 1)], c) && same(g.p[I(x, y - 2)], c)) continue;
+    if (x >= 1 && y >= 1 && same(g.p[I(x - 1, y)], c) && same(g.p[I(x, y - 1)], c) && same(g.p[I(x - 1, y - 1)], c)) continue;
     return c;
   }
   return (g.rng() * g.colors) | 0;
@@ -107,7 +111,7 @@ function fillInitial(g) {
       }
       g.tubes.spawned = placed;
     }
-    if (findRuns(g).length === 0 && hasValidMove(g)) return;
+    if (findMatches(g).length === 0 && hasValidMove(g)) return;
   }
   if (!hasValidMove(g)) shuffle(g);
 }
@@ -122,7 +126,16 @@ function wouldMatch(g, i, c) {
   n = 1;
   for (let yy = y - 1; yy >= 0 && same(g.p[I(x, yy)], c); yy--) n++;
   for (let yy = y + 1; yy < H && same(g.p[I(x, yy)], c); yy++) n++;
-  return n >= 3;
+  if (n >= 3) return true;
+  // cuadrado de 2 × 2: la pieza en i con las otras tres del mismo color
+  for (const [dx, dy] of [[-1, -1], [0, -1], [-1, 0], [0, 0]]) {
+    const x0 = x + dx, y0 = y + dy;
+    if (x0 < 0 || y0 < 0 || x0 + 1 >= W || y0 + 1 >= H) continue;
+    let ok = true;
+    for (const [ax, ay] of [[x0, y0], [x0 + 1, y0], [x0, y0 + 1], [x0 + 1, y0 + 1]]) if ((ax !== x || ay !== y) && !same(g.p[I(ax, ay)], c)) { ok = false; break; }
+    if (ok) return true;
+  }
+  return false;
 }
 
 function swapMakesMatch(g, a, b) {
@@ -144,8 +157,12 @@ function moveKind(g, a, b) {
   return 0;
 }
 
+// Tocar un especial lo activa: es una jugada más, que se anota [i, i].
+function canTap(p) { return p !== null && isSpecialK(p.k) && !p.lock; }
+
 function listMoves(g) {
   const out = [];
+  for (let i = 0; i < N; i++) if (canTap(g.p[i])) out.push([i, i]);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = I(x, y);
     if (x + 1 < W && moveKind(g, a, a + 1)) out.push([a, a + 1]);
@@ -155,6 +172,7 @@ function listMoves(g) {
 }
 
 function hasValidMove(g) {
+  for (let i = 0; i < N; i++) if (canTap(g.p[i])) return true;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = I(x, y);
     if (x + 1 < W && moveKind(g, a, a + 1)) return true;
@@ -191,6 +209,19 @@ function findRuns(g) {
   return runs;
 }
 
+// Cuadrados de 2 × 2 del mismo color (arman la antena). Se agrupan con las líneas que los tocan.
+function findSquares(g) {
+  const out = [];
+  for (let y = 0; y + 1 < H; y++) for (let x = 0; x + 1 < W; x++) {
+    const p = g.p[I(x, y)];
+    if (!matchable(p)) continue;
+    const c = p.c;
+    if (same(g.p[I(x + 1, y)], c) && same(g.p[I(x, y + 1)], c) && same(g.p[I(x + 1, y + 1)], c)) out.push({ dir: 'sq', cells: [I(x, y), I(x + 1, y), I(x, y + 1), I(x + 1, y + 1)], c });
+  }
+  return out;
+}
+function findMatches(g) { return findRuns(g).concat(findSquares(g)); }
+
 function groupRuns(runs) {
   const parent = runs.map((_, i) => i);
   const find = i => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
@@ -212,17 +243,22 @@ function groupRuns(runs) {
   return [...map.values()];
 }
 
+// Rango: batería (5) > sobrecarga (L o T) > rayo (4) > antena (cuadrado).
+// El rayo sale perpendicular a su línea: cuatro en vertical barren la fila, y al revés.
 function decideSpecial(g, gr, prefer) {
-  let maxLen = 0, hasH = false, hasV = false, longest = null;
+  let maxLen = 0, hasH = false, hasV = false, longest = null, square = null;
   for (const r of gr.runs) {
+    if (r.dir === 'sq') { if (!square) square = r; continue; }
     if (r.cells.length > maxLen) { maxLen = r.cells.length; longest = r; }
     if (r.dir === 'h') hasH = true; else hasV = true;
   }
   let k = -1;
   if (maxLen >= 5) k = K.BAT;
   else if (hasH && hasV) k = K.BOMB;
-  else if (maxLen === 4) k = longest.dir === 'h' ? K.LH : K.LV;
+  else if (maxLen === 4) k = longest.dir === 'h' ? K.LV : K.LH;
+  else if (square) k = K.ANT;
   if (k < 0) return null;
+  if (k === K.ANT) longest = square;
   const ok = i => g.p[i] && !g.p[i].lock;
   let pos = -1;
   if (prefer) for (const i of prefer) if (gr.cells.has(i) && ok(i)) { pos = i; break; }
@@ -278,6 +314,43 @@ function zapColor(g, w, from, c, t0) {
   return targets;
 }
 
+// Antena: rompe sus 4 vecinas y transmite a `count` blancos. Con `carry` lleva otro especial
+// (rayo o sobrecarga) y lo activa en el blanco.
+function antTarget(g, w, from, taken) {
+  const free = j => j !== from && !g.hole[j] && !w.hits.has(j) && !taken.has(j);
+  const pick = a => (a.length ? a[(g.rng() * a.length) | 0] : -1);
+  // 1. lo que pide el nivel: quemados, cinta, pads
+  let c = targetsLeft(g).filter(free);
+  if (c.length) return pick(c);
+  // 2. piezas de un color que falta en el pedido
+  const need = g.goals.filter(o => o.type === 'collect' && o.have < o.need).map(o => o.color);
+  c = [];
+  if (need.length) for (let j = 0; j < N; j++) { const q = g.p[j]; if (matchable(q) && need.includes(q.c) && free(j)) c.push(j); }
+  if (c.length) return pick(c);
+  // 3. la pieza que está debajo de una válvula
+  if (g.tubes) for (let j = 0; j < N; j++) { const q = g.p[j]; if (q && q.k === K.TUBE) { const b = belowCell(g, j); if (b >= 0 && g.p[b] && free(b)) c.push(b); } }
+  if (c.length) return pick(c);
+  // 4. cualquier pieza
+  for (let j = 0; j < N; j++) { const q = g.p[j]; if (q && q.k !== K.TUBE && free(j)) c.push(j); }
+  return pick(c);
+}
+function antenna(g, w, i, t0, count, carry) {
+  const x = X(i), y = Y(i);
+  for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) if (inB(nx, ny)) hitCell(g, w, I(nx, ny), t0);
+  const taken = new Set();
+  for (let n = 0; n < count; n++) {
+    const T = antTarget(g, w, i, taken);
+    if (T < 0) break;
+    taken.add(T);
+    const tf = t0 + 40 + n * 60, th = tf + 170;
+    w.fx.push({ type: 'ant', i, to: T, t: tf });
+    if (carry === K.LH) beamRow(g, w, Y(T), X(T), th);
+    else if (carry === K.LV) beamCol(g, w, X(T), Y(T), th);
+    else if (carry === K.BOMB) blast(g, w, T, 2, th, false);
+    else hitCell(g, w, T, th);
+  }
+}
+
 function activate(g, w, i, p, t) {
   const x = X(i), y = Y(i);
   if (p.k === K.LH) beamRow(g, w, y, x, t + 30);
@@ -289,7 +362,7 @@ function activate(g, w, i, p, t) {
     let c = -1, best = 0;
     for (let k = 0; k < 8; k++) if (cnt[k] > best) { best = cnt[k]; c = k; }
     if (c >= 0) zapColor(g, w, i, c, t + 40);
-  }
+  } else if (p.k === K.ANT) antenna(g, w, i, t + 30, 1, 0);
 }
 
 // combinación por intercambio. ia = donde quedó la pieza arrastrada.
@@ -307,12 +380,12 @@ function comboWave(g, ia, ib, steps) {
       for (let j = 0; j < N; j++) hitCell(g, w, j, 140 + 40 * Math.max(Math.abs(X(j) - cx), Math.abs(Y(j) - cy)));
     } else {
       const c = O.c;
-      if (O.k === K.LH || O.k === K.LV || O.k === K.BOMB) {
+      if (O.k === K.LH || O.k === K.LV || O.k === K.BOMB || O.k === K.ANT) {
         const tr = [];
         for (let j = 0; j < N; j++) {
           const q = g.p[j];
           if (q && q.k === K.N && q.c === c && !q.lock) {
-            q.k = O.k === K.BOMB ? K.BOMB : (g.rng() < 0.5 ? K.LH : K.LV);
+            q.k = O.k === K.BOMB || O.k === K.ANT ? O.k : (g.rng() < 0.5 ? K.LH : K.LV);
             tr.push({ id: q.id, i: j, k: q.k });
           }
         }
@@ -326,7 +399,11 @@ function comboWave(g, ia, ib, steps) {
     hitCell(g, w, ia, 0); hitCell(g, w, ib, 0);
     const cx = X(ia), cy = Y(ia);
     const line = k => k === K.LH || k === K.LV;
-    if (line(A.k) && line(B.k)) {
+    if (A.k === K.ANT || B.k === K.ANT) {
+      // antena + antena: tres transmisiones; antena + rayo o sobrecarga: lo lleva al blanco
+      const O = A.k === K.ANT ? B : A;
+      antenna(g, w, ia, 30, O.k === K.ANT ? 3 : 1, O.k === K.ANT ? 0 : O.k);
+    } else if (line(A.k) && line(B.k)) {
       beamRow(g, w, cy, cx, 30); beamCol(g, w, cx, cy, 30);
     } else if (A.k === K.BOMB && B.k === K.BOMB) {
       blast(g, w, ia, 2, 60, true);
@@ -386,7 +463,7 @@ function applyWave(g, w, cascade, created) {
     const np = mk(g, s.k === K.BAT ? -1 : s.c, s.k);
     g.p[s.i] = np;
     step.created.push({ i: s.i, id: np.id, c: np.c, k: np.k });
-    pts += s.k === K.BAT ? 200 : s.k === K.BOMB ? 100 : 60;
+    pts += s.k === K.BAT ? 200 : s.k === K.BOMB ? 100 : s.k === K.ANT ? 80 : 60;
   }
   step.score = pts * Math.min(cascade, 8);
   g.score += step.score;
@@ -577,7 +654,7 @@ function settle(g, steps) {
 function resolveAll(g, steps, first, prefer) {
   let cascade = 0;
   for (let guard = 0; guard < 80; guard++) {
-    const runs = findRuns(g);
+    const runs = findMatches(g);
     let w;
     if (cascade === 0 && first) w = first;
     else { if (!runs.length) break; w = newWave(); }
@@ -606,13 +683,14 @@ function shuffle(g) {
       for (let k = cols.length - 1; k > 0; k--) { const j = (g.rng() * (k + 1)) | 0; [cols[k], cols[j]] = [cols[j], cols[k]]; }
     } else cols = idxs.map(() => (g.rng() * g.colors) | 0);
     idxs.forEach((i, n) => { g.p[i].c = cols[n]; });
-    if (findRuns(g).length === 0 && hasValidMove(g)) break;
+    if (findMatches(g).length === 0 && hasValidMove(g)) break;
   }
   return { t: 'shuffle', list: idxs.map(i => ({ id: g.p[i].id, c: g.p[i].c })) };
 }
 
 // ---------------------------------------------------------------- API
 function trySwap(g, a, b) {
+  if (a === b) return tryTap(g, a);
   const steps = [];
   if (g.over) return { valid: false, steps };
   if (Math.abs(X(a) - X(b)) + Math.abs(Y(a) - Y(b)) !== 1) return { valid: false, steps };
@@ -629,14 +707,33 @@ function trySwap(g, a, b) {
   g.movesUsed++;
   const first = kind === 2 ? comboWave(g, b, a, steps) : null;
   resolveAll(g, steps, first, [b, a]);
+  afterMove(g, steps);
+  return { valid: true, steps };
+}
+
+// Tocar un especial: se activa donde está y gasta un movimiento.
+function tryTap(g, i) {
+  const steps = [];
+  if (g.over || !canTap(g.p[i])) return { valid: false, steps };
+  const p = g.p[i];
+  if (g.mode === 'moves') g.moves--;
+  g.movesUsed++;
+  steps.push({ t: 'tap', i, id: p.id });
+  const w = newWave();
+  hitCell(g, w, i, 0);
+  resolveAll(g, steps, w, null);
+  afterMove(g, steps);
+  return { valid: true, steps };
+}
+
+function afterMove(g, steps) {
   if (g.tubes) settle(g, steps);
   if (!g.preview) {
     for (let k = 0; k < 4 && !hasValidMove(g); k++) {
       steps.push(shuffle(g));
-      if (findRuns(g).length) resolveAll(g, steps, null, null);
+      if (findMatches(g).length) resolveAll(g, steps, null, null);
     }
   }
-  return { valid: true, steps };
 }
 
 function goalsDone(g) { return g.goals.every(o => o.have >= o.need); }
@@ -691,7 +788,7 @@ function clone(g) {
 }
 
 // ---------------------------------------------------------------- bot / pistas
-const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0];
+const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0, 45];
 
 function targetsLeft(g) {
   const t = [];
@@ -748,6 +845,7 @@ function rankMoves(g, rnd) {
   const targets = targetsLeft(g);
   const out = [];
   for (const [a, b] of ms) {
+    if (a === b) { out.push({ a, b, v: evalMove(g, a, a, targets) + (rnd ? rnd() * 4 : 0) }); continue; }
     const v1 = evalMove(g, a, b, targets), v2 = evalMove(g, b, a, targets);
     out.push(v1 >= v2 ? { a, b, v: v1 + (rnd ? rnd() * 4 : 0) } : { a: b, b: a, v: v2 + (rnd ? rnd() * 4 : 0) });
   }
@@ -790,7 +888,7 @@ function stepDuration(s) {
 }
 
 const Engine = {
-  W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, listMoves, hasValidMove, moveKind,
+  W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, tryTap, canTap, isSpecialK, listMoves, hasValidMove, moveKind,
   evaluateEnd, goalsDone, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
   isStable, shadowed,
 };

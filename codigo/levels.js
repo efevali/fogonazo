@@ -54,7 +54,7 @@ const LEVELS = [
     layout: ['........', '........', '.k.k.k..', '..k.k.k.', '.k.k.k..', '..k.k.k.', '........', '........'],
     text: 'Piezas fijadas con cinta kapton. No se pueden mover, pero podés incluirlas en una línea para despegarlas.' },
   { name: 'Placa dañada', colors: 6, moves: 26, goals: [{ type: 'burnt' }], tune: 'moves', target: 0.66, tip: 'burnt2',
-    layout: ['xx....xx', 'x......x', '..BBBB..', '.B....B.', '.B....B.', '..BBBB..', 'x......x', 'xx....xx'],
+    layout: ['xx....xx', 'x......x', '........', '..BBBB..', '.B....B.', '.B....B.', '..BBBB..', '........', 'x......x', 'xx....xx'],
     text: 'Placa rota y componentes carbonizados. Los que tienen carcasa necesitan dos golpes.' },
   { name: 'Reparación urgente', colors: 6, time: 120, goals: [{ type: 'burnt' }], tune: 'time', target: 0.58,
     layout: ['........', '........', '........', 'bb.bb.bb', '........', '........', 'bb.bb.bb', '........'],

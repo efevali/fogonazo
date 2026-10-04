@@ -553,7 +553,7 @@ html[data-art="16"] .led-g, html[data-art="16"] .gear-led { border-radius: 50%; 
 (function (root) {
 'use strict';
 
-const W = 8, H = 8, N = W * H;
+const W = 8, H = 10, N = W * H;
 // Tipos de pieza
 const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6, ANT: 7 };
 
@@ -573,11 +573,13 @@ const Y = i => (i / W) | 0;
 const I = (x, y) => y * W + x;
 const inB = (x, y) => x >= 0 && x < W && y >= 0 && y < H;
 
-function matchable(p) { return p !== null && p.k <= 3 && p.c >= 0; }
-function isSpecialK(k) { return k >= 1 && k <= 4; }
+// Piezas con color: las comunes, los rayos, la sobrecarga y la antena.
+function colored(k) { return k <= 3 || k === K.ANT; }
+function matchable(p) { return p !== null && colored(p.k) && p.c >= 0; }
+function isSpecialK(k) { return (k >= 1 && k <= 4) || k === K.ANT; }
 function fixed(p) { return p !== null && (p.k === K.BURNT || p.lock === 1); }
 function swappable(p) { return p !== null && p.k !== K.BURNT && p.lock !== 1; }
-function same(p, c) { return p !== null && p.k <= 3 && p.c === c && c >= 0; }
+function same(p, c) { return p !== null && colored(p.k) && p.c === c && c >= 0; }
 
 function mk(g, c, k) { return { id: g.nextId++, c, k: k || 0, hp: 0, lock: 0 }; }
 
@@ -592,9 +594,10 @@ function createGame(level, seed) {
     moves: level.moves || 0, movesUsed: 0, timeLeft: level.time || 0,
     goals: [], tubes: null, preview: false, over: false, won: false, scoreOnly: false,
   };
-  const L = level.layout || null;
+  // un diseño con menos filas que la placa se completa con filas libres arriba
+  const L = level.layout || null, off = L ? H - L.length : 0;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = L ? L[y][x] : '.';
+    const ch = L && y >= off ? L[y - off][x] : '.';
     const i = I(x, y);
     if (ch === 'x') g.hole[i] = 1;
     else if (ch === '1') g.pad[i] = 1;
@@ -624,6 +627,7 @@ function pickColorNoMatch(g, i) {
     const c = (g.rng() * g.colors) | 0;
     if (x >= 2 && same(g.p[I(x - 1, y)], c) && same(g.p[I(x - 2, y)], c)) continue;
     if (y >= 2 && same(g.p[I(x, y - 1)], c) && same(g.p[I(x, y - 2)], c)) continue;
+    if (x >= 1 && y >= 1 && same(g.p[I(x - 1, y)], c) && same(g.p[I(x, y - 1)], c) && same(g.p[I(x - 1, y - 1)], c)) continue;
     return c;
   }
   return (g.rng() * g.colors) | 0;
@@ -658,7 +662,7 @@ function fillInitial(g) {
       }
       g.tubes.spawned = placed;
     }
-    if (findRuns(g).length === 0 && hasValidMove(g)) return;
+    if (findMatches(g).length === 0 && hasValidMove(g)) return;
   }
   if (!hasValidMove(g)) shuffle(g);
 }
@@ -673,7 +677,16 @@ function wouldMatch(g, i, c) {
   n = 1;
   for (let yy = y - 1; yy >= 0 && same(g.p[I(x, yy)], c); yy--) n++;
   for (let yy = y + 1; yy < H && same(g.p[I(x, yy)], c); yy++) n++;
-  return n >= 3;
+  if (n >= 3) return true;
+  // cuadrado de 2 × 2: la pieza en i con las otras tres del mismo color
+  for (const [dx, dy] of [[-1, -1], [0, -1], [-1, 0], [0, 0]]) {
+    const x0 = x + dx, y0 = y + dy;
+    if (x0 < 0 || y0 < 0 || x0 + 1 >= W || y0 + 1 >= H) continue;
+    let ok = true;
+    for (const [ax, ay] of [[x0, y0], [x0 + 1, y0], [x0, y0 + 1], [x0 + 1, y0 + 1]]) if ((ax !== x || ay !== y) && !same(g.p[I(ax, ay)], c)) { ok = false; break; }
+    if (ok) return true;
+  }
+  return false;
 }
 
 function swapMakesMatch(g, a, b) {
@@ -695,8 +708,12 @@ function moveKind(g, a, b) {
   return 0;
 }
 
+// Tocar un especial lo activa: es una jugada más, que se anota [i, i].
+function canTap(p) { return p !== null && isSpecialK(p.k) && !p.lock; }
+
 function listMoves(g) {
   const out = [];
+  for (let i = 0; i < N; i++) if (canTap(g.p[i])) out.push([i, i]);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = I(x, y);
     if (x + 1 < W && moveKind(g, a, a + 1)) out.push([a, a + 1]);
@@ -706,6 +723,7 @@ function listMoves(g) {
 }
 
 function hasValidMove(g) {
+  for (let i = 0; i < N; i++) if (canTap(g.p[i])) return true;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = I(x, y);
     if (x + 1 < W && moveKind(g, a, a + 1)) return true;
@@ -742,6 +760,19 @@ function findRuns(g) {
   return runs;
 }
 
+// Cuadrados de 2 × 2 del mismo color (arman la antena). Se agrupan con las líneas que los tocan.
+function findSquares(g) {
+  const out = [];
+  for (let y = 0; y + 1 < H; y++) for (let x = 0; x + 1 < W; x++) {
+    const p = g.p[I(x, y)];
+    if (!matchable(p)) continue;
+    const c = p.c;
+    if (same(g.p[I(x + 1, y)], c) && same(g.p[I(x, y + 1)], c) && same(g.p[I(x + 1, y + 1)], c)) out.push({ dir: 'sq', cells: [I(x, y), I(x + 1, y), I(x, y + 1), I(x + 1, y + 1)], c });
+  }
+  return out;
+}
+function findMatches(g) { return findRuns(g).concat(findSquares(g)); }
+
 function groupRuns(runs) {
   const parent = runs.map((_, i) => i);
   const find = i => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
@@ -763,17 +794,22 @@ function groupRuns(runs) {
   return [...map.values()];
 }
 
+// Rango: batería (5) > sobrecarga (L o T) > rayo (4) > antena (cuadrado).
+// El rayo sale perpendicular a su línea: cuatro en vertical barren la fila, y al revés.
 function decideSpecial(g, gr, prefer) {
-  let maxLen = 0, hasH = false, hasV = false, longest = null;
+  let maxLen = 0, hasH = false, hasV = false, longest = null, square = null;
   for (const r of gr.runs) {
+    if (r.dir === 'sq') { if (!square) square = r; continue; }
     if (r.cells.length > maxLen) { maxLen = r.cells.length; longest = r; }
     if (r.dir === 'h') hasH = true; else hasV = true;
   }
   let k = -1;
   if (maxLen >= 5) k = K.BAT;
   else if (hasH && hasV) k = K.BOMB;
-  else if (maxLen === 4) k = longest.dir === 'h' ? K.LH : K.LV;
+  else if (maxLen === 4) k = longest.dir === 'h' ? K.LV : K.LH;
+  else if (square) k = K.ANT;
   if (k < 0) return null;
+  if (k === K.ANT) longest = square;
   const ok = i => g.p[i] && !g.p[i].lock;
   let pos = -1;
   if (prefer) for (const i of prefer) if (gr.cells.has(i) && ok(i)) { pos = i; break; }
@@ -829,6 +865,43 @@ function zapColor(g, w, from, c, t0) {
   return targets;
 }
 
+// Antena: rompe sus 4 vecinas y transmite a `count` blancos. Con `carry` lleva otro especial
+// (rayo o sobrecarga) y lo activa en el blanco.
+function antTarget(g, w, from, taken) {
+  const free = j => j !== from && !g.hole[j] && !w.hits.has(j) && !taken.has(j);
+  const pick = a => (a.length ? a[(g.rng() * a.length) | 0] : -1);
+  // 1. lo que pide el nivel: quemados, cinta, pads
+  let c = targetsLeft(g).filter(free);
+  if (c.length) return pick(c);
+  // 2. piezas de un color que falta en el pedido
+  const need = g.goals.filter(o => o.type === 'collect' && o.have < o.need).map(o => o.color);
+  c = [];
+  if (need.length) for (let j = 0; j < N; j++) { const q = g.p[j]; if (matchable(q) && need.includes(q.c) && free(j)) c.push(j); }
+  if (c.length) return pick(c);
+  // 3. la pieza que está debajo de una válvula
+  if (g.tubes) for (let j = 0; j < N; j++) { const q = g.p[j]; if (q && q.k === K.TUBE) { const b = belowCell(g, j); if (b >= 0 && g.p[b] && free(b)) c.push(b); } }
+  if (c.length) return pick(c);
+  // 4. cualquier pieza
+  for (let j = 0; j < N; j++) { const q = g.p[j]; if (q && q.k !== K.TUBE && free(j)) c.push(j); }
+  return pick(c);
+}
+function antenna(g, w, i, t0, count, carry) {
+  const x = X(i), y = Y(i);
+  for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) if (inB(nx, ny)) hitCell(g, w, I(nx, ny), t0);
+  const taken = new Set();
+  for (let n = 0; n < count; n++) {
+    const T = antTarget(g, w, i, taken);
+    if (T < 0) break;
+    taken.add(T);
+    const tf = t0 + 40 + n * 60, th = tf + 170;
+    w.fx.push({ type: 'ant', i, to: T, t: tf });
+    if (carry === K.LH) beamRow(g, w, Y(T), X(T), th);
+    else if (carry === K.LV) beamCol(g, w, X(T), Y(T), th);
+    else if (carry === K.BOMB) blast(g, w, T, 2, th, false);
+    else hitCell(g, w, T, th);
+  }
+}
+
 function activate(g, w, i, p, t) {
   const x = X(i), y = Y(i);
   if (p.k === K.LH) beamRow(g, w, y, x, t + 30);
@@ -840,7 +913,7 @@ function activate(g, w, i, p, t) {
     let c = -1, best = 0;
     for (let k = 0; k < 8; k++) if (cnt[k] > best) { best = cnt[k]; c = k; }
     if (c >= 0) zapColor(g, w, i, c, t + 40);
-  }
+  } else if (p.k === K.ANT) antenna(g, w, i, t + 30, 1, 0);
 }
 
 // combinación por intercambio. ia = donde quedó la pieza arrastrada.
@@ -858,12 +931,12 @@ function comboWave(g, ia, ib, steps) {
       for (let j = 0; j < N; j++) hitCell(g, w, j, 140 + 40 * Math.max(Math.abs(X(j) - cx), Math.abs(Y(j) - cy)));
     } else {
       const c = O.c;
-      if (O.k === K.LH || O.k === K.LV || O.k === K.BOMB) {
+      if (O.k === K.LH || O.k === K.LV || O.k === K.BOMB || O.k === K.ANT) {
         const tr = [];
         for (let j = 0; j < N; j++) {
           const q = g.p[j];
           if (q && q.k === K.N && q.c === c && !q.lock) {
-            q.k = O.k === K.BOMB ? K.BOMB : (g.rng() < 0.5 ? K.LH : K.LV);
+            q.k = O.k === K.BOMB || O.k === K.ANT ? O.k : (g.rng() < 0.5 ? K.LH : K.LV);
             tr.push({ id: q.id, i: j, k: q.k });
           }
         }
@@ -877,7 +950,11 @@ function comboWave(g, ia, ib, steps) {
     hitCell(g, w, ia, 0); hitCell(g, w, ib, 0);
     const cx = X(ia), cy = Y(ia);
     const line = k => k === K.LH || k === K.LV;
-    if (line(A.k) && line(B.k)) {
+    if (A.k === K.ANT || B.k === K.ANT) {
+      // antena + antena: tres transmisiones; antena + rayo o sobrecarga: lo lleva al blanco
+      const O = A.k === K.ANT ? B : A;
+      antenna(g, w, ia, 30, O.k === K.ANT ? 3 : 1, O.k === K.ANT ? 0 : O.k);
+    } else if (line(A.k) && line(B.k)) {
       beamRow(g, w, cy, cx, 30); beamCol(g, w, cx, cy, 30);
     } else if (A.k === K.BOMB && B.k === K.BOMB) {
       blast(g, w, ia, 2, 60, true);
@@ -937,7 +1014,7 @@ function applyWave(g, w, cascade, created) {
     const np = mk(g, s.k === K.BAT ? -1 : s.c, s.k);
     g.p[s.i] = np;
     step.created.push({ i: s.i, id: np.id, c: np.c, k: np.k });
-    pts += s.k === K.BAT ? 200 : s.k === K.BOMB ? 100 : 60;
+    pts += s.k === K.BAT ? 200 : s.k === K.BOMB ? 100 : s.k === K.ANT ? 80 : 60;
   }
   step.score = pts * Math.min(cascade, 8);
   g.score += step.score;
@@ -1128,7 +1205,7 @@ function settle(g, steps) {
 function resolveAll(g, steps, first, prefer) {
   let cascade = 0;
   for (let guard = 0; guard < 80; guard++) {
-    const runs = findRuns(g);
+    const runs = findMatches(g);
     let w;
     if (cascade === 0 && first) w = first;
     else { if (!runs.length) break; w = newWave(); }
@@ -1157,13 +1234,14 @@ function shuffle(g) {
       for (let k = cols.length - 1; k > 0; k--) { const j = (g.rng() * (k + 1)) | 0; [cols[k], cols[j]] = [cols[j], cols[k]]; }
     } else cols = idxs.map(() => (g.rng() * g.colors) | 0);
     idxs.forEach((i, n) => { g.p[i].c = cols[n]; });
-    if (findRuns(g).length === 0 && hasValidMove(g)) break;
+    if (findMatches(g).length === 0 && hasValidMove(g)) break;
   }
   return { t: 'shuffle', list: idxs.map(i => ({ id: g.p[i].id, c: g.p[i].c })) };
 }
 
 // ---------------------------------------------------------------- API
 function trySwap(g, a, b) {
+  if (a === b) return tryTap(g, a);
   const steps = [];
   if (g.over) return { valid: false, steps };
   if (Math.abs(X(a) - X(b)) + Math.abs(Y(a) - Y(b)) !== 1) return { valid: false, steps };
@@ -1180,14 +1258,33 @@ function trySwap(g, a, b) {
   g.movesUsed++;
   const first = kind === 2 ? comboWave(g, b, a, steps) : null;
   resolveAll(g, steps, first, [b, a]);
+  afterMove(g, steps);
+  return { valid: true, steps };
+}
+
+// Tocar un especial: se activa donde está y gasta un movimiento.
+function tryTap(g, i) {
+  const steps = [];
+  if (g.over || !canTap(g.p[i])) return { valid: false, steps };
+  const p = g.p[i];
+  if (g.mode === 'moves') g.moves--;
+  g.movesUsed++;
+  steps.push({ t: 'tap', i, id: p.id });
+  const w = newWave();
+  hitCell(g, w, i, 0);
+  resolveAll(g, steps, w, null);
+  afterMove(g, steps);
+  return { valid: true, steps };
+}
+
+function afterMove(g, steps) {
   if (g.tubes) settle(g, steps);
   if (!g.preview) {
     for (let k = 0; k < 4 && !hasValidMove(g); k++) {
       steps.push(shuffle(g));
-      if (findRuns(g).length) resolveAll(g, steps, null, null);
+      if (findMatches(g).length) resolveAll(g, steps, null, null);
     }
   }
-  return { valid: true, steps };
 }
 
 function goalsDone(g) { return g.goals.every(o => o.have >= o.need); }
@@ -1242,7 +1339,7 @@ function clone(g) {
 }
 
 // ---------------------------------------------------------------- bot / pistas
-const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0];
+const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0, 45];
 
 function targetsLeft(g) {
   const t = [];
@@ -1299,6 +1396,7 @@ function rankMoves(g, rnd) {
   const targets = targetsLeft(g);
   const out = [];
   for (const [a, b] of ms) {
+    if (a === b) { out.push({ a, b, v: evalMove(g, a, a, targets) + (rnd ? rnd() * 4 : 0) }); continue; }
     const v1 = evalMove(g, a, b, targets), v2 = evalMove(g, b, a, targets);
     out.push(v1 >= v2 ? { a, b, v: v1 + (rnd ? rnd() * 4 : 0) } : { a: b, b: a, v: v2 + (rnd ? rnd() * 4 : 0) });
   }
@@ -1341,7 +1439,7 @@ function stepDuration(s) {
 }
 
 const Engine = {
-  W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, listMoves, hasValidMove, moveKind,
+  W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, tryTap, canTap, isSpecialK, listMoves, hasValidMove, moveKind,
   evaluateEnd, goalsDone, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
   isStable, shadowed,
 };
@@ -1405,7 +1503,7 @@ const LEVELS = [
     layout: ['........', '........', '.k.k.k..', '..k.k.k.', '.k.k.k..', '..k.k.k.', '........', '........'],
     text: 'Piezas fijadas con cinta kapton. No se pueden mover, pero podés incluirlas en una línea para despegarlas.' },
   { name: 'Placa dañada', colors: 6, moves: 26, goals: [{ type: 'burnt' }], tune: 'moves', target: 0.66, tip: 'burnt2',
-    layout: ['xx....xx', 'x......x', '..BBBB..', '.B....B.', '.B....B.', '..BBBB..', 'x......x', 'xx....xx'],
+    layout: ['xx....xx', 'x......x', '........', '..BBBB..', '.B....B.', '.B....B.', '..BBBB..', '........', 'x......x', 'xx....xx'],
     text: 'Placa rota y componentes carbonizados. Los que tienen carcasa necesitan dos golpes.' },
   { name: 'Reparación urgente', colors: 6, time: 120, goals: [{ type: 'burnt' }], tune: 'time', target: 0.58,
     layout: ['........', '........', '........', 'bb.bb.bb', '........', '........', 'bb.bb.bb', '........'],
@@ -2337,6 +2435,7 @@ const Sound = (() => {
     beam() { tone({ f: 1800, f2: 160, dur: 0.28, vol: 0.06, type: 'sawtooth' }); noise({ dur: 0.25, vol: 0.09, filter: 'bandpass', freq: 3000, freq2: 600, q: 2 }); },
     blast() { noise({ dur: 0.45, vol: 0.22, filter: 'lowpass', freq: 1400, freq2: 120 }); tone({ f: 140, f2: 40, dur: 0.35, vol: 0.18, type: 'triangle' }); },
     zap() { tone({ f: 300, f2: 2400, dur: 0.35, vol: 0.06, duty: 0.125 }); for (let i = 0; i < 5; i++) noise({ t: i * 0.06, dur: 0.04, vol: 0.08, filter: 'highpass', freq: 2500 }); },
+    ant() { [0, 0.07, 0.14].forEach(t => tone({ f: 1568, f2: 2093, t, dur: 0.05, vol: 0.06, duty: 0.25 })); tone({ f: 2400, f2: 600, t: 0.2, dur: 0.18, vol: 0.04, duty: 0.125 }); },
     nova() { tone({ f: 80, f2: 1600, dur: 0.6, vol: 0.08, duty: 0.5 }); noise({ dur: 0.8, vol: 0.2, filter: 'lowpass', freq: 3000, freq2: 100 }); },
     solder() { noise({ dur: 0.22, vol: 0.05, filter: 'bandpass', freq: 5200, q: 3 }); tone({ f: 2100, dur: 0.05, vol: 0.025, type: 'triangle' }); },
     crack() { noise({ dur: 0.12, vol: 0.14, filter: 'lowpass', freq: 900 }); tone({ f: 95, dur: 0.1, vol: 0.1 }); },
@@ -2402,6 +2501,10 @@ const Sound = (() => {
     zap() {
       fm({ f: 200, f2: 3200, ratio: 7, index: 3, indexEnd: 6, indexTime: 0.4, dur: 0.42, vol: 0.06 });
       for (let i = 0; i < 6; i++) noise({ t: i * 0.055, dur: 0.035, vol: 0.07, filter: 'highpass', freq: 3500, pan: (i % 2 ? 0.4 : -0.4) });
+    },
+    ant() {
+      [0, 0.07, 0.14].forEach((t, i) => fm({ f: 1568, f2: 2093, slide: 0.04, t, ratio: 2, index: 1.5, indexEnd: 0.3, dur: 0.06, vol: 0.05, pan: (i - 1) * 0.4 }));
+      fm({ f: 2400, f2: 500, t: 0.2, ratio: 3.5, index: 3, indexEnd: 0.5, indexTime: 0.2, dur: 0.2, vol: 0.04 });
     },
     nova() {
       fm({ f: 60, f2: 1800, ratio: 2, index: 8, indexEnd: 1, indexTime: 0.7, dur: 0.75, vol: 0.08 });
@@ -2991,10 +3094,11 @@ function setStyle(st) {
 const View = (() => {
   const cv = $('#board'), ctx = cv.getContext('2d');
   let g = null;
-  let dpr = 1, cssS = 320, Wd = 320, cell = 40, sp = 36, bg = null, holeLayer = null;
+  const BW = E.W, BH = E.H;   // casilleros: 8 de ancho por 10 de alto
+  let dpr = 1, cssS = 320, Wd = 320, Hd = 400, cell = 40, sp = 36, bg = null, holeLayer = null;
   const pieces = new Map();
-  let padLv = new Uint8Array(64), padOrig = new Uint8Array(64);
-  const padFlash = new Float64Array(64);
+  let padLv = new Uint8Array(E.N), padOrig = new Uint8Array(E.N);
+  const padFlash = new Float64Array(E.N);
   let fx = [], parts = [], texts = [], timeline = [];
   let sel = -1, hint = null, shakeT = 0, shakeAmp = 0, mosaicT = 0;
   const mosaicCv = document.createElement('canvas');
@@ -3006,7 +3110,7 @@ const View = (() => {
     g = game;
     pieces.clear(); fx = []; parts = []; texts = []; timeline = []; sel = -1; hint = null;
     padOrig = g.padOrig.slice(); padLv = g.pad.slice(); padFlash.fill(0);
-    for (let i = 0; i < 64; i++) { const p = g.p[i]; if (p) addPiece(p.id, p.c, p.k, X(i), Y(i), p); }
+    for (let i = 0; i < E.N; i++) { const p = g.p[i]; if (p) addPiece(p.id, p.c, p.k, X(i), Y(i), p); }
     buildLayers();
   }
   function addPiece(id, c, k, x, y, src) {
@@ -3041,26 +3145,26 @@ const View = (() => {
   function resize() {
     const wrap = $('#boardWrap');
     const r = wrap.getBoundingClientRect();
-    const avail = Math.floor(Math.min(r.width - 16, r.height - 46));
-    const s = clamp(avail, 200, 560);
+    // el casillero es el mayor que entra a lo ancho (8) y a lo alto (10)
+    const cs = clamp(Math.floor(Math.min((r.width - 16) / BW, (r.height - 46) / BH)), 25, 70);
     dpr = Math.min(3, window.devicePixelRatio || 1);
-    const dev = Math.round(s * dpr / 8) * 8;
-    if (dev === Wd && Math.abs(cssS - dev / dpr) < 0.5) return;
-    Wd = dev; cssS = dev / dpr; cell = dev / 8;
+    const dc = Math.round(cs * dpr);
+    if (dc * BW === Wd && Math.abs(cssS - dc * BW / dpr) < 0.5) return;
+    cell = dc; Wd = dc * BW; Hd = dc * BH; cssS = Wd / dpr;
     sp = Math.round(cell * 0.94);
-    cv.width = cv.height = dev;
-    cv.style.width = cv.style.height = cssS + 'px';
+    cv.width = Wd; cv.height = Hd;
+    cv.style.width = cssS + 'px'; cv.style.height = (Hd / dpr) + 'px';
     Spr.clear();
     buildLayers();
   }
 
   function buildLayers() {
     if (!g) return;
-    bg = document.createElement('canvas'); bg.width = bg.height = Wd;
+    bg = document.createElement('canvas'); bg.width = Wd; bg.height = Hd;
     const b = bg.getContext('2d');
     const px = cell / 16;
     if (ART.style === '16') drawBoard16(b);
-    else for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    else for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       const x0 = Math.round(x * cell), y0 = Math.round(y * cell), x1 = Math.round((x + 1) * cell), y1 = Math.round((y + 1) * cell);
       b.fillStyle = (x + y) % 2 ? '#11523a' : '#0f4a33';
       b.fillRect(x0, y0, x1 - x0, y1 - y0);
@@ -3070,11 +3174,11 @@ const View = (() => {
       b.fillStyle = 'rgba(210,240,225,0.18)';
       b.fillRect(x0 + Math.round(px), y0 + Math.round(px), Math.ceil(px), Math.ceil(px));
     }
-    holeLayer = document.createElement('canvas'); holeLayer.width = holeLayer.height = Wd;
+    holeLayer = document.createElement('canvas'); holeLayer.width = Wd; holeLayer.height = Hd;
     const h = holeLayer.getContext('2d');
-    const isHole = (x, y) => x >= 0 && x < 8 && y >= 0 && y < 8 && g.hole[y * 8 + x];
+    const isHole = (x, y) => x >= 0 && x < BW && y >= 0 && y < BH && g.hole[y * BW + x];
     const edge = Math.max(2, Math.round(px * 1.5));
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       if (!isHole(x, y)) continue;
       const x0 = Math.round(x * cell), y0 = Math.round(y * cell), w = Math.round((x + 1) * cell) - x0, hh = Math.round((y + 1) * cell) - y0;
       h.fillStyle = '#1a252d'; h.fillRect(x0, y0, w, hh);
@@ -3082,9 +3186,9 @@ const View = (() => {
       for (let k = 1; k < 4; k++) { h.fillRect(x0, y0 + Math.round(hh * k / 4), w, 1); h.fillRect(x0 + Math.round(w * k / 4), y0, 1, hh); }
       h.fillStyle = '#062016';
       if (!isHole(x, y - 1) && y > 0) h.fillRect(x0, y0, w, edge);
-      if (!isHole(x, y + 1) && y < 7) h.fillRect(x0, y0 + hh - edge, w, edge);
+      if (!isHole(x, y + 1) && y < BH - 1) h.fillRect(x0, y0 + hh - edge, w, edge);
       if (!isHole(x - 1, y) && x > 0) h.fillRect(x0, y0, edge, hh);
-      if (!isHole(x + 1, y) && x < 7) h.fillRect(x0 + w - edge, y0, edge, hh);
+      if (!isHole(x + 1, y) && x < BW - 1) h.fillRect(x0 + w - edge, y0, edge, hh);
     }
   }
 
@@ -3092,7 +3196,7 @@ const View = (() => {
   function drawBoard16(b) {
     const u = cell / 32, R = Math.round;
     const rnd = E.rngFrom(((g.level && g.level.n) || 7) * 7919 + 13);
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       const x0 = R(x * cell), y0 = R(y * cell), w = R((x + 1) * cell) - x0, h = R((y + 1) * cell) - y0;
       const gr = b.createLinearGradient(0, y0, 0, y0 + h);
       const odd = (x + y) % 2;
@@ -3108,11 +3212,12 @@ const View = (() => {
       b.fillStyle = 'rgba(140,230,180,0.35)';
       if (y0 === y1) b.fillRect(R(x0), R(y0 - t / 2), R(x1 - x0), Math.max(1, R(u * 0.6))); else b.fillRect(R(x0 - t / 2), R(y0), Math.max(1, R(u * 0.6)), R(y1 - y0));
     };
-    for (let k = 1; k < 8; k++) for (let j = 0; j < 8; j++) {
-      if (rnd() < 0.3) trace(j * cell, k * cell, (j + 1) * cell, k * cell);
-      if (rnd() < 0.3) trace(k * cell, j * cell, k * cell, (j + 1) * cell);
+    for (let k = 1; k < Math.max(BW, BH); k++) for (let j = 0; j < Math.max(BW, BH); j++) {
+      const h = rnd() < 0.3, v = rnd() < 0.3;
+      if (h && k < BH && j < BW) trace(j * cell, k * cell, (j + 1) * cell, k * cell);
+      if (v && k < BW && j < BH) trace(k * cell, j * cell, k * cell, (j + 1) * cell);
     }
-    for (let y = 1; y < 8; y++) for (let x = 1; x < 8; x++) {
+    for (let y = 1; y < BH; y++) for (let x = 1; x < BW; x++) {
       if (rnd() > 0.28) continue;
       const cx = x * cell, cy = y * cell;
       b.fillStyle = '#7a5a1c'; b.beginPath(); b.arc(cx, cy, u * 3.4, 0, Math.PI * 2); b.fill();
@@ -3155,6 +3260,10 @@ const View = (() => {
         moveTo(B, ax, ay, 150, easeInOut, () => moveTo(B, bx, by, 150, easeInOut));
         after(150, () => Sound.play('bad'));
       } else { moveTo(A, bx, by, 150, easeInOut); moveTo(B, ax, ay, 150, easeInOut); }
+    } else if (st.t === 'tap') {
+      const pv = pieces.get(st.id);
+      if (pv) { pv.flash = t0; burst(pv.x, pv.y, '#ffffff', 4, 1.6); }
+      Sound.play('click');
     } else if (st.t === 'transform') {
       st.list.forEach((it, n) => {
         const doIt = () => { const pv = pieces.get(it.id); if (!pv) return; pv.k = it.k; pv.flash = performance.now(); burst(pv.x, pv.y, '#ffffff', 5, 2); if (st.bonus) { Sound.play('bonus', n, 0); Game.bonusTick(); } };
@@ -3170,6 +3279,7 @@ const View = (() => {
         if (f.type === 'beam') Sound.play('beam', null, 60);
         else if (f.type === 'blast') { Sound.play('blast', null, 80); shake(f.big ? 7 : 4); }
         else if (f.type === 'zap') Sound.play('zap', null, 80);
+        else if (f.type === 'ant') Sound.play('ant', null, 90);
         else if (f.type === 'nova') { Sound.play('nova'); shake(9); }
       });
       for (const c of st.cleared) after(c.t, () => {
@@ -3281,7 +3391,11 @@ const View = (() => {
       const p = (t - pv.land) / 140;
       if (p < 1) { const q = Math.sin(p * Math.PI) * 0.1; sy = 1 - q; sx = 1 + q * 0.6; } else pv.land = 0;
     }
-    if (hint && (pv.id === hint.ida || pv.id === hint.idb) && !REDUCED) {
+    if (hint && hint.a === hint.b && pv.id === hint.ida && !REDUCED) {
+      // pista de un toque: el especial late
+      const ph = ((t - hint.t0) / 1000) % 1.6;
+      if (ph < 0.6) s *= 1 + Math.sin(ph / 0.6 * Math.PI * 2) * 0.08;
+    } else if (hint && (pv.id === hint.ida || pv.id === hint.idb) && !REDUCED) {
       const ph = ((t - hint.t0) / 1000) % 1.6;
       if (ph < 0.6) {
         const w = Math.sin(ph / 0.6 * Math.PI * 3) * 0.08;
@@ -3300,7 +3414,7 @@ const View = (() => {
       gr.addColorStop(0, `rgba(255,240,140,${pulse})`); gr.addColorStop(1, 'rgba(255,190,40,0)');
       ctx.fillStyle = gr; ctx.fillRect(cx - cell, cy - cell, cell * 2, cell * 2);
     }
-    if (pv.k <= 3 && pv.c === 2 && !pv.pop) {
+    if ((pv.k <= 3 || pv.k === K.ANT) && pv.c === 2 && !pv.pop) {
       const ph = ((t / 1000) + pv.phase) % 4.5;
       if (ph < 0.35) {
         const a = Math.sin(ph / 0.35 * Math.PI) * 0.6;
@@ -3382,7 +3496,7 @@ const View = (() => {
           const xa = Math.max(0, ox - reach), xb = Math.min(Wd, ox + reach);
           bolt(jag(xa, oy, xb, oy, cell * 0.12), a);
         } else {
-          const ya = Math.max(0, oy - reach), yb = Math.min(Wd, oy + reach);
+          const ya = Math.max(0, oy - reach), yb = Math.min(Hd, oy + reach);
           bolt(jag(ox, ya, ox, yb, cell * 0.12), a);
         }
       } else if (f.type === 'blast') {
@@ -3399,10 +3513,29 @@ const View = (() => {
           const a = e < hitAt ? 1 : 1 - (e - hitAt) / 160;
           bolt(jag(ox, oy, (X(j) + 0.5) * cell, (Y(j) + 0.5) * cell, cell * 0.2), a);
         });
+      } else if (f.type === 'ant') {
+        // transmisión: anillos en la antena, un pulso de píxeles que viaja y un anillo en el blanco
+        const tx = (X(f.to) + 0.5) * cell, ty = (Y(f.to) + 0.5) * cell;
+        const q = Math.max(2, Math.round(cell / 10)), p = clamp(e / 170, 0, 1);
+        const ring = (x, y, r, a) => {
+          const n = Math.max(8, Math.round(r * 2 * Math.PI / (q * 1.6)));
+          ctx.fillStyle = `rgba(228,252,255,${a})`;
+          for (let k = 0; k < n; k++) { const ang = k / n * Math.PI * 2; ctx.fillRect(Math.round(x + Math.cos(ang) * r - q / 2), Math.round(y + Math.sin(ang) * r - q / 2), q, q); }
+        };
+        if (e < 320) ring(ox, oy, cell * (0.45 + 0.6 * e / 320), 1 - e / 320);
+        if (p < 1) {
+          const hx = lerp(ox, tx, p), hy = lerp(oy, ty, p), d = Math.hypot(tx - ox, ty - oy), n = Math.max(2, Math.round(d * p / (q * 2.2)));
+          for (let k = 0; k <= n; k++) {
+            const f2 = k / n, a = 0.15 + 0.75 * f2;
+            ctx.fillStyle = `rgba(150,235,255,${a})`;
+            ctx.fillRect(Math.round(lerp(ox, hx, f2) - q / 2), Math.round(lerp(oy, hy, f2) - q / 2), q, q);
+          }
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(hx - q), Math.round(hy - q), q * 2, q * 2);
+        } else if (e < 430) ring(tx, ty, cell * (0.2 + 0.5 * (e - 170) / 260), 1 - (e - 170) / 260);
       } else if (f.type === 'nova') {
         const p = clamp(e / 550, 0, 1);
         ctx.fillStyle = `rgba(255,255,255,${0.7 * (1 - p)})`;
-        ctx.beginPath(); ctx.arc(ox, oy, Wd * 1.2 * easeOut(p), 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ox, oy, Hd * 1.2 * easeOut(p), 0, Math.PI * 2); ctx.fill();
       }
     }
   }
@@ -3469,7 +3602,7 @@ const View = (() => {
       $('#boardFrame').style.transform = `translate(${(Math.random() - 0.5) * a}px, ${(Math.random() - 0.5) * a}px)`;
     } else if (shakeAmp) { shakeAmp = 0; $('#boardFrame').style.transform = ''; }
     ctx.drawImage(bg, 0, 0);
-    for (let i = 0; i < 64; i++) {
+    for (let i = 0; i < E.N; i++) {
       if (!padOrig[i]) continue;
       const name = padLv[i] >= 2 ? 'pad2' : padLv[i] === 1 ? 'pad1' : 'padDone';
       const x0 = Math.round(X(i) * cell), y0 = Math.round(Y(i) * cell);
@@ -3490,13 +3623,13 @@ const View = (() => {
       if (p >= 1 || REDUCED) mosaicT = 0;
       else {
         const blk = Math.max(1, Math.round(lerp(cell / 1.5, 1, easeOut(p))));
-        const w = Math.max(1, Math.round(Wd / blk));
-        mosaicCv.width = mosaicCv.height = w;
+        const w = Math.max(1, Math.round(Wd / blk)), h = Math.max(1, Math.round(Hd / blk));
+        mosaicCv.width = w; mosaicCv.height = h;
         const m = mosaicCv.getContext('2d');
         m.imageSmoothingEnabled = true;
-        m.drawImage(cv, 0, 0, w, w);
+        m.drawImage(cv, 0, 0, w, h);
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(mosaicCv, 0, 0, w, w, 0, 0, Wd, Wd);
+        ctx.drawImage(mosaicCv, 0, 0, w, h, 0, 0, Wd, Hd);
       }
     }
   }
@@ -3509,10 +3642,10 @@ const View = (() => {
     get hint() { return hint; },
     cellAt(clientX, clientY) {
       const r = cv.getBoundingClientRect();
-      const x = Math.floor((clientX - r.left) / r.width * 8), y = Math.floor((clientY - r.top) / r.height * 8);
-      return x >= 0 && x < 8 && y >= 0 && y < 8 ? y * 8 + x : -1;
+      const x = Math.floor((clientX - r.left) / r.width * BW), y = Math.floor((clientY - r.top) / r.height * BH);
+      return x >= 0 && x < BW && y >= 0 && y < BH ? y * BW + x : -1;
     },
-    cellCss() { return cv.getBoundingClientRect().width / 8; },
+    cellCss() { return cv.getBoundingClientRect().width / BW; },
     nudge(i) { const p = g && g.p[i]; if (!p) return; const pv = pieces.get(p.id); if (pv) { pv.flash = performance.now(); } },
     canvas: cv,
   };
@@ -3637,9 +3770,9 @@ const HUD = {
 // ------------------------------------------------------------ textos de ayuda
 const TIPS = {
   swap: { icon: ['piece', 2], title: 'Cómo se juega', text: 'Deslizá un componente hacia un vecino. Si quedan 3 o más iguales en línea, se van.' },
-  line: { icon: ['lineH', 2], title: 'Nuevo: rayo', text: '4 en línea arman un componente con rayo. Cuando lo eliminás, barre toda su fila o su columna, según indiquen las flechas.' },
-  bomb: { icon: ['bomb', 3], title: 'Nuevo: sobrecarga', text: 'Una línea en L o en T arma una sobrecarga. Cuando la eliminás, explota y limpia todo a su alrededor.' },
-  battery: { icon: ['battery'], title: 'Nuevo: batería', text: '5 en línea arman una batería. Intercambiala con un componente y se eliminan todos los de ese tipo. Probá combinar dos especiales entre sí.' },
+  line: { icon: ['lineH', 2], title: 'Nuevo: rayo', text: '4 en línea arman un componente con rayo. Cuando lo eliminás o lo tocás, barre toda su fila o su columna, según indiquen las flechas.' },
+  bomb: { icon: ['bomb', 3], title: 'Nuevo: sobrecarga', text: 'Una línea en L o en T arma una sobrecarga. Cuando la eliminás o la tocás, explota y limpia todo a su alrededor.' },
+  battery: { icon: ['battery'], title: 'Nuevo: batería', text: '5 en línea arman una batería. Intercambiala con un componente y se eliminan todos los de ese tipo; si la tocás, los del tipo que más hay. Probá combinar dos especiales entre sí.' },
   color6: { icon: ['piece', 5], title: 'Nuevo componente', text: 'Capacitor cerámico. Con seis tipos en la mesa hay menos combinaciones posibles.' },
   pads: { icon: ['pads', 1], title: 'Nuevo: pads', text: 'Pads de cobre sin soldar. Para estañarlos, formá una línea encima o hacé pasar un especial por ahí.' },
   pads2: { icon: ['pads', 2], title: 'Nuevo: doble faz', text: 'Los pads con remaches en las esquinas necesitan dos pasadas de estaño.' },
@@ -3873,6 +4006,7 @@ const Game = {
     const g = this.g, s = View.sel;
     const p = g.p[i];
     if (s < 0) {
+      if (E.canTap(p)) { this.move(i, i); return; }   // sin nada seleccionado, tocar un especial lo activa
       if (p && E.swappable(p)) { View.sel = i; Sound.play('click'); }
       else if (p) { View.nudge(i); Sound.play('bad'); }
       return;
@@ -4049,8 +4183,8 @@ const Game = {
     let tx = x, ty = y;
     if (Math.abs(dx) > Math.abs(dy)) tx += dx > 0 ? 1 : -1; else ty += dy > 0 ? 1 : -1;
     View.sel = -1;
-    if (tx < 0 || tx > 7 || ty < 0 || ty > 7) return;
-    Game.move(down.c, ty * 8 + tx);
+    if (tx < 0 || tx >= E.W || ty < 0 || ty >= E.H) return;
+    Game.move(down.c, ty * E.W + tx);
   });
   const up = e => {
     if (!down || e.pointerId !== down.id) return;
