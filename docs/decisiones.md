@@ -61,3 +61,4 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **GitHub Pages, en `efevali.github.io/fogonazo`** (4/10). El repositorio se renombró a minúscula antes de publicar: la dirección no se puede cambiar después de instalar sin perder las versiones nuevas y el avance (lo que le pasó a Kasa). *Descartado:* Netlify, que sin cuenta publica por una hora.
 - **El avance empieza de cero** (4/10). El de claude.ai no pasa a la versión instalable. *Descartado:* un código para copiar el avance de una a otra.
 - **Orientación horizontal: a evaluar** (#4).
+- **La 0.1.0 espera a decidir dónde vive Fogonazo** (4/10, #7). Está lista (pull request #6, con el boceto B-01 aprobado), pero comparte sitio con Kasa: borrar los datos del sitio desde Chrome borraría los dos avances. Antes de publicar, se ordena la estructura de GitHub común a los proyectos.
