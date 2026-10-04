@@ -17,7 +17,8 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **Sin duplicados** (4/10). Se borró el artefacto «Fogonazo en 16 bits» de claude.ai: su contenido es el [muestrario](muestrario.html).
 - **Sin llave de prueba** (4/10). Los niveles se juegan en orden, también para probarlos. *Descartado:* una llave que destrabe todos los niveles, como la de Kasa.
 - **Versionado desde 0.1.0** (4/10). Las siete publicaciones del artefacto no se numeran; la primera versión del repositorio es la instalable.
-- **Licencia: pendiente** (#5). Hoy el repositorio no tiene licencia (rigen los derechos de autor por defecto).
+- **Licencia: pendiente** (#5).
+- **Después de la 0.1.0, una tanda grande** (4/10). Los cambios siguientes (#8, #9, #10 y los que surjan jugando la versión instalada) se juntan antes de implementar, para diseñar y calibrar una sola vez. Hoy el repositorio no tiene licencia (rigen los derechos de autor por defecto).
 
 ## Nombre
 
@@ -31,6 +32,7 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 
 ## Niveles y dificultad
 
+- **Tablero de 8 × 10, en vertical** (4/10, #10). El de 8 × 8 lo limita el ancho y debajo sobraban unos 240 px. Las dos filas nuevas van arriba para conservar los diseños, que están pensados contra el borde inferior. Obliga a recalibrar los 30 niveles. *Descartado:* pasar a horizontal (#4).
 - **Calibración con un bot imperfecto** (3/10): 62 % la mejor jugada, 20 % la segunda, 18 % cualquiera; 400 partidas por nivel.
 - **Pads fuera del borde inferior y de las esquinas** (3/10). Ahí las líneas se forman entre 3 y 5 veces menos, y los últimos pads tardaban demasiado.
 - **Nivel 19 con dos pasos por fila de quemados** (3/10): `bb.bb.bb`. Con la caída nueva, las filas enteras encerraban 24 lugares que quedaban vacíos, y en contrarreloj eso frustra más de lo que desafía. *Descartado:* dejarlo como un nivel de abrir paso.
@@ -45,6 +47,7 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **16 bits como alternativa, no como reemplazo** (3/10). 8 bits es el estilo por defecto y no se saca. El selector «Gráficos» está en los Ajustes del mapa y en la pausa.
 - **El estilo cambia la consola completa** (3/10): dibujos, interfaz, tipografía, música y efectos. Se tomó como modelo la diferencia entre la NES y la Sega Genesis.
 - **Tipografía de 16 bits: la opción A** (3/10), Jersey 25 para títulos y Jersey 15 para textos y botones. *Descartadas:* B (Jersey 25 + DotGothic16, la letra fina de los juegos de rol de Super Nintendo) y C (Workbench + VT323, al estilo Amiga). Las tres se ven en el [muestrario](muestrario.html).
+- **Componentes de 8 bits más finos** (4/10, #9, boceto B-02). Se veían «gordos»: ocupaban casi todo el casillero con cuerpos anchos. Se afinaron las proporciones, con cuerpos más angostos y patas más largas, sin cambiar paleta ni tamaño. *Descartado:* achicar los mismos dibujos al 80 % del casillero, que los achica sin quitarles lo ancho.
 - **Contador de estrellas en una fila propia** (3/10), bajo el título: en pantallas angostas lo tapaba.
 - **Sin ligaduras tipográficas** (3/10): Pixelify Sans unía «fi» y «fl» en un signo que parecía una «A».
 - **Cartel de fin de nivel en 16 bits con panel de fondo** (3/10): sin él, el texto metálico no se leía.
@@ -62,7 +65,7 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **Para Android** (3/10): es el teléfono en el que se juega.
 - **GitHub Pages, en `efevali.github.io/fogonazo`** (4/10). El repositorio se renombró a minúscula antes de publicar: la dirección no se puede cambiar después de instalar sin perder las versiones nuevas y el avance (lo que le pasó a Kasa). *Descartado:* Netlify, que sin cuenta publica por una hora.
 - **El avance empieza de cero** (4/10). El de claude.ai no pasa a la versión instalable. *Descartado:* un código para copiar el avance de una a otra.
-- **Orientación horizontal: a evaluar** (#4).
+- ~~**Orientación horizontal: a evaluar**~~ (#4). Descartada el 4/10: el juego sigue en vertical. En horizontal, el tablero cuadrado queda más chico, porque lo limita el alto.
 - ~~**La 0.1.0 espera a decidir dónde vive Fogonazo**~~ (4/10, #7). Resuelto el mismo día: sigue en `efevali.github.io`.
 - **Fogonazo sigue en `efevali.github.io/fogonazo`, junto a Kasa** (4/10, #7). El riesgo más probable es borrar los datos de navegación de Chrome con «Cookies y datos de sitios» marcado (viene así por defecto), y eso borra todos los sitios a la vez: separar los juegos no lo evita. *Descartados:* una organización de GitHub por producto (solo protege en casos poco frecuentes) y un dominio propio (tiene costo).
 - **Sin copia de seguridad del avance, por ahora** (4/10, #7). *Descartados:* exportar e importar (el navegador no deja guardar una copia fuera del sitio sin que el usuario la maneje), Google Drive del jugador (trámite con Google y ventana para renovar el permiso), un servicio de cuentas (responsabilidad sobre datos de terceros) y guardar en Git (la credencial quedaría expuesta en el juego). El análisis está en el #7. La evolución del guardado queda para más adelante.
