@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Dibuja el ícono de Fogonazo: el LED de 16 bits con un destello detrás, sobre la placa. Lo usa herramientas/iconos.js. -->
+<html><body style="margin:0;background:#333">
+<script src="../codigo/sprites.js"></script>
+<script src="../codigo/sprites16.js"></script>
+<script>
+ART.style = '16';
+function icon(size, scale, round) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const c = cv.getContext('2d'); c.imageSmoothingEnabled = false;
+  if (round) { c.beginPath(); c.roundRect(0, 0, size, size, size * 0.22); c.clip(); }
+  const bg = c.createRadialGradient(size/2, size*0.42, 0, size/2, size/2, size*0.75);
+  bg.addColorStop(0, '#17603f'); bg.addColorStop(1, '#0a3020');
+  c.fillStyle = bg; c.fillRect(0, 0, size, size);
+  // pistas de la placa
+  c.fillStyle = 'rgba(40,140,90,0.45)';
+  const u = size / 32;
+  [[3,8,29,8],[3,24,12,24],[20,24,29,24]].forEach(([a,y,b]) => c.fillRect(a*u, y*u - u*0.6, (b-a)*u, u*1.2));
+  [[6,3,6,29],[26,3,26,29]].forEach(([x,a,_,b]) => c.fillRect(x*u - u*0.6, a*u, u*1.2, (b-a)*u));
+  // destello
+  const cx = size/2, cy = size*0.40, R = size*0.46*scale;
+  c.save(); c.translate(cx, cy);
+  for (let k = 0; k < 12; k++) {
+    c.rotate(Math.PI*2/12);
+    c.fillStyle = k % 2 ? 'rgba(255,190,70,0.55)' : 'rgba(255,240,170,0.75)';
+    c.beginPath(); c.moveTo(-R*0.09, 0); c.lineTo(0, -R*(k%2?0.78:1)); c.lineTo(R*0.09, 0); c.fill();
+  }
+  c.restore();
+  const g = c.createRadialGradient(cx, cy, 0, cx, cy, R*0.62);
+  g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.35, 'rgba(255,215,120,0.9)'); g.addColorStop(1, 'rgba(255,120,40,0)');
+  c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R*0.62, 0, Math.PI*2); c.fill();
+  // LED
+  const s = Math.round(size*0.62*scale/32)*32 || size*0.62*scale;
+  c.drawImage(HD.render('led', s), Math.round(cx - s/2), Math.round(size*0.5*1 - s*0.42 + (1-scale)*size*0.08));
+  return cv.toDataURL('image/png');
+}
+// El adaptable (maskable) achica el dibujo para que entre en el círculo que recorta Android.
+window.ICONS = {
+  'icono-512.png': icon(512, 1, false), 'icono-192.png': icon(192, 1, false),
+  'icono-maskable-512.png': icon(512, 0.78, false), 'icono-maskable-192.png': icon(192, 0.78, false),
+  'apple-touch-icon.png': icon(180, 1, false),
+};
+</script></body></html>

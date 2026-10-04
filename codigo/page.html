@@ -1,7 +1,4 @@
 <title>Fogonazo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Jersey+25&family=Pixelify+Sans:wght@400;600&family=Silkscreen:wght@400;700&display=swap">
 <style>
 /* ================================================================================================
    GUÍA DE ESTILO DE FOGONAZO
@@ -14,6 +11,8 @@
      rojo, puntos en un display fluorescente (VFD) verde agua y el avance de estrellas en un vúmetro
      de LEDs. Tema oscuro único, a propósito: no hay modo claro.
    - Pensado para el celular, en vertical.
+   - Funciona sin conexión: todo queda guardado en el teléfono (sw.js), también las tipografías
+     (herramientas/fuentes.js).
 
    Dos consolas: 8 bits (por defecto, no se saca) y 16 bits
    - El selector «Gráficos: 8 bits / 16 bits» está en los Ajustes del mapa y en la pausa, y se guarda.
@@ -48,9 +47,29 @@
    - Los efectos de 16 bits están nivelados con los de 8. La música baja al terminar un nivel para
      que se escuche la fanfarria. Volúmenes por defecto: efectos 70, música 35; «Silenciar todo».
 
+   Versión instalable (0.1.0)
+   - Tarjeta «Instalá Fogonazo en tu teléfono», solo en el navegador (no desde el ícono ni en la vista previa
+     de claude.ai), arriba del bloque del nivel actual: ícono, título, «Queda entre tus apps y funciona sin
+     conexión.» e «Instalar». Abre el cuadro de Chrome si ya está disponible; si no, la ventana «Instalar
+     Fogonazo» con los dos pasos del menú ⋮ (o los de Safari en iPhone). En Samsung Internet, la ventana
+     ofrece «Abrir en Chrome». Instalado, la tarjeta pasa a «Listo», con borde verde.
+   - Versión: última fila de Ajustes antes de «Listo», con su número y su fecha. Al día, «Buscar»; con una
+     nueva, LED verde «Hay una versión nueva» y «Actualizar» (cobre, el principal), que reabre el juego y avisa
+     «Listo». Mientras haya una nueva, un LED verde en el engranaje del mapa. Verde: el color de lo nuevo.
+   - Avisos breves (toast) abajo, en un panel como los del tablero.
+   - En 16 bits, Jersey no tiene negrita: lo destacado va en blanco, sin negrita sintética.
+
    Textos
    - Amenos, en voseo rioplatense, sin errores ni redundancias y técnicamente correctos.
    ================================================================================================ */
+/* Tipografías locales (herramientas/fuentes.js), para que el juego funcione sin conexión.
+   La vista previa de claude.ai las lleva adentro del archivo (herramientas/vista_previa.js). */
+@font-face { font-family: 'Silkscreen'; font-weight: 400; font-display: swap; src: url(fuentes/silkscreen-400.woff2) format('woff2'); }
+@font-face { font-family: 'Silkscreen'; font-weight: 700; font-display: swap; src: url(fuentes/silkscreen-700.woff2) format('woff2'); }
+@font-face { font-family: 'Pixelify Sans'; font-weight: 400; font-display: swap; src: url(fuentes/pixelify-sans-400.woff2) format('woff2'); }
+@font-face { font-family: 'Pixelify Sans'; font-weight: 600; font-display: swap; src: url(fuentes/pixelify-sans-600.woff2) format('woff2'); }
+@font-face { font-family: 'Jersey 15'; font-weight: 400; font-display: swap; src: url(fuentes/jersey-15-400.woff2) format('woff2'); }
+@font-face { font-family: 'Jersey 25'; font-weight: 400; font-display: swap; src: url(fuentes/jersey-25-400.woff2) format('woff2'); }
 :root {
   --mat: #1a252d;
   --mat-line: #22303a;
@@ -416,6 +435,62 @@ html[data-art="16"] .board-frame { border-radius: 11px; background: linear-gradi
   .led-dot, .node.current .pad::after, .seg.warn .on { animation: none; }
   .card, .banner, .goal.bump, .bigstars svg.pop { animation: none; }
 }
+/* ---------------- versión instalable: tarjeta «Instalar», ventana de instalación, versión y avisos */
+.inst {
+  display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px;
+  background: var(--panel); box-shadow: inset 0 0 0 2px var(--edge), 0 3px 0 #0006;
+}
+.inst-ic { width: 46px; height: 46px; border-radius: 10px; flex: none; image-rendering: pixelated; box-shadow: 0 0 0 2px #05090b; }
+.inst-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.inst-t b { font-family: var(--font-ui); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; line-height: 1.3; }
+.inst-t small { font-size: 13px; line-height: 1.3; color: var(--muted); }
+.inst.ok { box-shadow: inset 0 0 0 2px #1d6b3e, 0 3px 0 #0006; }
+.inst-tick { width: 46px; height: 46px; border-radius: 10px; flex: none; display: grid; place-items: center; background: #0f3a22; box-shadow: inset 0 0 0 2px #1d6b3e; color: var(--ok); }
+.inst-tick svg { width: 22px; height: 22px; }
+.btn.small { min-height: 40px; padding: 8px 10px; font-size: 12px; flex: none; }
+.inst-head { display: flex; align-items: center; gap: 12px; }
+.pasos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pasos li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; color: #c9d6dc; }
+.pasos .n { font-family: var(--font-ui); font-size: 13px; width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 4px; background: var(--copper); color: #2a1406; box-shadow: inset 0 2px 0 var(--copper-hi), inset 0 -3px 0 var(--copper-lo); }
+.tecla { display: inline-grid; place-items: center; width: 24px; height: 24px; vertical-align: -6px; border-radius: 4px; background: #05090b; box-shadow: inset 0 0 0 2px var(--edge); color: var(--silk); }
+.tecla svg { width: 14px; height: 14px; }
+.inst-nota { font-size: 14px; line-height: 1.4; color: var(--muted); background: var(--panel-2); border-radius: 5px; padding: 8px 10px; }
+.verrow { display: flex; align-items: center; gap: 10px; background: var(--panel-2); border-radius: 5px; padding: 8px 10px; }
+.verrow .vt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.verrow b { font-family: var(--font-ui); font-size: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: .06em; }
+.verrow small { font-size: 13px; line-height: 1.3; color: var(--muted); }
+.ver-new { display: flex; align-items: center; gap: 7px; font-size: 14px; color: var(--ok); }
+.led-g { width: 10px; height: 10px; border-radius: 2px; flex: none; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+#btnSettings { position: relative; }
+.gear-led { position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; border-radius: 2px; background: var(--ok); box-shadow: 0 0 8px var(--ok), 0 0 0 2px var(--panel); }
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20;
+  width: max-content; max-width: min(340px, calc(100% - 32px)); padding: 10px 14px; border-radius: 6px; text-align: center;
+  background: var(--panel); color: var(--silk); font-size: 15px; line-height: 1.35;
+  box-shadow: inset 0 0 0 2px var(--edge), 0 6px 0 #0009; animation: cardIn .2s ease-out;
+}
+html[data-art="16"] .inst {
+  border-radius: 10px; padding: 12px 14px;
+  background: var(--screw) 3px 3px / 12px 12px no-repeat, var(--screw) calc(100% - 3px) 3px / 12px 12px no-repeat,
+    var(--screw) 3px calc(100% - 3px) / 12px 12px no-repeat, var(--screw) calc(100% - 3px) calc(100% - 3px) / 12px 12px no-repeat,
+    linear-gradient(180deg, #24343f 0%, #18232b 60%, #121b21 100%);
+  box-shadow: inset 0 1px 0 #5a7182, inset 0 0 0 3px #0c1216, inset 0 0 0 4px #33444f, 0 0 0 2px #05080a, 0 0 0 4px #4c5f6c, 0 4px 0 4px #000a;
+}
+html[data-art="16"] .inst.ok { box-shadow: inset 0 1px 0 #5a7182, inset 0 0 0 3px #0c1216, inset 0 0 0 4px #2f8a55, 0 0 0 2px #05080a, 0 0 0 4px #2f8a55, 0 4px 0 4px #000a; }
+html[data-art="16"] .inst-t b, html[data-art="16"] .verrow b { font-size: 19px; font-weight: 400; letter-spacing: .03em; }
+/* Jersey no tiene negrita: en 16 bits lo destacado va en blanco, sin negrita sintética */
+html[data-art="16"] .pasos b, html[data-art="16"] .inst-nota b { font-weight: 400; color: #fff; }
+html[data-art="16"] .inst-t small, html[data-art="16"] .verrow small, html[data-art="16"] .ver-new, html[data-art="16"] .inst-nota { font-size: 17px; line-height: 1.2; }
+html[data-art="16"] .inst-ic, html[data-art="16"] .inst-tick { border-radius: 12px; box-shadow: 0 0 0 2px #05080a, 0 0 0 3px #4c5f6c; }
+html[data-art="16"] .btn.small { font-size: 19px; min-height: 42px; padding: 6px 14px; }
+html[data-art="16"] .pasos li { font-size: 19px; line-height: 1.25; }
+html[data-art="16"] .pasos .n { font-size: 18px; border-radius: 50%; background: linear-gradient(180deg, #ffe0b4 0%, #f5ad62 20%, #dc7c31 54%, #b45a1c 55%, #d0743a 100%); box-shadow: 0 0 0 2px #3a1a06; }
+html[data-art="16"] .verrow, html[data-art="16"] .inst-nota, html[data-art="16"] .toast {
+  background: linear-gradient(180deg, #24333e 0%, #16212a 55%, #111920 100%); border-radius: 7px;
+  box-shadow: inset 0 1px 0 #4f6474, inset 0 -2px 0 #070b0e, 0 0 0 2px #070b0e, 0 0 0 3px #3e4f5c, 0 3px 0 3px #05080a;
+}
+html[data-art="16"] .toast { font-size: 19px; }
+html[data-art="16"] .led-g, html[data-art="16"] .gear-led { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e2ffe9 0 1.5px, #3ee07a 3px, #127a3a 6px); }
 </style>
 
 <div id="app">
