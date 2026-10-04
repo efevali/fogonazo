@@ -1,0 +1,452 @@
+{
+ "1": {
+  "id": 1,
+  "name": "Blink",
+  "tune": "score",
+  "target": 0.97,
+  "scoreTarget": 7100,
+  "stars": [
+   7100,
+   15800,
+   23800
+  ],
+  "winRate": 0.9725,
+  "medianScore": 14760,
+  "moves": 18
+ },
+ "2": {
+  "id": 2,
+  "name": "Divisor de tensión",
+  "tune": "score",
+  "target": 0.95,
+  "scoreTarget": 8600,
+  "stars": [
+   8600,
+   17400,
+   24700
+  ],
+  "winRate": 0.9525,
+  "medianScore": 16520,
+  "moves": 20
+ },
+ "3": {
+  "id": 3,
+  "name": "Filtro RC",
+  "tune": "moves",
+  "target": 0.92,
+  "neverRate": 0,
+  "stars": [
+   0,
+   10000,
+   13500
+  ],
+  "winRate": 0.9525,
+  "moves": 16,
+  "medianDone": 11
+ },
+ "4": {
+  "id": 4,
+  "name": "Puente rectificador",
+  "tune": "moves",
+  "target": 0.87,
+  "neverRate": 0,
+  "stars": [
+   0,
+   11100,
+   14700
+  ],
+  "winRate": 0.95,
+  "moves": 18,
+  "medianDone": 14
+ },
+ "5": {
+  "id": 5,
+  "name": "Multivibrador astable",
+  "tune": "score",
+  "target": 0.82,
+  "scoreTarget": 10000,
+  "stars": [
+   10000,
+   15400,
+   21000
+  ],
+  "winRate": 0.8325,
+  "medianScore": 13680,
+  "time": 60
+ },
+ "6": {
+  "id": 6,
+  "name": "Timer 555",
+  "tune": "moves",
+  "target": 0.9,
+  "neverRate": 0,
+  "stars": [
+   0,
+   6000,
+   7900
+  ],
+  "winRate": 0.9675,
+  "moves": 24,
+  "medianDone": 16
+ },
+ "7": {
+  "id": 7,
+  "name": "Regulador 7805",
+  "tune": "moves",
+  "target": 0.83,
+  "neverRate": 0,
+  "stars": [
+   0,
+   6400,
+   8200
+  ],
+  "winRate": 0.895,
+  "moves": 21,
+  "medianDone": 16
+ },
+ "8": {
+  "id": 8,
+  "name": "Flip-flop",
+  "tune": "score",
+  "target": 0.76,
+  "scoreTarget": 6000,
+  "stars": [
+   6000,
+   8700,
+   11200
+  ],
+  "winRate": 0.7675,
+  "medianScore": 7500,
+  "moves": 22
+ },
+ "9": {
+  "id": 9,
+  "name": "Generador PWM",
+  "tune": "time",
+  "target": 0.82,
+  "neverRate": 0,
+  "stars": [
+   0,
+   6200,
+   8200
+  ],
+  "winRate": 0.8675,
+  "time": 70,
+  "medianDone": 32.20243075567951
+ },
+ "10": {
+  "id": 10,
+  "name": "Fuente lineal",
+  "tune": "moves",
+  "target": 0.74,
+  "neverRate": 0,
+  "stars": [
+   0,
+   7100,
+   9400
+  ],
+  "winRate": 0.7025,
+  "moves": 20,
+  "medianDone": 15
+ },
+ "11": {
+  "id": 11,
+  "name": "Pistas de cobre",
+  "tune": "moves",
+  "target": 0.88,
+  "neverRate": 0,
+  "stars": [
+   0,
+   10500,
+   15300
+  ],
+  "winRate": 0.8675,
+  "moves": 17,
+  "medianDone": 11
+ },
+ "12": {
+  "id": 12,
+  "name": "Plaqueta perforada",
+  "tune": "moves",
+  "target": 0.8,
+  "neverRate": 0,
+  "stars": [
+   0,
+   7400,
+   9700
+  ],
+  "winRate": 0.825,
+  "moves": 25,
+  "medianDone": 18
+ },
+ "13": {
+  "id": 13,
+  "name": "Doble faz",
+  "tune": "moves",
+  "target": 0.72,
+  "neverRate": 0,
+  "stars": [
+   0,
+   10600,
+   13200
+  ],
+  "winRate": 0.7675,
+  "moves": 29,
+  "medianDone": 23
+ },
+ "14": {
+  "id": 14,
+  "name": "Soldadura por ola",
+  "tune": "time",
+  "target": 0.65,
+  "neverRate": 0,
+  "stars": [
+   0,
+   4800,
+   6700
+  ],
+  "winRate": 0.725,
+  "time": 50,
+  "medianDone": 42.3956013065111
+ },
+ "15": {
+  "id": 15,
+  "name": "Montaje SMD",
+  "tune": "moves",
+  "target": 0.55,
+  "neverRate": 0,
+  "stars": [
+   0,
+   8600,
+   11800
+  ],
+  "winRate": 0.5525,
+  "moves": 27,
+  "medianDone": 26
+ },
+ "16": {
+  "id": 16,
+  "name": "Cortocircuito",
+  "tune": "moves",
+  "target": 0.82,
+  "neverRate": 0,
+  "stars": [
+   0,
+   8100,
+   11900
+  ],
+  "winRate": 0.83,
+  "moves": 12,
+  "medianDone": 8
+ },
+ "17": {
+  "id": 17,
+  "name": "Cinta kapton",
+  "tune": "moves",
+  "target": 0.74,
+  "neverRate": 0,
+  "stars": [
+   0,
+   7200,
+   9800
+  ],
+  "winRate": 0.7025,
+  "moves": 29,
+  "medianDone": 22
+ },
+ "18": {
+  "id": 18,
+  "name": "Placa dañada",
+  "tune": "moves",
+  "target": 0.66,
+  "neverRate": 0,
+  "stars": [
+   0,
+   5400,
+   7200
+  ],
+  "winRate": 0.58,
+  "moves": 20,
+  "medianDone": 18
+ },
+ "19": {
+  "id": 19,
+  "name": "Reparación urgente",
+  "tune": "time",
+  "target": 0.58,
+  "neverRate": 0,
+  "stars": [
+   0,
+   5400,
+   7600
+  ],
+  "winRate": 0.66,
+  "time": 60,
+  "medianDone": 54.24161910760775
+ },
+ "20": {
+  "id": 20,
+  "name": "Fuente quemada",
+  "tune": "moves",
+  "target": 0.5,
+  "neverRate": 0,
+  "stars": [
+   0,
+   6500,
+   8800
+  ],
+  "winRate": 0.5,
+  "moves": 15,
+  "medianDone": 15
+ },
+ "21": {
+  "id": 21,
+  "name": "Tríodo",
+  "tune": "moves",
+  "target": 0.76,
+  "neverRate": 0,
+  "stars": [
+   0,
+   13300,
+   18500
+  ],
+  "winRate": 0.7375,
+  "moves": 25,
+  "medianDone": 16
+ },
+ "22": {
+  "id": 22,
+  "name": "Radio a válvulas",
+  "tune": "moves",
+  "target": 0.66,
+  "neverRate": 0,
+  "stars": [
+   0,
+   11300,
+   15500
+  ],
+  "winRate": 0.6175,
+  "moves": 33,
+  "medianDone": 27
+ },
+ "23": {
+  "id": 23,
+  "name": "Amplificador valvular",
+  "tune": "moves",
+  "target": 0.58,
+  "neverRate": 0,
+  "stars": [
+   0,
+   13300,
+   18200
+  ],
+  "winRate": 0.55,
+  "moves": 20,
+  "medianDone": 19
+ },
+ "24": {
+  "id": 24,
+  "name": "Theremin",
+  "tune": "score",
+  "target": 0.52,
+  "scoreTarget": 7600,
+  "stars": [
+   7600,
+   9800,
+   12100
+  ],
+  "winRate": 0.535,
+  "medianScore": 7770,
+  "time": 75
+ },
+ "25": {
+  "id": 25,
+  "name": "Transmisor AM",
+  "tune": "moves",
+  "target": 0.46,
+  "neverRate": 0,
+  "stars": [
+   0,
+   17100,
+   22000
+  ],
+  "winRate": 0.4625,
+  "moves": 22,
+  "medianDone": 23
+ },
+ "26": {
+  "id": 26,
+  "name": "Contador binario",
+  "tune": "moves",
+  "target": 0.6,
+  "neverRate": 0,
+  "stars": [
+   0,
+   4900,
+   6200
+  ],
+  "winRate": 0.69,
+  "moves": 26,
+  "medianDone": 25
+ },
+ "27": {
+  "id": 27,
+  "name": "Display 7 segmentos",
+  "tune": "moves",
+  "target": 0.52,
+  "neverRate": 0,
+  "stars": [
+   0,
+   10400,
+   13600
+  ],
+  "winRate": 0.53,
+  "moves": 29,
+  "medianDone": 28.5
+ },
+ "28": {
+  "id": 28,
+  "name": "Sintetizador",
+  "tune": "score",
+  "target": 0.45,
+  "scoreTarget": 5700,
+  "stars": [
+   5700,
+   7000,
+   8800
+  ],
+  "winRate": 0.465,
+  "medianScore": 5560,
+  "time": 90
+ },
+ "29": {
+  "id": 29,
+  "name": "Osciloscopio",
+  "tune": "moves",
+  "target": 0.4,
+  "neverRate": 0,
+  "stars": [
+   0,
+   12700,
+   18300
+  ],
+  "winRate": 0.435,
+  "moves": 18,
+  "medianDone": 21
+ },
+ "30": {
+  "id": 30,
+  "name": "Computadora de 8 bits",
+  "tune": "moves",
+  "target": 0.34,
+  "neverRate": 0,
+  "stars": [
+   0,
+   16300,
+   21100
+  ],
+  "winRate": 0.37,
+  "moves": 20,
+  "medianDone": 24
+ }
+}

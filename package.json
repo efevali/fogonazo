@@ -1,0 +1,10 @@
+{
+  "name": "fogonazo",
+  "private": true,
+  "description": "Juego de juntar tres con componentes electrónicos.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "armar": "node herramientas/armar.js",
+    "probar": "node herramientas/probar.js"
+  }
+}
