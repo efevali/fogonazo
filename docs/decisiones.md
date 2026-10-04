@@ -37,6 +37,8 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **Nivel 29 sin cambios** (3/10). No tiene ninguna columna libre de obstáculos: las válvulas aparecen en cualquiera y esperan sobre el obstáculo hasta que se rompe; romperlo ya es parte del pedido. *Descartado:* rediseñarlo con columnas libres. La dificultad se evalúa jugando.
 - **Niveles de válvulas con 5 colores** (3/10): 22, 23, 25, 29 y 30, propuesta de Claude, a evaluar jugando. Sin la bajada libre, con 6 colores una válvula tardaba una mediana de 25 movimientos en llegar al zócalo (con 5, 8), y esos niveles pedían entre 36 y 70 movimientos. El costo es que ahí no aparecen el capacitor cerámico ni el cristal. *Alternativa, si se extrañan:* 6 colores con menos válvulas.
 
+- **Tasa de victoria buscada de los niveles 9 y 10** (4/10). `codigo/levels.js` pedía 70 % y 62 %, pero se calibraron con 82 % y 74 %, después de la ayuda de piezas. Se igualan con lo calibrado, para que una recalibración completa no los vuelva más difíciles. No cambia el juego.
+
 ## Estilo visual
 
 - **Banco de trabajo de electrónica** (3/10). Tapete antiestático, la placa en el centro e instrumentos en el tablero: display de 7 segmentos para los movimientos, display fluorescente para los puntos y un vúmetro de LEDs para las estrellas. Tema oscuro único, a propósito.
