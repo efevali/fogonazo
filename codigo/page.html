@@ -493,6 +493,23 @@ html[data-art="16"] .verrow, html[data-art="16"] .inst-nota, html[data-art="16"]
 }
 html[data-art="16"] .toast { font-size: 19px; }
 html[data-art="16"] .led-g, html[data-art="16"] .gear-led { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e2ffe9 0 1.5px, #3ee07a 3px, #127a3a 6px); }
+.star-total { cursor: pointer; border: 0; color: inherit; }
+.mode-row { display: flex; justify-content: space-between; align-items: center; margin-top: -6px; padding: 0 2px; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.mode-row .v { color: var(--copper-hi); }
+.modepick { grid-template-columns: 1fr 1fr 1fr; }
+.modepick .lbl { grid-column: 1 / -1; padding: 4px 2px 0; }
+.rec { background: var(--panel-2); border-radius: 5px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; box-shadow: inset 0 0 0 2px transparent; }
+.rec.cur { box-shadow: inset 0 0 0 2px var(--copper); }
+.rec-top { display: flex; justify-content: space-between; align-items: center; }
+.rec-top .k { font-family: var(--font-ui); font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+.rec-top .v { font-family: var(--font-ui); font-size: 16px; display: flex; align-items: center; gap: 6px; }
+.rec-bar { flex: none; height: 10px; }
+.rec-sub { font-size: 12px; color: var(--muted); }
+html[data-art="16"] .mode-row { font-size: 16px; }
+html[data-art="16"] .rec { border-radius: 8px; }
+html[data-art="16"] .rec-top .k { font-size: 17px; }
+html[data-art="16"] .rec-top .v { font-size: 21px; }
+html[data-art="16"] .rec-sub { font-size: 15px; }
 </style>
 
 <div id="app">
@@ -501,7 +518,8 @@ html[data-art="16"] .led-g, html[data-art="16"] .gear-led { border-radius: 50%; 
       <div class="brand"><span class="led-dot" aria-hidden="true"></span><h1>Fogonazo</h1></div>
       <button class="icon-btn" id="btnSettings" aria-label="Ajustes"></button>
     </header>
-    <div class="progress-row"><div class="star-total" id="starTotal" aria-label="Estrellas"></div><div class="prog" id="prog" aria-hidden="true"></div></div>
+    <div class="progress-row"><button class="star-total" id="starTotal" aria-label="Estrellas: ver récords por modo"></button><div class="prog" id="prog" aria-hidden="true"></div></div>
+    <div class="mode-row" id="modeRow"></div>
     <p class="tagline">Juntá componentes de a tres en la placa. Treinta circuitos, de un LED que titila a una computadora de 8 bits.</p>
     <div id="blocks" style="display:flex;flex-direction:column;gap:14px"></div>
     <button class="btn ghost help-link" id="btnHelp">Cómo se juega</button>

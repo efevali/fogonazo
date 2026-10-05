@@ -34,8 +34,18 @@ const IC = {
 const svgStar = on => pixSvg(IC.star, on ? '#ffbf2e' : '#2c3a44');
 
 // ------------------------------------------------------------ niveles calibrados
-function levelDef(n) {
-  const base = LEVELS[n - 1], cal = CAL[n] || {};
+/* Modos de dificultad (Ajustes). La estrella vale lo mismo en cualquier modo; cada modo guarda sus propios
+   récords. Los factores son provisorios hasta recalibrar con el bot: Difícil es la 0.2.0 tal cual. */
+const MODES = [
+  { id: 'facil', name: 'Fácil', moves: 1.3, stars: 0.8 },
+  { id: 'normal', name: 'Normal', moves: 1.12, stars: 0.9 },
+  { id: 'dificil', name: 'Difícil', moves: 1, stars: 1 },
+];
+const modeOf = id => MODES.find(m => m.id === id) || MODES[1];
+const r50 = v => Math.max(50, Math.round(v / 50) * 50);
+
+function levelDef(n, modeId) {
+  const base = LEVELS[n - 1], cal = CAL[n] || {}, M = modeOf(modeId || Save.settings.mode);
   const d = Object.assign({}, base);
   d.goals = base.goals.map(o => Object.assign({}, o));
   if (cal.moves) d.moves = cal.moves;
@@ -43,6 +53,12 @@ function levelDef(n) {
   if (base.tune === 'score') d.goals[0].n = cal.scoreTarget || 1000;
   d.stars = cal.stars || [0, 1000, 2000];
   if (d.time) d.moves = 0;
+  if (M.moves !== 1) { if (d.time) d.time = Math.round(d.time * M.moves); else d.moves = Math.round(d.moves * M.moves); }
+  if (M.stars !== 1) {
+    d.stars = d.stars.map((v, k) => k ? r50(v * M.stars) : v);
+    if (base.tune === 'score') d.goals[0].n = r50(d.goals[0].n * M.stars);
+  }
+  d.mode = M.id;
   d.n = n;
   d.block = Math.floor((n - 1) / 5);
   return d;
@@ -51,19 +67,31 @@ function levelDef(n) {
 // ------------------------------------------------------------ guardado
 const KEY = 'chispazo.v1';
 const Save = {
-  data: { stars: {}, best: {} },
-  settings: { sfx: 0.7, music: 0.35, mute: false, style: '8' },
+  // stars y best: lo mejor de cualquier modo (desbloqueo y total). modes: los récords de cada modo.
+  data: { stars: {}, best: {}, modes: {} },
+  settings: { sfx: 0.7, music: 0.35, mute: false, style: '8', mode: 'normal' },
   load() {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) return;
       const d = JSON.parse(raw);
-      if (d.progress && d.progress.stars) this.data = { stars: d.progress.stars || {}, best: d.progress.best || {} };
+      if (d.progress && d.progress.stars) this.data = { stars: d.progress.stars || {}, best: d.progress.best || {}, modes: d.progress.modes || {} };
       if (d.settings) Object.assign(this.settings, d.settings);
     } catch (e) {}
+    this.fixModes();
   },
+  // Avance anterior a los modos: se jugó con la dificultad de la 0.2.0, que es Difícil.
+  fixModes() {
+    const m = this.data.modes;
+    if (!Object.keys(m).length && Object.keys(this.data.stars).length) m.dificil = { stars: { ...this.data.stars }, best: { ...this.data.best } };
+    for (const M of MODES) m[M.id] = m[M.id] || { stars: {}, best: {} };
+  },
+  mode(id) { return this.data.modes[id || this.settings.mode]; },
   persist() { try { localStorage.setItem(KEY, JSON.stringify({ progress: this.data, settings: this.settings })); } catch (e) {} },
-  record(n, stars, score) {
+  record(n, stars, score, modeId) {
+    const m = this.mode(modeId);
+    if (stars > (m.stars[n] || 0)) m.stars[n] = stars;
+    if (stars > 0 && score > (m.best[n] || 0)) m.best[n] = score;
     const s = this.data.stars, b = this.data.best;
     let changed = false;
     if (stars > (s[n] || 0)) { s[n] = stars; changed = true; }
@@ -76,12 +104,20 @@ const Save = {
     if (!o) return false;
     for (const [k, v] of Object.entries(o.stars || {})) if ((+v || 0) > (this.data.stars[k] || 0)) { this.data.stars[k] = +v; changed = true; }
     for (const [k, v] of Object.entries(o.best || {})) if ((+v || 0) > (this.data.best[k] || 0)) { this.data.best[k] = +v; changed = true; }
+    this.fixModes();
+    for (const [id, r] of Object.entries(o.modes || {})) {
+      const m = this.data.modes[id];
+      if (!m || !r) continue;
+      for (const key of ['stars', 'best']) for (const [k, v] of Object.entries(r[key] || {})) if ((+v || 0) > (m[key][k] || 0)) { m[key][k] = +v; changed = true; }
+    }
     return changed;
   },
   stars(n) { return this.data.stars[n] || 0; },
+  modeStars(n, id) { return this.mode(id).stars[n] || 0; },
+  modeTotal(id) { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.modeStars(n, id); return t; },
   unlocked(n) { return n === 1 || this.stars(n - 1) > 0; },
   total() { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.stars(n); return t; },
-  reset() { this.data = { stars: {}, best: {} }; this.persist(); Cloud.push(true); },
+  reset() { this.data = { stars: {}, best: {}, modes: {} }; this.fixModes(); this.persist(); Cloud.push(true); },
 };
 
 // Sincronización opcional con la cuenta (si el visor la ofrece): el avance te sigue entre dispositivos.
@@ -107,7 +143,7 @@ const Cloud = {
     if (!this.ref) return;
     if (this.busy) { this.pending = true; return; }
     this.busy = true;
-    try { await this.ref.set({ stars: Save.data.stars, best: Save.data.best }); } catch (e) {}
+    try { await this.ref.set({ stars: Save.data.stars, best: Save.data.best, modes: Save.data.modes }); } catch (e) {}
     this.busy = false;
     if (this.pending) { this.pending = false; this.push(); }
   },
@@ -1097,6 +1133,8 @@ const UI = {
   },
   renderMap() {
     $('#starTotal').innerHTML = svgStar(true).replace('<svg', '<svg width="16" height="16"') + `<span>${Save.total()}/${LEVELS.length * 3}</span>`;
+    const M = modeOf(Save.settings.mode);
+    $('#modeRow').innerHTML = `<span class="lbl">Modo ${M.name}</span><span class="v">${Save.modeTotal()}/${LEVELS.length * 3}</span>`;
     const segs = 18, lit = Math.round(Save.total() / (LEVELS.length * 3) * segs);
     $('#prog').innerHTML = Array.from({ length: segs }, (_, k) => `<i class="${k < lit ? 'lit' : ''}"></i>`).join('');
     const wrap = $('#blocks');
@@ -1111,7 +1149,7 @@ const UI = {
       card.innerHTML = `<div class="block-head"><span class="ref">U${bi + 1}</span><h2>${b.name}</h2><span class="desc">${b.desc}</span></div><div class="nodes"></div>`;
       const nodes = card.querySelector('.nodes');
       for (let n = first; n < first + 5; n++) {
-        const L = LEVELS[n - 1], st = Save.stars(n), un = Save.unlocked(n);
+        const L = LEVELS[n - 1], st = Save.modeStars(n), un = Save.unlocked(n);
         const btn = document.createElement('button');
         btn.className = 'node' + (st ? ' done' : '') + (un ? '' : ' locked') + (n === current && un ? ' current' : '');
         btn.setAttribute('aria-label', `Nivel ${n}: ${L.name}${un ? '' : ' (bloqueado)'}${st ? ', ' + st + ' estrellas' : ''}`);
@@ -1153,6 +1191,35 @@ const UI = {
       Sound.play('click');
     }));
   },
+  modeControl() {
+    const id = Save.settings.mode;
+    return `<div class="stylepick modepick" role="group" aria-label="Dificultad"><span class="lbl">Dificultad</span>${MODES.map(M => `<button data-mode="${M.id}" aria-pressed="${M.id === id}">${M.name}</button>`).join('')}</div>`;
+  },
+  wireMode(c) {
+    c.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+      Save.settings.mode = b.dataset.mode; Save.persist();
+      if (this.screen === 'map') this.renderMap();
+      c.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x.dataset.mode === Save.settings.mode));
+      Sound.play('click');
+    }));
+  },
+  records() {
+    const max = LEVELS.length * 3, cur = Save.settings.mode;
+    const rows = MODES.map(M => {
+      const t = Save.modeTotal(M.id), segs = 10, lit = Math.round(t / max * segs);
+      let full = 0; for (let n = 1; n <= LEVELS.length; n++) if (Save.modeStars(n, M.id) === 3) full++;
+      return `<div class="rec${M.id === cur ? ' cur' : ''}"><div class="rec-top"><span class="k">${M.name}</span><span class="v">${svgStar(true).replace('<svg', '<svg width="14" height="14"')} ${t}/${max}</span></div>
+        <div class="prog rec-bar" aria-hidden="true">${Array.from({ length: segs }, (_, k) => `<i class="${k < lit ? 'lit' : ''}"></i>`).join('')}</div>
+        <span class="rec-sub">${full ? `${full} ${full === 1 ? 'nivel' : 'niveles'} con tres estrellas` : 'Sin niveles con tres estrellas'}</span></div>`;
+    }).join('');
+    this.modal(`<span class="eyebrow">RÉCORDS</span><h2>Tus estrellas</h2>
+      <div class="spec"><span class="k" style="flex:1">Total</span><span class="v">${Save.total()}/${max}</span></div>
+      ${rows}
+      <p class="aviso-avance">Cada estrella vale lo mismo en cualquier modo. Completá los treinta circuitos en los tres.</p>
+      <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
+      c.querySelector('#mClose').onclick = () => { Sound.play('click'); this.close(); };
+    });
+  },
   soundControls() {
     const s = Save.settings;
     return `<div class="stack">
@@ -1170,17 +1237,17 @@ const UI = {
     c.querySelector('#tMute').addEventListener('click', e => { s.mute = !s.mute; e.currentTarget.setAttribute('aria-pressed', s.mute); Sound.ensure(); upd(); });
   },
   settings() {
-    this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.styleControl()}${this.soundControls()}
+    this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.modeControl()}${this.styleControl()}${this.soundControls()}
       <button class="btn ghost" id="mHelp">Cómo se juega</button>
       <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
       <p class="aviso-avance">El avance se guarda solo en este teléfono. Si borrás los datos de navegación de Chrome, destildá «Cookies y datos de sitios» para no perderlo.</p>
       ${versionRowHTML()}
       <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
-      this.wireSound(c); this.wireStyle(c);
+      this.wireSound(c); this.wireStyle(c); this.wireMode(c);
       c.querySelector('#mClose').onclick = () => { Sound.play('click'); this.close(); };
       c.querySelector('#mHelp').onclick = () => { Sound.play('click'); this.help(); };
       c.querySelector('#mReset').onclick = () => {
-        c.querySelector('#resetZone').innerHTML = `<div class="confirm"><p>Se borran todas las estrellas y récords de este juego. No se puede deshacer.</p><div class="row"><button class="btn danger" id="rYes">Borrar</button><button class="btn ghost" id="rNo">Cancelar</button></div></div>`;
+        c.querySelector('#resetZone').innerHTML = `<div class="confirm"><p>Se borran todas las estrellas y récords de este juego, en los tres modos. No se puede deshacer.</p><div class="row"><button class="btn danger" id="rYes">Borrar</button><button class="btn ghost" id="rNo">Cancelar</button></div></div>`;
         c.querySelector('#rYes').onclick = () => { Save.reset(); this._scrolled = 0; this.renderMap(); this.close(); };
         c.querySelector('#rNo').onclick = () => this.settings();
       };
@@ -1373,8 +1440,8 @@ const Game = {
     await View.wait(350);
     let stars = 0;
     if (g.won) { stars = 1; if (g.score >= d.stars[1]) stars = 2; if (g.score >= d.stars[2]) stars = 3; }
-    const prevBest = Save.data.best[d.n] || 0;
-    Save.record(d.n, stars, g.score);
+    const prevBest = Save.mode(d.mode).best[d.n] || 0;
+    Save.record(d.n, stars, g.score, d.mode);
     if (g.won) this.winModal(stars, prevBest); else this.loseModal();
   },
   winModal(stars, prevBest) {
@@ -1498,6 +1565,7 @@ function boot() {
   $('#btnSettings').innerHTML = pixSvg(IC.gear);
   $('#btnPause').innerHTML = pixSvg(IC.gear);
   $('#btnBack').innerHTML = pixSvg(IC.back);
+  $('#starTotal').onclick = () => { Sound.ensure(); Sound.play('click'); UI.records(); };
   $('#btnSettings').onclick = () => { Sound.ensure(); Sound.play('click'); UI.settings(); };
   $('#btnHelp').onclick = () => { Sound.ensure(); Sound.play('click'); UI.help(); };
   $('#btnPause').onclick = () => { Sound.play('click'); Game.pause(); };
