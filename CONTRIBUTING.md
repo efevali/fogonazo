@@ -95,7 +95,7 @@ La dificultad se calibra con un bot que juega imperfecto (ver el [manifiesto](do
 
 1. `node herramientas/probar.js` tiene que terminar sin errores.
 2. `node herramientas/medir.js <niveles>` muestra cuánto cambió la tasa de victoria con los valores actuales.
-3. Si se apartó de lo buscado, `node herramientas/calibrar.js 400 0.62 <niveles>` recalibra esos niveles y actualiza `codigo/calibrated.json`.
+3. Si se apartó de lo buscado, `node herramientas/calibrar.js 400 0.62 <niveles>` recalibra esos niveles y actualiza `codigo/calibrated.json`. Esa es la dificultad del modo Difícil; `node herramientas/modos.js 100 <niveles>` muestra cómo quedan Normal y Fácil.
 4. Los cambios de movimientos, tiempos o colores que salgan de ahí se cuentan en el pull request y se anotan en el [registro de decisiones](docs/decisiones.md).
 
 La tasa del bot es una guía, no la última palabra: manda cómo se siente el nivel en el teléfono.

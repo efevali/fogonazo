@@ -29,7 +29,7 @@ Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos
 | Archivo | Qué es |
 |---|---|
 | `codigo/engine.js` | El motor, sin pantalla: tablero, líneas, especiales, obstáculos, caída, válvulas, bonus, ayuda de piezas del pedido, el bot y la duración de cada animación. Corre igual en el navegador y en Node. |
-| `codigo/levels.js` | Los 30 niveles (nombre, componentes, pedido, diseño de la placa, texto y tasa de victoria buscada) y los 6 bloques. |
+| `codigo/levels.js` | Los 30 niveles (nombre, componentes, pedido, diseño de la placa, texto y tasa de victoria buscada), los 6 bloques y los tres modos de dificultad. |
 | `codigo/calibrated.json` | El resultado de la calibración: movimientos o tiempo, meta de puntos y umbrales de estrellas de cada nivel. Lo escribe `herramientas/calibrar.js`. |
 | `codigo/page.html` | Estilos (8 y 16 bits) y estructura de la página. |
 | `codigo/sprites.js`, `codigo/sprites16.js` | Los dibujos en 8 bits (16 × 16) y en 16 bits (32 × 32). |
@@ -72,6 +72,7 @@ Cada versión publicada se encuentra en el historial del repositorio («Commits�
 - `herramientas/probar.js`: juega 180 partidas con el bot y verifica que el tablero quede siempre consistente. Se corre después de tocar el motor.
 - `herramientas/calibrar.js`: recalibra la dificultad (`node herramientas/calibrar.js 400 0.62 16,17,18`: 400 partidas por nivel, con un bot que elige la mejor jugada el 62 % de las veces). Sin lista de niveles, recalibra los 30.
 - `herramientas/medir.js`: la tasa de victoria del bot con los valores calibrados actuales, para ver cuánto cambia un nivel después de tocar reglas.
+- `herramientas/modos.js`: cuántas partidas gana el bot y cuántas llegan a dos y tres estrellas en cada modo de dificultad (`node herramientas/modos.js 100`), para ajustar los factores de `MODES` en `codigo/levels.js`.
 - `herramientas/bots.js`: compara un bot como el de la calibración con uno fuerte y uno perfecto, en los 30 niveles.
 - `herramientas/ayuda_piezas.js`: mide los niveles de pedido de piezas con y sin la ayuda de piezas del pedido.
 - `herramientas/version.js`: sube la versión (`parche`, `menor` o `mayor`) en el juego y en `sw.js`, pone la fecha de hoy y vuelve a armar. Con `fecha`, solo cambia la fecha.

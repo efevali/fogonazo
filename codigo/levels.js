@@ -102,6 +102,27 @@ const BLOCKS = [
   { name: 'Prototipo final', desc: 'Todo junto' },
 ];
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, BLOCKS };
-else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; }
+/* Modos de dificultad (Ajustes). La estrella vale lo mismo en cualquier modo; cada modo guarda sus propios
+   récords. Difícil es la calibración de calibrated.json tal cual; los otros dos multiplican los movimientos
+   (o el tiempo) y los umbrales de estrellas. Se miden con herramientas/modos.js. */
+const MODES = [
+  { id: 'facil', name: 'Fácil', moves: 1.3, stars: 0.8 },
+  { id: 'normal', name: 'Normal', moves: 1.12, stars: 0.9 },
+  { id: 'dificil', name: 'Difícil', moves: 1, stars: 1 },
+];
+const modeOf = id => MODES.find(m => m.id === id) || MODES[1];
+// Aplica un modo a la definición calibrada de un nivel (d.moves o d.time, d.stars y, si se juega por puntaje, la meta).
+function applyMode(d, M) {
+  const r50 = v => { const st = v > 20000 ? 500 : 100; return Math.max(st, Math.round(v / st) * st); };
+  if (M.moves !== 1) { if (d.time) d.time = Math.round(d.time * M.moves); else d.moves = Math.round(d.moves * M.moves); }
+  if (M.stars !== 1) {
+    d.stars = d.stars.map((v, k) => k ? r50(v * M.stars) : v);
+    if (d.tune === 'score') { d.goals[0].n = r50(d.goals[0].n * M.stars); d.stars[0] = d.goals[0].n; }
+  }
+  d.mode = M.id;
+  return d;
+}
+
+if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, BLOCKS, MODES, modeOf, applyMode };
+else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; root.MODES = MODES; root.modeOf = modeOf; root.applyMode = applyMode; }
 })(typeof window !== 'undefined' ? window : this);

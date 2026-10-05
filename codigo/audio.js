@@ -14,7 +14,7 @@ const Sound = (() => {
   function ensure() {
     if (ctx) { if (ctx.state === 'suspended') ctx.resume().catch(() => {}); return true; }
     try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return false; }
-    master = ctx.createGain(); master.gain.value = 0.9;
+    master = ctx.createGain(); master.gain.value = 1.035;   // 0.3.0: +15 % (antes 0.9)
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -14; comp.ratio.value = 4;
     sfxBus = ctx.createGain(); musicBus = ctx.createGain();
