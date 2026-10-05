@@ -13,7 +13,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.2.0', fecha: '4/10/2026' };
+const FOGONAZO_VERSION = { v: '0.3.0', fecha: '5/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -34,16 +34,6 @@ const IC = {
 const svgStar = on => pixSvg(IC.star, on ? '#ffbf2e' : '#2c3a44');
 
 // ------------------------------------------------------------ niveles calibrados
-/* Modos de dificultad (Ajustes). La estrella vale lo mismo en cualquier modo; cada modo guarda sus propios
-   récords. Los factores son provisorios hasta recalibrar con el bot: Difícil es la 0.2.0 tal cual. */
-const MODES = [
-  { id: 'facil', name: 'Fácil', moves: 1.3, stars: 0.8 },
-  { id: 'normal', name: 'Normal', moves: 1.12, stars: 0.9 },
-  { id: 'dificil', name: 'Difícil', moves: 1, stars: 1 },
-];
-const modeOf = id => MODES.find(m => m.id === id) || MODES[1];
-const r50 = v => Math.max(50, Math.round(v / 50) * 50);
-
 function levelDef(n, modeId) {
   const base = LEVELS[n - 1], cal = CAL[n] || {}, M = modeOf(modeId || Save.settings.mode);
   const d = Object.assign({}, base);
@@ -53,12 +43,7 @@ function levelDef(n, modeId) {
   if (base.tune === 'score') d.goals[0].n = cal.scoreTarget || 1000;
   d.stars = cal.stars || [0, 1000, 2000];
   if (d.time) d.moves = 0;
-  if (M.moves !== 1) { if (d.time) d.time = Math.round(d.time * M.moves); else d.moves = Math.round(d.moves * M.moves); }
-  if (M.stars !== 1) {
-    d.stars = d.stars.map((v, k) => k ? r50(v * M.stars) : v);
-    if (base.tune === 'score') d.goals[0].n = r50(d.goals[0].n * M.stars);
-  }
-  d.mode = M.id;
+  applyMode(d, M);
   d.n = n;
   d.block = Math.floor((n - 1) / 5);
   return d;
@@ -71,6 +56,7 @@ const Save = {
   data: { stars: {}, best: {}, modes: {} },
   settings: { sfx: 0.7, music: 0.35, mute: false, style: '8', mode: 'normal' },
   load() {
+    this.fixModes();
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) return;
@@ -86,7 +72,7 @@ const Save = {
     if (!Object.keys(m).length && Object.keys(this.data.stars).length) m.dificil = { stars: { ...this.data.stars }, best: { ...this.data.best } };
     for (const M of MODES) m[M.id] = m[M.id] || { stars: {}, best: {} };
   },
-  mode(id) { return this.data.modes[id || this.settings.mode]; },
+  mode(id) { this.fixModes(); return this.data.modes[modeOf(id || this.settings.mode).id]; },
   persist() { try { localStorage.setItem(KEY, JSON.stringify({ progress: this.data, settings: this.settings })); } catch (e) {} },
   record(n, stars, score, modeId) {
     const m = this.mode(modeId);
@@ -1273,7 +1259,8 @@ const UI = {
       <div class="legend"><h3>Componentes</h3><div class="parts">${parts}</div>
       <h3>Especiales</h3>${li(items)}<p>Combiná dos especiales entre sí para efectos más grandes: dos baterías limpian toda la placa.</p>
       <h3>Obstáculos</h3>${li(obs)}
-      <h3>Estrellas</h3><p>Una estrella por cumplir el pedido; dos y tres según el puntaje. Lo que sobra de movimientos o de tiempo se convierte en rayos de bonus.</p></div>
+      <h3>Estrellas</h3><p>Una estrella por cumplir el pedido; dos y tres según el puntaje. Lo que sobra de movimientos o de tiempo se convierte en rayos de bonus.</p>
+      <h3>Dificultad</h3><p>En Ajustes elegís entre Fácil, Normal y Difícil: cambian los movimientos (o el tiempo) y los puntos de cada estrella. Una estrella vale lo mismo en cualquier modo y cada uno guarda sus récords: tocá el total de estrellas del mapa para verlos.</p></div>
       <button class="btn" id="mClose" data-focus>Entendido</button>`, c => {
       c.querySelectorAll('[data-icon]').forEach(el => {
         const [k, a] = el.dataset.icon.split(':');

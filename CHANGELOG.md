@@ -2,6 +2,16 @@
 
 Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico que explica el [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.3.0 — 5/10/2026
+
+Modos de dificultad ([milestone](https://github.com/efevali/fogonazo/milestone/3)).
+
+- Ajustes: dificultad Fácil, Normal o Difícil. Normal, el de entrada, es un poco más suave que la 0.2.0; Difícil es la 0.2.0. Cambian los movimientos (o el tiempo) y los puntos de cada estrella.
+- Una estrella vale lo mismo en cualquier modo y cada modo guarda sus récords. El mapa muestra las estrellas del modo elegido y, bajo el total, «Modo …» con las de ese modo; tocando el total se abre «Récords», con las de cada modo. El avance de antes queda en Difícil.
+- La tarjeta «Instalar» va siempre antes del primer bloque.
+- Sonido: volumen general 15 % más alto.
+- Manual: cómo funciona la dificultad.
+
 ## 0.2.0 — 4/10/2026
 
 Tablero 8 × 10 y antena ([milestone](https://github.com/efevali/fogonazo/milestone/2)).

@@ -13,6 +13,7 @@
      Opciones:
        --avance "1-7:3,8:1"   estrellas por nivel: «1-7:3» da tres estrellas del 1 al 7; «8:1», una al 8.
                               Sin avance, el juego arranca de cero.
+       --modo normal          modo de dificultad elegido, al que va el avance: facil, normal (por defecto) o dificil
        --16                   estilo 16 bits (por defecto, 8 bits)
        --accion "js"          JavaScript que se ejecuta antes de capturar (abrir Ajustes, simular una versión
                               nueva); se puede repetir y van en orden. Tiene a mano F = window.__fogonazo.
@@ -37,10 +38,11 @@ const args = process.argv.slice(2);
 const salida = args[0];
 if (!salida || salida.startsWith('--')) { console.error('Uso: node herramientas/boceto.js salida.png [--avance …] [--16] [--accion …] [--entera]'); process.exit(1); }
 const acciones = [];
-let avance = '', estilo = '8', entera = false;
+let avance = '', estilo = '8', entera = false, modo = 'normal';
 for (let i = 1; i < args.length; i++) {
   if (args[i] === '--avance') avance = args[++i];
   else if (args[i] === '--16') estilo = '16';
+  else if (args[i] === '--modo') modo = args[++i];
   else if (args[i] === '--accion') acciones.push(args[++i]);
   else if (args[i] === '--entera') entera = true;
   else { console.error('Opción desconocida: ' + args[i]); process.exit(1); }
@@ -51,7 +53,7 @@ for (const parte of avance.split(',').filter(Boolean)) {
   const [a, b] = rango.split('-').map(Number);
   for (let n = a; n <= (b || a); n++) { stars[n] = +est; best[n] = 10000; }
 }
-const guardado = { progress: { stars, best }, settings: { sfx: 0.7, music: 0.35, mute: false, style: estilo } };
+const guardado = { progress: { stars, best, modes: { [modo]: { stars, best } } }, settings: { sfx: 0.7, music: 0.35, mute: false, style: estilo, mode: modo } };
 
 const servidor = http.createServer((req, res) => {
   let ruta = decodeURIComponent(new URL(req.url, 'http://x').pathname);

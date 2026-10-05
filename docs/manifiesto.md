@@ -54,6 +54,8 @@ Las piezas bajan de a un casillero y las nuevas entran solo por arriba. Un lugar
 
 Una estrella por cumplir el pedido; dos y tres según el puntaje. Al cumplir el pedido, cada movimiento que sobra (o cada 5 segundos) se convierte en un rayo de bonus. En los niveles de puntaje, al terminar explotan los especiales que quedaron en la placa.
 
+Hay tres modos de dificultad, que se eligen en Ajustes: Fácil, Normal (el de entrada) y Difícil. Una estrella vale lo mismo en cualquier modo, pero cada modo guarda sus propias estrellas y récords; el mapa muestra las del modo elegido y el total suma lo mejor de cada nivel. Tocando el total se ven las de cada modo. Un nivel que se pasó en cualquier modo queda abierto en todos.
+
 ### Ayuda de piezas del pedido
 
 En los niveles que piden piezas, una parte de las piezas nuevas sale de los colores que todavía faltan: 0,14 × (tipos que faltan ÷ tipos en la mesa). Con un solo tipo pedido, la ayuda es menor. No cambia los movimientos ni el tiempo.
@@ -76,5 +78,7 @@ La lista vigente vive en el código: los niveles en `codigo/levels.js` y sus mov
 ## Dificultad
 
 Se calibra con un bot que juega imperfecto: elige la mejor jugada el 62 % de las veces, la segunda el 20 % y cualquiera el 18 %. En contrarreloj piensa entre 1,7 y 3,1 segundos por jugada. Con 400 partidas por nivel se eligen los movimientos, el tiempo o la meta de puntos para la tasa de victoria que pide cada nivel (`target` en `codigo/levels.js`), que baja en oleadas: de 97 % en el nivel 1 a 34 % en el 30. Un bot que siempre elige la mejor jugada gana apenas un poco más (nivel 30: 46 % contra 41 %).
+
+Esa calibración es la del modo Difícil. Normal y Fácil multiplican los movimientos (o el tiempo) y los puntos de cada estrella, y en los niveles de puntaje también la meta: Normal da 12 % más de movimientos y pide 10 % menos de puntos; Fácil, 30 % más y 20 % menos (`MODES` en `codigo/levels.js`). Con 100 partidas por nivel y modo (`node herramientas/modos.js`), el bot gana en promedio el 71 % de las partidas en Difícil, el 82 % en Normal y el 90 % en Fácil, y llega a dos estrellas o más en el 35 %, el 54 % y el 76 %.
 
 La tasa del bot es una guía, no la última palabra: en los niveles de pedido de piezas una persona rindió por debajo del bot, y por eso se agregó la ayuda de piezas. Manda cómo se siente el nivel en el teléfono. Cómo se recalibra está en [CONTRIBUTING.md](../CONTRIBUTING.md#dificultad).

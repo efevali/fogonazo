@@ -44,6 +44,9 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **Niveles de válvulas con 5 colores** (3/10): 22, 23, 25, 29 y 30, propuesta de Claude, a evaluar jugando. Sin la bajada libre, con 6 colores una válvula tardaba una mediana de 25 movimientos en llegar al zócalo (con 5, 8), y esos niveles pedían entre 36 y 70 movimientos. El costo es que ahí no aparecen el capacitor cerámico ni el cristal. *Alternativa, si se extrañan:* 6 colores con menos válvulas.
 
 - **Tasa de victoria buscada de los niveles 9 y 10** (4/10). `codigo/levels.js` pedía 70 % y 62 %, pero se calibraron con 82 % y 74 %. Se igualan con lo calibrado, para que una recalibración completa no los vuelva más difíciles. No cambia el juego.
+- **Tres modos de dificultad** (5/10, #15, boceto B-05). Jugando la 0.2.0, sacar dos estrellas costaba mucho. En vez de bajar la dificultad para todos, cada uno elige en Ajustes: Fácil, Normal (por defecto, un poco más suave que la 0.2.0) y Difícil (la 0.2.0). Se tocan solo los movimientos o el tiempo y los umbrales de estrellas, no los pedidos: cambiar los pedidos es rediseñar cada nivel. Los factores salieron del bot (ver el [manifiesto](manifiesto.md#dificultad)).
+- **Una estrella vale lo mismo en cualquier modo, con récords por modo** (5/10, #15). El total del mapa suma lo mejor de cada nivel; el mapa muestra las estrellas del modo elegido, para que completar cada modo sea una meta; tocando el total se ven las de cada modo. Es un récord personal: sin cuentas no hay comparación con otros. *Descartados:* que Fácil tenga un tope de dos estrellas, y tres contadores separados sin total común.
+- **El avance anterior a los modos pasa a Difícil** (5/10): se jugó con la dificultad de la 0.2.0. En Normal el mapa arranca sin estrellas, con los niveles abiertos. *Descartado:* pasarlo a Normal, que lo anotaría en un modo más fácil que el jugado.
 
 ## Estilo visual
 
@@ -62,10 +65,12 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **El tema de 8 bits es el original, sin cambios** (3/10). El del mapa y el del contrarreloj se compusieron a partir de él. Los de 16 bits son arreglos FM de las mismas notas, «ensuciados» porque la primera versión sonaba demasiado suave y definida.
 - **Sonido de línea** (3/10): el original en 8 bits y la opción B «Bip» en 16. El de 16 bits anterior sonaba a campana, molestaba y salía 2,5 veces más fuerte que el resto. *Descartadas:* A «Chispa» y C «Descarga», que también se escuchan en el [muestrario](muestrario.html).
 - **Efectos de 16 bits nivelados con los de 8** (3/10): salían entre 3 y 8 veces más fuertes. La música de 16 bits va al 60 % para no tapar los efectos.
+- **Volumen general 15 % más alto** (5/10): en el teléfono todo sonaba un poco bajo. Se revisó la cadena de sonido y no había nada raro (el compresor final evita que sature), así que se subió la ganancia general de 0,9 a 1,035. Los niveles de efectos y música de Ajustes no cambian.
 
 ## Versión instalable
 
 - **Instalable desde Chrome, sin APK** (4/10), como Kasa. *Descartado:* un APK hecho con PWABuilder.
+- **La tarjeta «Instalar» va siempre antes del primer bloque** (5/10, #18, boceto B-06), sin depender del avance. *Antes:* arriba del bloque del nivel actual (B-01).
 - **Para Android** (3/10): es el teléfono en el que se juega.
 - **GitHub Pages, en `efevali.github.io/fogonazo`** (4/10). El repositorio se renombró a minúscula antes de publicar: la dirección no se puede cambiar después de instalar sin perder las versiones nuevas y el avance (lo que le pasó a Kasa). *Descartado:* Netlify, que sin cuenta publica por una hora.
 - **El avance empieza de cero** (4/10). El de claude.ai no pasa a la versión instalable. *Descartado:* un código para copiar el avance de una a otra.
