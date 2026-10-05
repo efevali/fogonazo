@@ -4,7 +4,7 @@ Qué es Fogonazo, cómo se juega y por qué camino avanza. Ante una duda de dise
 
 ## Qué es Fogonazo
 
-Un juego de juntar tres para el celular, con componentes electrónicos en pixel art. Se juega sobre una placa de 8 × 8 y tiene 30 niveles con nombres de circuitos reales, de un LED que titila a una computadora de 8 bits. Es parte de un proyecto más amplio: hacer juegos simples, divertidos y visualmente atractivos.
+Un juego de juntar tres para el celular, con componentes electrónicos en pixel art. Se juega sobre una placa de 8 × 10 (8 columnas por 10 filas) y tiene 30 niveles con nombres de circuitos reales, de un LED que titila a una computadora de 8 bits. Es parte de un proyecto más amplio: hacer juegos simples, divertidos y visualmente atractivos.
 
 Lo que se acordó al empezar, y vale para todo el juego:
 
@@ -25,15 +25,18 @@ En orden de aparición: resistencia (naranja), capacitor electrolítico (azul), 
 
 ### Cómo se juega
 
-Se desliza una pieza hacia su vecina, o se toca una y después la otra. Si quedan tres o más iguales en línea, se eliminan y caen piezas nuevas. Hay que cumplir el pedido del nivel antes de quedarse sin movimientos o sin tiempo. Los niveles de puntaje se juegan hasta el final; los de pedido terminan al cumplirlo.
+Se desliza una pieza hacia su vecina, o se toca una y después la otra. Si quedan tres o más iguales en línea, o cuatro en un cuadrado de 2 × 2, se eliminan y caen piezas nuevas. Hay que cumplir el pedido del nivel antes de quedarse sin movimientos o sin tiempo. Los niveles de puntaje se juegan hasta el final; los de pedido terminan al cumplirlo.
 
 ### Especiales
 
-- **Rayo** (4 en línea): barre la fila o la columna que marcan las flechas.
+- **Rayo** (4 en línea): barre la fila o la columna que marcan las flechas, perpendicular a la línea que lo armó: cuatro en vertical dan un rayo que barre la fila.
 - **Sobrecarga** (línea en L o en T): explota en rombo, con radio 2.
-- **Batería** (5 en línea): intercambiada con un componente, elimina todos los de ese tipo.
+- **Batería** (5 en línea): intercambiada con un componente, elimina todos los de ese tipo; tocada, los del tipo que más hay.
+- **Antena** (cuadrado de 2 × 2): rompe sus cuatro vecinas y transmite a un blanco, que elige sola: primero lo que pide el nivel (quemados, cinta, pads), después piezas de un color del pedido, después la pieza que está debajo de una válvula y, si no, una al azar.
 
-Combinaciones: rayo + rayo (cruz), rayo + sobrecarga (3 filas y 3 columnas), sobrecarga + sobrecarga (5 × 5), batería + especial (convierte en ese especial todo el color y lo dispara), batería + batería (toda la placa).
+Si una jugada forma más de un especial, gana el de mayor rango: batería > sobrecarga > rayo > antena. Los especiales se activan al eliminarlos en una línea, cuando los alcanza otra explosión, al intercambiarlos con otro especial o **tocándolos**: el toque cuenta como un movimiento.
+
+Combinaciones: rayo + rayo (cruz), rayo + sobrecarga (3 filas y 3 columnas), sobrecarga + sobrecarga (5 × 5), batería + especial (convierte en ese especial todo el color y lo dispara), batería + batería (toda la placa), antena + antena (tres transmisiones), antena + rayo o sobrecarga (lo lleva al blanco y lo activa ahí).
 
 ### Obstáculos y pedidos
 

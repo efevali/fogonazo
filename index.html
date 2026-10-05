@@ -473,6 +473,7 @@ html[data-art="16"] .board-frame { border-radius: 11px; background: linear-gradi
 .pasos .n { font-family: var(--font-ui); font-size: 13px; width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 4px; background: var(--copper); color: #2a1406; box-shadow: inset 0 2px 0 var(--copper-hi), inset 0 -3px 0 var(--copper-lo); }
 .tecla { display: inline-grid; place-items: center; width: 24px; height: 24px; vertical-align: -6px; border-radius: 4px; background: #05090b; box-shadow: inset 0 0 0 2px var(--edge); color: var(--silk); }
 .tecla svg { width: 14px; height: 14px; }
+.aviso-avance { margin: -4px 4px 0; font-size: 12px; line-height: 1.4; color: var(--muted); text-align: center; }
 .inst-nota { font-size: 14px; line-height: 1.4; color: var(--muted); background: var(--panel-2); border-radius: 5px; padding: 8px 10px; }
 .verrow { display: flex; align-items: center; gap: 10px; background: var(--panel-2); border-radius: 5px; padding: 8px 10px; }
 .verrow .vt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
@@ -499,6 +500,7 @@ html[data-art="16"] .inst.ok { box-shadow: inset 0 1px 0 #5a7182, inset 0 0 0 3p
 html[data-art="16"] .inst-t b, html[data-art="16"] .verrow b { font-size: 19px; font-weight: 400; letter-spacing: .03em; }
 /* Jersey no tiene negrita: en 16 bits lo destacado va en blanco, sin negrita sintética */
 html[data-art="16"] .pasos b, html[data-art="16"] .inst-nota b { font-weight: 400; color: #fff; }
+html[data-art="16"] .aviso-avance { font-size: 15px; line-height: 1.2; }
 html[data-art="16"] .inst-t small, html[data-art="16"] .verrow small, html[data-art="16"] .ver-new, html[data-art="16"] .inst-nota { font-size: 17px; line-height: 1.2; }
 html[data-art="16"] .inst-ic, html[data-art="16"] .inst-tick { border-radius: 12px; box-shadow: 0 0 0 2px #05080a, 0 0 0 3px #4c5f6c; }
 html[data-art="16"] .btn.small { font-size: 19px; min-height: 42px; padding: 6px 14px; }
@@ -551,9 +553,9 @@ html[data-art="16"] .led-g, html[data-art="16"] .gear-led { border-radius: 50%; 
 (function (root) {
 'use strict';
 
-const W = 8, H = 8, N = W * H;
+const W = 8, H = 10, N = W * H;
 // Tipos de pieza
-const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6 };
+const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6, ANT: 7 };
 
 function rngFrom(seed) {
   let s = seed >>> 0;
@@ -571,11 +573,13 @@ const Y = i => (i / W) | 0;
 const I = (x, y) => y * W + x;
 const inB = (x, y) => x >= 0 && x < W && y >= 0 && y < H;
 
-function matchable(p) { return p !== null && p.k <= 3 && p.c >= 0; }
-function isSpecialK(k) { return k >= 1 && k <= 4; }
+// Piezas con color: las comunes, los rayos, la sobrecarga y la antena.
+function colored(k) { return k <= 3 || k === K.ANT; }
+function matchable(p) { return p !== null && colored(p.k) && p.c >= 0; }
+function isSpecialK(k) { return (k >= 1 && k <= 4) || k === K.ANT; }
 function fixed(p) { return p !== null && (p.k === K.BURNT || p.lock === 1); }
 function swappable(p) { return p !== null && p.k !== K.BURNT && p.lock !== 1; }
-function same(p, c) { return p !== null && p.k <= 3 && p.c === c && c >= 0; }
+function same(p, c) { return p !== null && colored(p.k) && p.c === c && c >= 0; }
 
 function mk(g, c, k) { return { id: g.nextId++, c, k: k || 0, hp: 0, lock: 0 }; }
 
@@ -590,9 +594,10 @@ function createGame(level, seed) {
     moves: level.moves || 0, movesUsed: 0, timeLeft: level.time || 0,
     goals: [], tubes: null, preview: false, over: false, won: false, scoreOnly: false,
   };
-  const L = level.layout || null;
+  // un diseño con menos filas que la placa se completa con filas libres arriba
+  const L = level.layout || null, off = L ? H - L.length : 0;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = L ? L[y][x] : '.';
+    const ch = L && y >= off ? L[y - off][x] : '.';
     const i = I(x, y);
     if (ch === 'x') g.hole[i] = 1;
     else if (ch === '1') g.pad[i] = 1;
@@ -622,6 +627,7 @@ function pickColorNoMatch(g, i) {
     const c = (g.rng() * g.colors) | 0;
     if (x >= 2 && same(g.p[I(x - 1, y)], c) && same(g.p[I(x - 2, y)], c)) continue;
     if (y >= 2 && same(g.p[I(x, y - 1)], c) && same(g.p[I(x, y - 2)], c)) continue;
+    if (x >= 1 && y >= 1 && same(g.p[I(x - 1, y)], c) && same(g.p[I(x, y - 1)], c) && same(g.p[I(x - 1, y - 1)], c)) continue;
     return c;
   }
   return (g.rng() * g.colors) | 0;
@@ -656,7 +662,7 @@ function fillInitial(g) {
       }
       g.tubes.spawned = placed;
     }
-    if (findRuns(g).length === 0 && hasValidMove(g)) return;
+    if (findMatches(g).length === 0 && hasValidMove(g)) return;
   }
   if (!hasValidMove(g)) shuffle(g);
 }
@@ -671,7 +677,16 @@ function wouldMatch(g, i, c) {
   n = 1;
   for (let yy = y - 1; yy >= 0 && same(g.p[I(x, yy)], c); yy--) n++;
   for (let yy = y + 1; yy < H && same(g.p[I(x, yy)], c); yy++) n++;
-  return n >= 3;
+  if (n >= 3) return true;
+  // cuadrado de 2 × 2: la pieza en i con las otras tres del mismo color
+  for (const [dx, dy] of [[-1, -1], [0, -1], [-1, 0], [0, 0]]) {
+    const x0 = x + dx, y0 = y + dy;
+    if (x0 < 0 || y0 < 0 || x0 + 1 >= W || y0 + 1 >= H) continue;
+    let ok = true;
+    for (const [ax, ay] of [[x0, y0], [x0 + 1, y0], [x0, y0 + 1], [x0 + 1, y0 + 1]]) if ((ax !== x || ay !== y) && !same(g.p[I(ax, ay)], c)) { ok = false; break; }
+    if (ok) return true;
+  }
+  return false;
 }
 
 function swapMakesMatch(g, a, b) {
@@ -693,8 +708,12 @@ function moveKind(g, a, b) {
   return 0;
 }
 
+// Tocar un especial lo activa: es una jugada más, que se anota [i, i].
+function canTap(p) { return p !== null && isSpecialK(p.k) && !p.lock; }
+
 function listMoves(g) {
   const out = [];
+  for (let i = 0; i < N; i++) if (canTap(g.p[i])) out.push([i, i]);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = I(x, y);
     if (x + 1 < W && moveKind(g, a, a + 1)) out.push([a, a + 1]);
@@ -704,6 +723,7 @@ function listMoves(g) {
 }
 
 function hasValidMove(g) {
+  for (let i = 0; i < N; i++) if (canTap(g.p[i])) return true;
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const a = I(x, y);
     if (x + 1 < W && moveKind(g, a, a + 1)) return true;
@@ -740,6 +760,19 @@ function findRuns(g) {
   return runs;
 }
 
+// Cuadrados de 2 × 2 del mismo color (arman la antena). Se agrupan con las líneas que los tocan.
+function findSquares(g) {
+  const out = [];
+  for (let y = 0; y + 1 < H; y++) for (let x = 0; x + 1 < W; x++) {
+    const p = g.p[I(x, y)];
+    if (!matchable(p)) continue;
+    const c = p.c;
+    if (same(g.p[I(x + 1, y)], c) && same(g.p[I(x, y + 1)], c) && same(g.p[I(x + 1, y + 1)], c)) out.push({ dir: 'sq', cells: [I(x, y), I(x + 1, y), I(x, y + 1), I(x + 1, y + 1)], c });
+  }
+  return out;
+}
+function findMatches(g) { return findRuns(g).concat(findSquares(g)); }
+
 function groupRuns(runs) {
   const parent = runs.map((_, i) => i);
   const find = i => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
@@ -761,17 +794,22 @@ function groupRuns(runs) {
   return [...map.values()];
 }
 
+// Rango: batería (5) > sobrecarga (L o T) > rayo (4) > antena (cuadrado).
+// El rayo sale perpendicular a su línea: cuatro en vertical barren la fila, y al revés.
 function decideSpecial(g, gr, prefer) {
-  let maxLen = 0, hasH = false, hasV = false, longest = null;
+  let maxLen = 0, hasH = false, hasV = false, longest = null, square = null;
   for (const r of gr.runs) {
+    if (r.dir === 'sq') { if (!square) square = r; continue; }
     if (r.cells.length > maxLen) { maxLen = r.cells.length; longest = r; }
     if (r.dir === 'h') hasH = true; else hasV = true;
   }
   let k = -1;
   if (maxLen >= 5) k = K.BAT;
   else if (hasH && hasV) k = K.BOMB;
-  else if (maxLen === 4) k = longest.dir === 'h' ? K.LH : K.LV;
+  else if (maxLen === 4) k = longest.dir === 'h' ? K.LV : K.LH;
+  else if (square) k = K.ANT;
   if (k < 0) return null;
+  if (k === K.ANT) longest = square;
   const ok = i => g.p[i] && !g.p[i].lock;
   let pos = -1;
   if (prefer) for (const i of prefer) if (gr.cells.has(i) && ok(i)) { pos = i; break; }
@@ -827,6 +865,43 @@ function zapColor(g, w, from, c, t0) {
   return targets;
 }
 
+// Antena: rompe sus 4 vecinas y transmite a `count` blancos. Con `carry` lleva otro especial
+// (rayo o sobrecarga) y lo activa en el blanco.
+function antTarget(g, w, from, taken) {
+  const free = j => j !== from && !g.hole[j] && !w.hits.has(j) && !taken.has(j);
+  const pick = a => (a.length ? a[(g.rng() * a.length) | 0] : -1);
+  // 1. lo que pide el nivel: quemados, cinta, pads
+  let c = targetsLeft(g).filter(free);
+  if (c.length) return pick(c);
+  // 2. piezas de un color que falta en el pedido
+  const need = g.goals.filter(o => o.type === 'collect' && o.have < o.need).map(o => o.color);
+  c = [];
+  if (need.length) for (let j = 0; j < N; j++) { const q = g.p[j]; if (matchable(q) && need.includes(q.c) && free(j)) c.push(j); }
+  if (c.length) return pick(c);
+  // 3. la pieza que está debajo de una válvula
+  if (g.tubes) for (let j = 0; j < N; j++) { const q = g.p[j]; if (q && q.k === K.TUBE) { const b = belowCell(g, j); if (b >= 0 && g.p[b] && free(b)) c.push(b); } }
+  if (c.length) return pick(c);
+  // 4. cualquier pieza
+  for (let j = 0; j < N; j++) { const q = g.p[j]; if (q && q.k !== K.TUBE && free(j)) c.push(j); }
+  return pick(c);
+}
+function antenna(g, w, i, t0, count, carry) {
+  const x = X(i), y = Y(i);
+  for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) if (inB(nx, ny)) hitCell(g, w, I(nx, ny), t0);
+  const taken = new Set();
+  for (let n = 0; n < count; n++) {
+    const T = antTarget(g, w, i, taken);
+    if (T < 0) break;
+    taken.add(T);
+    const tf = t0 + 40 + n * 60, th = tf + 170;
+    w.fx.push({ type: 'ant', i, to: T, t: tf });
+    if (carry === K.LH) beamRow(g, w, Y(T), X(T), th);
+    else if (carry === K.LV) beamCol(g, w, X(T), Y(T), th);
+    else if (carry === K.BOMB) blast(g, w, T, 2, th, false);
+    else hitCell(g, w, T, th);
+  }
+}
+
 function activate(g, w, i, p, t) {
   const x = X(i), y = Y(i);
   if (p.k === K.LH) beamRow(g, w, y, x, t + 30);
@@ -838,7 +913,7 @@ function activate(g, w, i, p, t) {
     let c = -1, best = 0;
     for (let k = 0; k < 8; k++) if (cnt[k] > best) { best = cnt[k]; c = k; }
     if (c >= 0) zapColor(g, w, i, c, t + 40);
-  }
+  } else if (p.k === K.ANT) antenna(g, w, i, t + 30, 1, 0);
 }
 
 // combinación por intercambio. ia = donde quedó la pieza arrastrada.
@@ -856,12 +931,12 @@ function comboWave(g, ia, ib, steps) {
       for (let j = 0; j < N; j++) hitCell(g, w, j, 140 + 40 * Math.max(Math.abs(X(j) - cx), Math.abs(Y(j) - cy)));
     } else {
       const c = O.c;
-      if (O.k === K.LH || O.k === K.LV || O.k === K.BOMB) {
+      if (O.k === K.LH || O.k === K.LV || O.k === K.BOMB || O.k === K.ANT) {
         const tr = [];
         for (let j = 0; j < N; j++) {
           const q = g.p[j];
           if (q && q.k === K.N && q.c === c && !q.lock) {
-            q.k = O.k === K.BOMB ? K.BOMB : (g.rng() < 0.5 ? K.LH : K.LV);
+            q.k = O.k === K.BOMB || O.k === K.ANT ? O.k : (g.rng() < 0.5 ? K.LH : K.LV);
             tr.push({ id: q.id, i: j, k: q.k });
           }
         }
@@ -875,7 +950,11 @@ function comboWave(g, ia, ib, steps) {
     hitCell(g, w, ia, 0); hitCell(g, w, ib, 0);
     const cx = X(ia), cy = Y(ia);
     const line = k => k === K.LH || k === K.LV;
-    if (line(A.k) && line(B.k)) {
+    if (A.k === K.ANT || B.k === K.ANT) {
+      // antena + antena: tres transmisiones; antena + rayo o sobrecarga: lo lleva al blanco
+      const O = A.k === K.ANT ? B : A;
+      antenna(g, w, ia, 30, O.k === K.ANT ? 3 : 1, O.k === K.ANT ? 0 : O.k);
+    } else if (line(A.k) && line(B.k)) {
       beamRow(g, w, cy, cx, 30); beamCol(g, w, cx, cy, 30);
     } else if (A.k === K.BOMB && B.k === K.BOMB) {
       blast(g, w, ia, 2, 60, true);
@@ -935,7 +1014,7 @@ function applyWave(g, w, cascade, created) {
     const np = mk(g, s.k === K.BAT ? -1 : s.c, s.k);
     g.p[s.i] = np;
     step.created.push({ i: s.i, id: np.id, c: np.c, k: np.k });
-    pts += s.k === K.BAT ? 200 : s.k === K.BOMB ? 100 : 60;
+    pts += s.k === K.BAT ? 200 : s.k === K.BOMB ? 100 : s.k === K.ANT ? 80 : 60;
   }
   step.score = pts * Math.min(cascade, 8);
   g.score += step.score;
@@ -1126,7 +1205,7 @@ function settle(g, steps) {
 function resolveAll(g, steps, first, prefer) {
   let cascade = 0;
   for (let guard = 0; guard < 80; guard++) {
-    const runs = findRuns(g);
+    const runs = findMatches(g);
     let w;
     if (cascade === 0 && first) w = first;
     else { if (!runs.length) break; w = newWave(); }
@@ -1155,13 +1234,14 @@ function shuffle(g) {
       for (let k = cols.length - 1; k > 0; k--) { const j = (g.rng() * (k + 1)) | 0; [cols[k], cols[j]] = [cols[j], cols[k]]; }
     } else cols = idxs.map(() => (g.rng() * g.colors) | 0);
     idxs.forEach((i, n) => { g.p[i].c = cols[n]; });
-    if (findRuns(g).length === 0 && hasValidMove(g)) break;
+    if (findMatches(g).length === 0 && hasValidMove(g)) break;
   }
   return { t: 'shuffle', list: idxs.map(i => ({ id: g.p[i].id, c: g.p[i].c })) };
 }
 
 // ---------------------------------------------------------------- API
 function trySwap(g, a, b) {
+  if (a === b) return tryTap(g, a);
   const steps = [];
   if (g.over) return { valid: false, steps };
   if (Math.abs(X(a) - X(b)) + Math.abs(Y(a) - Y(b)) !== 1) return { valid: false, steps };
@@ -1178,14 +1258,33 @@ function trySwap(g, a, b) {
   g.movesUsed++;
   const first = kind === 2 ? comboWave(g, b, a, steps) : null;
   resolveAll(g, steps, first, [b, a]);
+  afterMove(g, steps);
+  return { valid: true, steps };
+}
+
+// Tocar un especial: se activa donde está y gasta un movimiento.
+function tryTap(g, i) {
+  const steps = [];
+  if (g.over || !canTap(g.p[i])) return { valid: false, steps };
+  const p = g.p[i];
+  if (g.mode === 'moves') g.moves--;
+  g.movesUsed++;
+  steps.push({ t: 'tap', i, id: p.id });
+  const w = newWave();
+  hitCell(g, w, i, 0);
+  resolveAll(g, steps, w, null);
+  afterMove(g, steps);
+  return { valid: true, steps };
+}
+
+function afterMove(g, steps) {
   if (g.tubes) settle(g, steps);
   if (!g.preview) {
     for (let k = 0; k < 4 && !hasValidMove(g); k++) {
       steps.push(shuffle(g));
-      if (findRuns(g).length) resolveAll(g, steps, null, null);
+      if (findMatches(g).length) resolveAll(g, steps, null, null);
     }
   }
-  return { valid: true, steps };
 }
 
 function goalsDone(g) { return g.goals.every(o => o.have >= o.need); }
@@ -1240,7 +1339,7 @@ function clone(g) {
 }
 
 // ---------------------------------------------------------------- bot / pistas
-const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0];
+const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0, 45];
 
 function targetsLeft(g) {
   const t = [];
@@ -1297,6 +1396,7 @@ function rankMoves(g, rnd) {
   const targets = targetsLeft(g);
   const out = [];
   for (const [a, b] of ms) {
+    if (a === b) { out.push({ a, b, v: evalMove(g, a, a, targets) + (rnd ? rnd() * 4 : 0) }); continue; }
     const v1 = evalMove(g, a, b, targets), v2 = evalMove(g, b, a, targets);
     out.push(v1 >= v2 ? { a, b, v: v1 + (rnd ? rnd() * 4 : 0) } : { a: b, b: a, v: v2 + (rnd ? rnd() * 4 : 0) });
   }
@@ -1339,7 +1439,7 @@ function stepDuration(s) {
 }
 
 const Engine = {
-  W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, listMoves, hasValidMove, moveKind,
+  W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, tryTap, canTap, isSpecialK, listMoves, hasValidMove, moveKind,
   evaluateEnd, goalsDone, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
   isStable, shadowed,
 };
@@ -1359,23 +1459,23 @@ const LEVELS = [
     text: 'El primer circuito de todos: hacer titilar un LED. Deslizá un componente hacia un vecino para armar líneas de 3 iguales.' },
   { name: 'Divisor de tensión', colors: 5, moves: 20, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.95, tip: 'line',
     text: 'Dos resistencias en serie y la tensión se reparte. Probá juntar 4 en línea.' },
-  { name: 'Filtro RC', colors: 5, moves: 20, goals: [{ type: 'collect', color: 0, n: 28 }, { type: 'collect', color: 1, n: 28 }], tune: 'moves', target: 0.92,
+  { name: 'Filtro RC', colors: 5, moves: 20, goals: [{ type: 'collect', color: 0, n: 40 }, { type: 'collect', color: 1, n: 40 }], tune: 'moves', target: 0.92,
     text: 'Con una resistencia y un capacitor ya se puede filtrar ruido. Esta vez hay que juntar de los dos.' },
-  { name: 'Puente rectificador', colors: 5, moves: 20, goals: [{ type: 'collect', color: 2, n: 36 }], tune: 'moves', target: 0.87, tip: 'bomb',
+  { name: 'Puente rectificador', colors: 5, moves: 20, goals: [{ type: 'collect', color: 2, n: 50 }], tune: 'moves', target: 0.87, tip: 'bomb',
     text: 'Cuatro diodos convierten la alterna en continua. Un LED también es un diodo: juntá LEDs.' },
   { name: 'Multivibrador astable', colors: 5, time: 60, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.82, tip: 'battery',
     text: 'Oscila solo, sin parar. Este nivel es contrarreloj: sumá puntos antes de que se acabe el tiempo.' },
 
   // ---------------- Bloque 2 · Integrados
-  { name: 'Timer 555', colors: 6, moves: 20, goals: [{ type: 'collect', color: 4, n: 22 }], tune: 'moves', target: 0.9, tip: 'color6',
+  { name: 'Timer 555', colors: 6, moves: 20, goals: [{ type: 'collect', color: 4, n: 34 }], tune: 'moves', target: 0.9, tip: 'color6',
     text: 'Uno de los integrados más fabricados de la historia. Además, llega un componente nuevo a la mesa: el capacitor cerámico.' },
-  { name: 'Regulador 7805', colors: 6, moves: 22, goals: [{ type: 'collect', color: 5, n: 20 }, { type: 'collect', color: 1, n: 20 }], tune: 'moves', target: 0.83,
+  { name: 'Regulador 7805', colors: 6, moves: 22, goals: [{ type: 'collect', color: 5, n: 28 }, { type: 'collect', color: 1, n: 28 }], tune: 'moves', target: 0.83,
     text: 'Entra tensión sucia y salen 5 V limpios. Necesita un capacitor de cada lado.' },
   { name: 'Flip-flop', colors: 6, moves: 22, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.76,
     text: 'Un bit de memoria con dos estados estables. Buscá cascadas y combiná especiales.' },
-  { name: 'Generador PWM', colors: 6, time: 90, goals: [{ type: 'collect', color: 2, n: 25 }], tune: 'time', target: 0.82,
+  { name: 'Generador PWM', colors: 6, time: 90, goals: [{ type: 'collect', color: 2, n: 32 }], tune: 'time', target: 0.82,
     text: 'Pulsos de ancho variable para regular el brillo de un LED. Contrarreloj: juntá los LEDs a tiempo.' },
-  { name: 'Fuente lineal', colors: 6, moves: 30, goals: [{ type: 'collect', color: 3, n: 22 }, { type: 'collect', color: 2, n: 22 }, { type: 'collect', color: 1, n: 22 }], tune: 'moves', target: 0.74,
+  { name: 'Fuente lineal', colors: 6, moves: 30, goals: [{ type: 'collect', color: 3, n: 28 }, { type: 'collect', color: 2, n: 28 }, { type: 'collect', color: 1, n: 28 }], tune: 'moves', target: 0.74,
     text: 'Transformador, puente de diodos y filtro. Primer jefe: tres pedidos a la vez.' },
 
   // ---------------- Bloque 3 · Soldadura
@@ -1383,16 +1483,16 @@ const LEVELS = [
     layout: ['........', '........', '.111111.', '.111111.', '.111111.', '.111111.', '........', '........'],
     text: 'Hay pads de cobre sin soldar. Formá líneas encima de ellos para estañarlos.' },
   { name: 'Plaqueta perforada', colors: 6, moves: 22, goals: [{ type: 'pads' }], tune: 'moves', target: 0.8,
-    layout: ['........', '.1.1.1..', '..1.1.1.', '.1.1.1..', '..1.1.1.', '.1.1.1..', '..1.1.1.', '........'],
+    layout: ['........', '.1.1.1..', '..1.1.1.', '.1.1.1..', '..1.1.1.', '.1.1.1..', '..1.1.1.', '.1.1.1..', '..1.1.1.', '........'],
     text: 'Una placa universal llena de pads que esperan estaño.' },
   { name: 'Doble faz', colors: 6, moves: 24, goals: [{ type: 'pads' }], tune: 'moves', target: 0.72, tip: 'pads2',
-    layout: ['........', '.111111.', '.122221.', '.12..21.', '.12..21.', '.122221.', '.111111.', '........'],
+    layout: ['........', '.111111.', '.122221.', '.12..21.', '.12..21.', '.12..21.', '.12..21.', '.122221.', '.111111.', '........'],
     text: 'Placa de doble faz: los pads con remaches necesitan dos pasadas de estaño.' },
   { name: 'Soldadura por ola', colors: 6, time: 120, goals: [{ type: 'pads' }], tune: 'time', target: 0.65,
-    layout: ['........', '........', '.111111.', '........', '........', '.111111.', '........', '........'],
+    layout: ['........', '.111111.', '........', '........', '.111111.', '........', '........', '.111111.', '........', '........'],
     text: 'En la fábrica, el estaño pasa en una ola. Contrarreloj: soldá todo a tiempo.' },
   { name: 'Montaje SMD', colors: 6, moves: 28, goals: [{ type: 'pads' }], tune: 'moves', target: 0.55,
-    layout: ['........', '.22..22.', '........', '..2..2..', '..2..2..', '........', '.22..22.', '........'],
+    layout: ['........', '.22..22.', '........', '..2..2..', '..2..2..', '..2..2..', '..2..2..', '........', '.22..22.', '........'],
     text: 'Jefe del bloque: componentes de montaje superficial, con pads chicos que necesitan doble pasada.' },
 
   // ---------------- Bloque 4 · Taller
@@ -1400,44 +1500,44 @@ const LEVELS = [
     layout: ['........', '........', '..b..b..', '.b.BB.b.', 'bb.bb.bb', '.b....b.', '........', '........'],
     text: 'Algo hizo humo. Los componentes quemados no se mueven: rompelos con líneas al lado o con especiales.' },
   { name: 'Cinta kapton', colors: 6, moves: 22, goals: [{ type: 'locks' }], tune: 'moves', target: 0.74, tip: 'locks',
-    layout: ['........', '........', '.k.k.k..', '..k.k.k.', '.k.k.k..', '..k.k.k.', '........', '........'],
+    layout: ['........', '........', '.k.k.k..', '..k.k.k.', '.k.k.k..', '..k.k.k.', '.k.k.k..', '..k.k.k.', '........', '........'],
     text: 'Piezas fijadas con cinta kapton. No se pueden mover, pero podés incluirlas en una línea para despegarlas.' },
   { name: 'Placa dañada', colors: 6, moves: 26, goals: [{ type: 'burnt' }], tune: 'moves', target: 0.66, tip: 'burnt2',
-    layout: ['xx....xx', 'x......x', '..BBBB..', '.B....B.', '.B....B.', '..BBBB..', 'x......x', 'xx....xx'],
+    layout: ['xx....xx', 'x......x', '........', '..BBBB..', '.B....B.', '.B....B.', '..BBBB..', '........', 'x......x', 'xx....xx'],
     text: 'Placa rota y componentes carbonizados. Los que tienen carcasa necesitan dos golpes.' },
   { name: 'Reparación urgente', colors: 6, time: 120, goals: [{ type: 'burnt' }], tune: 'time', target: 0.58,
-    layout: ['........', '........', '........', 'bb.bb.bb', '........', '........', 'bb.bb.bb', '........'],
+    layout: ['........', '........', 'bb.bb.bb', '........', '........', 'bb.bb.bb', '........', '........', 'bb.bb.bb', '........'],
     text: 'El equipo tiene que salir hoy. Contrarreloj: sacá todos los quemados.' },
   { name: 'Fuente quemada', colors: 6, moves: 30, goals: [{ type: 'burnt' }, { type: 'pads' }], tune: 'moves', target: 0.5,
     layout: ['........', '.k.kk.k.', '..BBBB..', '.11BB11.', '.11..11.', '..bbbb..', '.k.kk.k.', '........'],
     text: 'Jefe del bloque: limpiar lo quemado y volver a soldar.' },
 
   // ---------------- Bloque 5 · Válvulas
-  { name: 'Tríodo', colors: 5, moves: 20, goals: [{ type: 'tubes', n: 2 }], tubes: { n: 2, max: 1 }, tune: 'moves', target: 0.76, tip: 'tubes',
+  { name: 'Tríodo', colors: 5, moves: 20, goals: [{ type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.76, tip: 'tubes',
     text: 'Antes de los transistores estaban las válvulas. Bajalas hasta el zócalo, en la fila de abajo.' },
-  { name: 'Radio a válvulas', colors: 5, moves: 26, goals: [{ type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.66,
+  { name: 'Radio a válvulas', colors: 5, moves: 26, goals: [{ type: 'tubes', n: 5 }], tubes: { n: 5, max: 2 }, tune: 'moves', target: 0.66,
     layout: ['........', '........', '........', '...xx...', '...xx...', '........', '........', '........'],
-    text: 'La radio del abuelo. Tres válvulas al zócalo.' },
-  { name: 'Amplificador valvular', colors: 5, moves: 26, goals: [{ type: 'tubes', n: 3 }, { type: 'collect', color: 3, n: 20 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.58,
+    text: 'La radio del abuelo. Cinco válvulas al zócalo.' },
+  { name: 'Amplificador valvular', colors: 5, moves: 26, goals: [{ type: 'tubes', n: 4 }, { type: 'collect', color: 3, n: 28 }], tubes: { n: 4, max: 2 }, tune: 'moves', target: 0.58,
     text: 'Para un sonido cálido hacen falta válvulas y un buen transformador de salida, o sea, bobinas.' },
   { name: 'Theremin', colors: 6, time: 75, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.52,
     text: 'Se toca sin tocarlo. Contrarreloj de puntos: aprovechá las cascadas.' },
-  { name: 'Transmisor AM', colors: 5, moves: 30, goals: [{ type: 'tubes', n: 4 }, { type: 'pads' }], tubes: { n: 4, max: 2 }, tune: 'moves', target: 0.46,
+  { name: 'Transmisor AM', colors: 5, moves: 30, goals: [{ type: 'tubes', n: 5 }, { type: 'pads' }], tubes: { n: 5, max: 2 }, tune: 'moves', target: 0.46,
     layout: ['........', '........', '........', '........', '.111111.', '.111111.', '........', '........'],
     text: 'Jefe del bloque: válvulas de potencia y dos filas de pads por soldar.' },
 
   // ---------------- Bloque 6 · Prototipo final
-  { name: 'Contador binario', colors: 7, moves: 26, goals: [{ type: 'collect', color: 6, n: 18 }, { type: 'collect', color: 4, n: 18 }], tune: 'moves', target: 0.6, tip: 'color7',
+  { name: 'Contador binario', colors: 7, moves: 26, goals: [{ type: 'collect', color: 6, n: 26 }, { type: 'collect', color: 4, n: 26 }], tune: 'moves', target: 0.6, tip: 'color7',
     text: 'Un cristal de cuarzo marca el ritmo y los chips cuentan. Es el último componente nuevo: con él ya conocés los siete.' },
   { name: 'Display 7 segmentos', colors: 6, moves: 28, goals: [{ type: 'pads' }], tune: 'moves', target: 0.52,
-    layout: ['..2222..', '.2....2.', '.2....2.', '..1111..', '.2....2.', '.2....2.', '..2222..', '........'],
+    layout: ['..2222..', '.2....2.', '.2....2.', '.2....2.', '..1111..', '.2....2.', '.2....2.', '.2....2.', '..2222..', '........'],
     text: 'Siete segmentos y un 8 entero por soldar.' },
   { name: 'Sintetizador', colors: 7, time: 90, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.45,
     text: 'Osciladores, filtros y envolventes. Contrarreloj con siete componentes en la mesa.' },
-  { name: 'Osciloscopio', colors: 5, moves: 30, goals: [{ type: 'burnt' }, { type: 'locks' }, { type: 'tubes', n: 2 }], tubes: { n: 2, max: 1 }, tune: 'moves', target: 0.4,
+  { name: 'Osciloscopio', colors: 5, moves: 30, goals: [{ type: 'burnt' }, { type: 'locks' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.4,
     layout: ['........', '........', '........', 'b.b..b.b', '.k.kk.k.', '........', '........', '........'],
     text: 'El instrumento para ver las señales. Quemados, cinta y válvulas a la vez.' },
-  { name: 'Computadora de 8 bits', colors: 5, moves: 32, goals: [{ type: 'pads' }, { type: 'burnt' }, { type: 'tubes', n: 2 }], tubes: { n: 2, max: 1 }, tune: 'moves', target: 0.34,
+  { name: 'Computadora de 8 bits', colors: 5, moves: 32, goals: [{ type: 'pads' }, { type: 'burnt' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.34,
     layout: ['........', '.2.BB.2.', '.2....2.', '...11...', '...11...', '.2....2.', '.2.bb.2.', '........'],
     text: 'El proyecto final: todo lo aprendido en una sola placa.' },
 ];
@@ -1455,7 +1555,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, 
 else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; }
 })(typeof window !== 'undefined' ? window : this);
 
-const CAL = {"1":{"moves":18,"scoreTarget":7100,"stars":[7100,15800,23800]},"2":{"moves":20,"scoreTarget":8600,"stars":[8600,17400,24700]},"3":{"moves":16,"stars":[0,10000,13500]},"4":{"moves":18,"stars":[0,11100,14700]},"5":{"time":60,"scoreTarget":10000,"stars":[10000,15400,21000]},"6":{"moves":24,"stars":[0,6000,7900]},"7":{"moves":21,"stars":[0,6400,8200]},"8":{"moves":22,"scoreTarget":6000,"stars":[6000,8700,11200]},"9":{"time":70,"stars":[0,6200,8200]},"10":{"moves":20,"stars":[0,7100,9400]},"11":{"moves":17,"stars":[0,10500,15300]},"12":{"moves":25,"stars":[0,7400,9700]},"13":{"moves":29,"stars":[0,10600,13200]},"14":{"time":50,"stars":[0,4800,6700]},"15":{"moves":27,"stars":[0,8600,11800]},"16":{"moves":12,"stars":[0,8100,11900]},"17":{"moves":29,"stars":[0,7200,9800]},"18":{"moves":20,"stars":[0,5400,7200]},"19":{"time":60,"stars":[0,5400,7600]},"20":{"moves":15,"stars":[0,6500,8800]},"21":{"moves":25,"stars":[0,13300,18500]},"22":{"moves":33,"stars":[0,11300,15500]},"23":{"moves":20,"stars":[0,13300,18200]},"24":{"time":75,"scoreTarget":7600,"stars":[7600,9800,12100]},"25":{"moves":22,"stars":[0,17100,22000]},"26":{"moves":26,"stars":[0,4900,6200]},"27":{"moves":29,"stars":[0,10400,13600]},"28":{"time":90,"scoreTarget":5700,"stars":[5700,7000,8800]},"29":{"moves":18,"stars":[0,12700,18300]},"30":{"moves":20,"stars":[0,16300,21100]}};
+const CAL = {"1":{"moves":18,"scoreTarget":14500,"stars":[14500,33500,48000]},"2":{"moves":20,"scoreTarget":18000,"stars":[18000,37000,52500]},"3":{"moves":14,"stars":[0,19000,27000]},"4":{"moves":14,"stars":[0,19300,26900]},"5":{"time":60,"scoreTarget":20000,"stars":[20000,30000,41000]},"6":{"moves":21,"stars":[0,10900,13900]},"7":{"moves":18,"stars":[0,10400,13500]},"8":{"moves":22,"scoreTarget":10700,"stars":[10700,16500,21200]},"9":{"time":65,"stars":[0,9700,13500]},"10":{"moves":18,"stars":[0,10900,14100]},"11":{"moves":14,"stars":[0,17900,26500]},"12":{"moves":20,"stars":[0,11700,15800]},"13":{"moves":23,"stars":[0,16400,20200]},"14":{"time":50,"stars":[0,8300,11700]},"15":{"moves":21,"stars":[0,14000,17600]},"16":{"moves":11,"stars":[0,14600,22800]},"17":{"moves":23,"stars":[0,11500,15700]},"18":{"moves":18,"stars":[0,7900,10900]},"19":{"time":55,"stars":[0,9000,13000]},"20":{"moves":14,"stars":[0,9500,13300]},"21":{"moves":18,"stars":[0,22500,31500]},"22":{"moves":22,"stars":[0,20500,27500]},"23":{"moves":16,"stars":[0,25000,34000]},"24":{"time":75,"scoreTarget":13700,"stars":[13700,17200,21300]},"25":{"moves":17,"stars":[0,28000,37500]},"26":{"moves":24,"stars":[0,8000,10400]},"27":{"moves":24,"stars":[0,16100,21100]},"28":{"time":90,"scoreTarget":9200,"stars":[9200,11100,13700]},"29":{"moves":13,"stars":[0,22500,33000]},"30":{"moves":15,"stars":[0,29500,39000]}};
 /* Chispazo — arte pixelado (16×16). Cada sprite: paleta + filas; el contorno oscuro se agrega solo. */
 const PIECE_NAMES = ['Resistencia', 'Capacitor electrolítico', 'LED', 'Bobina', 'Chip', 'Capacitor cerámico', 'Cristal'];
 const PIECE_SHORT = ['resistencias', 'electrolíticos', 'LEDs', 'bobinas', 'chips', 'cerámicos', 'cristales'];
@@ -1470,16 +1570,16 @@ const SPR = {
       '................',
       '................',
       '................',
-      '..LL1L....L4LL..',
-      '..BB1B2L3LB4BB..',
-      '..BB1B2B3BB4BB..',
-      '..BB1B2B3BB4BB..',
-      'ggBB1B2B3BB4BBgg',
-      'hhBB1B2B3BB4BBhh',
-      '..BB1B2B3BB4BB..',
-      '..BB1B2B3BB4BB..',
-      '..BB1B2D3DB4BB..',
-      '..DD1D....D4DD..',
+      '................',
+      '..L1L......L4L..',
+      '..B1BL2L3LLB4B..',
+      '..B1BB2B3BBB4B..',
+      'ggB1BB2B3BBB4Bgg',
+      'hhB1BB2B3BBB4Bhh',
+      '..B1BB2B3BBB4B..',
+      '..B1BD2D3DDB4B..',
+      '..D1D......D4D..',
+      '................',
       '................',
       '................',
       '................',
@@ -1489,20 +1589,20 @@ const SPR = {
     pal: { S: '#e9eef3', H: '#ffffff', s: '#97a3b0', D: '#1d3f8f', L: '#79a6ff', B: '#2f6ae0', W: '#bcd5ff', m: '#1d3f8f', d: '#132c66', g: LEGS.g },
     rows: [
       '................',
-      '...SHSSSSSSSS...',
-      '...ssssssssss...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBmmBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBmmBD...',
-      '...DLBBBBWWBD...',
-      '...DLBBBBWWBD...',
-      '...dddddddddd...',
+      '....SHSSSSSS....',
+      '....ssssssss....',
+      '....DLBBBWWD....',
+      '....DLBBBWWD....',
+      '....DLBBBmmD....',
+      '....DLBBBWWD....',
+      '....DLBBBWWD....',
+      '....DLBBBmmD....',
+      '....DLBBBWWD....',
+      '....DLBBBWWD....',
+      '....dddddddd....',
       '......g..g......',
       '......g..g......',
-      '................',
+      '......g..g......',
       '................',
     ],
   },
@@ -1510,20 +1610,20 @@ const SPR = {
     pal: { L: '#ff8a7f', H: '#ffd9d3', B: '#e5322d', D: '#a51d1d', K: '#741313', R: '#c42a2a', g: LEGS.g },
     rows: [
       '................',
-      '......LLLL......',
-      '.....LHHBBB.....',
-      '....LHHBBBBD....',
-      '....LHBBBBBD....',
-      '....LHBBBBBD....',
-      '....LBBKKBBD....',
-      '....LBBKBBBD....',
-      '....LBBKKKBD....',
-      '....BBBBBBBD....',
-      '...RRRRRRRRRR...',
-      '.....g....g.....',
-      '.....g....g.....',
-      '.....g....g.....',
-      '.....g..........',
+      '.......LL.......',
+      '......LHBB......',
+      '.....LHBBBD.....',
+      '.....LHBBBD.....',
+      '.....LHBBBD.....',
+      '.....LBKKBD.....',
+      '.....LBKBBD.....',
+      '.....LBKKKD.....',
+      '.....BBBBBD.....',
+      '....RRRRRRRR....',
+      '......g..g......',
+      '......g..g......',
+      '......g..g......',
+      '......g.........',
       '................',
     ],
   },
@@ -1532,18 +1632,18 @@ const SPR = {
     rows: [
       '................',
       '................',
-      '...LLLLNNLLLL...',
-      '.ppBBBBBBBBBMpp.',
-      '.qqBoBBBBBBBMqq.',
-      '...BBBBBBBBBM...',
-      '.ppBBttttttBMpp.',
-      '.qqBBBBBBBBBMqq.',
-      '...BBttttBBBM...',
-      '.ppBBBBBBBBBMpp.',
-      '.qqBBBBBBBBBMqq.',
-      '...BBBBBBBBBM...',
-      '.ppBBBBBBBBBMpp.',
-      '.qqDDDDDDDDDDqq.',
+      '....LLLNNLLL....',
+      '..ppBBBBBBBMpp..',
+      '..qqBoBBBBBMqq..',
+      '....BBBBBBBM....',
+      '..ppBttttBBMpp..',
+      '..qqBBBBBBBMqq..',
+      '....BtttBBBM....',
+      '..ppBBBBBBBMpp..',
+      '..qqBBBBBBBMqq..',
+      '....BBBBBBBM....',
+      '..ppBBBBBBBMpp..',
+      '..qqDDDDDDDDqq..',
       '................',
       '................',
     ],
@@ -1553,16 +1653,16 @@ const SPR = {
     rows: [
       '................',
       '................',
-      '...LLLLLLLLLL...',
-      '..LHHHHHHHHHHL..',
-      '..LLeeeeeeeeLL..',
-      '..BeBBBBBBBBeB..',
-      '..BeBttBtttBeB..',
-      '..BeBBBBBBBBeB..',
-      '..BeBtttBttBeB..',
-      '..BBeeeeeeeeBB..',
-      '..DDDDDDDDDDDD..',
+      '....LLLLLLLL....',
+      '...LHHHHHHHHL...',
+      '...LLeeeeeeLL...',
+      '...BeBBBBBBeB...',
+      '...BeBtBttBeB...',
+      '...BeBBBBBBeB...',
+      '...BeBttBtBeB...',
+      '...BBeeeeeeBB...',
       '...DDDDDDDDDD...',
+      '....DDDDDDDD....',
       '.....g....g.....',
       '.....g....g.....',
       '.....g....g.....',
@@ -1659,7 +1759,7 @@ const SPR = {
 SPR.coil = (function () {
   const pal = { a: '#7fd487', b: '#36a456', c: '#1f6e36', u: '#ffc489', v: '#dd8a40', w: '#9a5320', l: '#dd8a40' };
   const rows = [];
-  const cx = 8, cy = 7, R = 6.9, r = 2.6, turns = 9;
+  const cx = 8, cy = 7, R = 6.0, r = 2.9, turns = 9;
   for (let y = 0; y < 16; y++) {
     let row = '';
     for (let x = 0; x < 16; x++) {
@@ -1672,7 +1772,7 @@ SPR.coil = (function () {
         const edge = d > R - 1.1 || d < r + 0.9;
         if (copper) row += f < 0.13 ? 'u' : (shade > 0.55 ? 'w' : 'v');
         else row += edge ? (shade > 0.2 ? 'c' : 'b') : (shade < -0.3 ? 'a' : 'b');
-      } else if ((x === 6 || x === 9) && y >= 13 && y <= 14) row += 'l';
+      } else if ((x === 6 || x === 9) && y >= 12 && y <= 14) row += 'l';
       else row += '.';
     }
     rows.push(row);
@@ -1684,17 +1784,17 @@ SPR.coil = (function () {
 SPR.ccap = (function () {
   const pal = { H: '#fff6cc', L: '#ffe27a', Y: '#f2c12e', D: '#bf8913', m: '#9c6e0c', g: LEGS.g };
   const rows = [];
-  const cx = 8, cy = 6.2, R = 5.6;
+  const cx = 8, cy = 5.8, R = 4.7;
   for (let y = 0; y < 16; y++) {
     let row = '';
     for (let x = 0; x < 16; x++) {
       const dx = x + 0.5 - cx, dy = y + 0.5 - cy, d = Math.hypot(dx, dy);
       if (d <= R) {
         const sh = (dx + dy) / R;
-        if (Math.hypot(dx + 2.2, dy + 2.2) < 1.3) row += 'H';
-        else if (y === 7 && x >= 6 && x <= 9) row += 'm';
+        if (Math.hypot(dx + 1.8, dy + 1.8) < 1.1) row += 'H';
+        else if (y === 6 && x >= 7 && x <= 8) row += 'm';
         else row += sh < -0.55 ? 'L' : sh > 0.45 ? 'D' : 'Y';
-      } else if ((x === 6 || x === 9) && y >= 12 && y <= 14) row += 'g';
+      } else if ((x === 6 || x === 9) && y >= 11 && y <= 14) row += 'g';
       else row += '.';
     }
     rows.push(row);
@@ -2335,6 +2435,7 @@ const Sound = (() => {
     beam() { tone({ f: 1800, f2: 160, dur: 0.28, vol: 0.06, type: 'sawtooth' }); noise({ dur: 0.25, vol: 0.09, filter: 'bandpass', freq: 3000, freq2: 600, q: 2 }); },
     blast() { noise({ dur: 0.45, vol: 0.22, filter: 'lowpass', freq: 1400, freq2: 120 }); tone({ f: 140, f2: 40, dur: 0.35, vol: 0.18, type: 'triangle' }); },
     zap() { tone({ f: 300, f2: 2400, dur: 0.35, vol: 0.06, duty: 0.125 }); for (let i = 0; i < 5; i++) noise({ t: i * 0.06, dur: 0.04, vol: 0.08, filter: 'highpass', freq: 2500 }); },
+    ant() { [0, 0.07, 0.14].forEach(t => tone({ f: 1568, f2: 2093, t, dur: 0.05, vol: 0.06, duty: 0.25 })); tone({ f: 2400, f2: 600, t: 0.2, dur: 0.18, vol: 0.04, duty: 0.125 }); },
     nova() { tone({ f: 80, f2: 1600, dur: 0.6, vol: 0.08, duty: 0.5 }); noise({ dur: 0.8, vol: 0.2, filter: 'lowpass', freq: 3000, freq2: 100 }); },
     solder() { noise({ dur: 0.22, vol: 0.05, filter: 'bandpass', freq: 5200, q: 3 }); tone({ f: 2100, dur: 0.05, vol: 0.025, type: 'triangle' }); },
     crack() { noise({ dur: 0.12, vol: 0.14, filter: 'lowpass', freq: 900 }); tone({ f: 95, dur: 0.1, vol: 0.1 }); },
@@ -2400,6 +2501,10 @@ const Sound = (() => {
     zap() {
       fm({ f: 200, f2: 3200, ratio: 7, index: 3, indexEnd: 6, indexTime: 0.4, dur: 0.42, vol: 0.06 });
       for (let i = 0; i < 6; i++) noise({ t: i * 0.055, dur: 0.035, vol: 0.07, filter: 'highpass', freq: 3500, pan: (i % 2 ? 0.4 : -0.4) });
+    },
+    ant() {
+      [0, 0.07, 0.14].forEach((t, i) => fm({ f: 1568, f2: 2093, slide: 0.04, t, ratio: 2, index: 1.5, indexEnd: 0.3, dur: 0.06, vol: 0.05, pan: (i - 1) * 0.4 }));
+      fm({ f: 2400, f2: 500, t: 0.2, ratio: 3.5, index: 3, indexEnd: 0.5, indexTime: 0.2, dur: 0.2, vol: 0.04 });
     },
     nova() {
       fm({ f: 60, f2: 1800, ratio: 2, index: 8, indexEnd: 1, indexTime: 0.7, dur: 0.75, vol: 0.08 });
@@ -2615,7 +2720,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.1.0', fecha: '4/10/2026' };
+const FOGONAZO_VERSION = { v: '0.2.0', fecha: '4/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -2903,6 +3008,21 @@ function pieceSprite(c, k, hp) {
   if (k === K.BURNT) return hp >= 2 ? 'burnt2' : 'burnt1';
   return PIECE_SPRITES[c];
 }
+// Antena: ondas en píxeles que salen de los dos costados de la pieza (las mismas en 8 y 16 bits).
+function antWaves(ctx, cx, cy, cell, t, alpha) {
+  const q = Math.max(2, Math.round(cell / 12)), o = Math.max(1, Math.round(q / 3));
+  for (let n = 0; n < 2; n++) {
+    const p = ((t / 900) + n * 0.5) % 1, r = cell * (0.36 + 0.2 * p);
+    const step = q / r, span = 0.72, pts = [];
+    for (const sg of [-1, 1]) for (let a = -span; a <= span + 1e-6; a += step) pts.push([Math.round(cx + sg * Math.cos(a) * r - q / 2), Math.round(cy + Math.sin(a) * r - q / 2)]);
+    ctx.globalAlpha = alpha * (0.4 + 0.6 * (1 - p));
+    ctx.fillStyle = '#062029';
+    for (const [x, y] of pts) ctx.fillRect(x - o, y - o, q + 2 * o, q + 2 * o);
+    ctx.fillStyle = '#e4fcff';
+    for (const [x, y] of pts) ctx.fillRect(x, y, q, q);
+  }
+  ctx.globalAlpha = alpha;
+}
 // ícono suelto (canvas) para HUD y modales
 function iconCanvas(kind, arg, css) {
   const px = Math.round(css * Math.min(3, window.devicePixelRatio || 1));
@@ -2925,7 +3045,8 @@ function iconCanvas(kind, arg, css) {
     g.addColorStop(0, 'rgba(255,240,140,0.95)'); g.addColorStop(1, 'rgba(255,200,40,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, px, px);
     put(PIECE_SPRITES[arg || 3]);
-  } else if (kind === 'score') put('battery');
+  } else if (kind === 'ant') { put(PIECE_SPRITES[arg === undefined ? 1 : arg]); antWaves(ctx, px / 2, px / 2, px, 300, 1); }
+  else if (kind === 'score') put('battery');
   return cv;
 }
 
@@ -2973,10 +3094,11 @@ function setStyle(st) {
 const View = (() => {
   const cv = $('#board'), ctx = cv.getContext('2d');
   let g = null;
-  let dpr = 1, cssS = 320, Wd = 320, cell = 40, sp = 36, bg = null, holeLayer = null;
+  const BW = E.W, BH = E.H;   // casilleros: 8 de ancho por 10 de alto
+  let dpr = 1, cssS = 320, Wd = 320, Hd = 400, cell = 40, sp = 36, bg = null, holeLayer = null;
   const pieces = new Map();
-  let padLv = new Uint8Array(64), padOrig = new Uint8Array(64);
-  const padFlash = new Float64Array(64);
+  let padLv = new Uint8Array(E.N), padOrig = new Uint8Array(E.N);
+  const padFlash = new Float64Array(E.N);
   let fx = [], parts = [], texts = [], timeline = [];
   let sel = -1, hint = null, shakeT = 0, shakeAmp = 0, mosaicT = 0;
   const mosaicCv = document.createElement('canvas');
@@ -2988,7 +3110,7 @@ const View = (() => {
     g = game;
     pieces.clear(); fx = []; parts = []; texts = []; timeline = []; sel = -1; hint = null;
     padOrig = g.padOrig.slice(); padLv = g.pad.slice(); padFlash.fill(0);
-    for (let i = 0; i < 64; i++) { const p = g.p[i]; if (p) addPiece(p.id, p.c, p.k, X(i), Y(i), p); }
+    for (let i = 0; i < E.N; i++) { const p = g.p[i]; if (p) addPiece(p.id, p.c, p.k, X(i), Y(i), p); }
     buildLayers();
   }
   function addPiece(id, c, k, x, y, src) {
@@ -3023,26 +3145,26 @@ const View = (() => {
   function resize() {
     const wrap = $('#boardWrap');
     const r = wrap.getBoundingClientRect();
-    const avail = Math.floor(Math.min(r.width - 16, r.height - 46));
-    const s = clamp(avail, 200, 560);
+    // el casillero es el mayor que entra a lo ancho (8) y a lo alto (10)
+    const cs = clamp(Math.floor(Math.min((r.width - 16) / BW, (r.height - 46) / BH)), 25, 70);
     dpr = Math.min(3, window.devicePixelRatio || 1);
-    const dev = Math.round(s * dpr / 8) * 8;
-    if (dev === Wd && Math.abs(cssS - dev / dpr) < 0.5) return;
-    Wd = dev; cssS = dev / dpr; cell = dev / 8;
+    const dc = Math.round(cs * dpr);
+    if (dc * BW === Wd && Math.abs(cssS - dc * BW / dpr) < 0.5) return;
+    cell = dc; Wd = dc * BW; Hd = dc * BH; cssS = Wd / dpr;
     sp = Math.round(cell * 0.94);
-    cv.width = cv.height = dev;
-    cv.style.width = cv.style.height = cssS + 'px';
+    cv.width = Wd; cv.height = Hd;
+    cv.style.width = cssS + 'px'; cv.style.height = (Hd / dpr) + 'px';
     Spr.clear();
     buildLayers();
   }
 
   function buildLayers() {
     if (!g) return;
-    bg = document.createElement('canvas'); bg.width = bg.height = Wd;
+    bg = document.createElement('canvas'); bg.width = Wd; bg.height = Hd;
     const b = bg.getContext('2d');
     const px = cell / 16;
     if (ART.style === '16') drawBoard16(b);
-    else for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    else for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       const x0 = Math.round(x * cell), y0 = Math.round(y * cell), x1 = Math.round((x + 1) * cell), y1 = Math.round((y + 1) * cell);
       b.fillStyle = (x + y) % 2 ? '#11523a' : '#0f4a33';
       b.fillRect(x0, y0, x1 - x0, y1 - y0);
@@ -3052,11 +3174,11 @@ const View = (() => {
       b.fillStyle = 'rgba(210,240,225,0.18)';
       b.fillRect(x0 + Math.round(px), y0 + Math.round(px), Math.ceil(px), Math.ceil(px));
     }
-    holeLayer = document.createElement('canvas'); holeLayer.width = holeLayer.height = Wd;
+    holeLayer = document.createElement('canvas'); holeLayer.width = Wd; holeLayer.height = Hd;
     const h = holeLayer.getContext('2d');
-    const isHole = (x, y) => x >= 0 && x < 8 && y >= 0 && y < 8 && g.hole[y * 8 + x];
+    const isHole = (x, y) => x >= 0 && x < BW && y >= 0 && y < BH && g.hole[y * BW + x];
     const edge = Math.max(2, Math.round(px * 1.5));
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       if (!isHole(x, y)) continue;
       const x0 = Math.round(x * cell), y0 = Math.round(y * cell), w = Math.round((x + 1) * cell) - x0, hh = Math.round((y + 1) * cell) - y0;
       h.fillStyle = '#1a252d'; h.fillRect(x0, y0, w, hh);
@@ -3064,9 +3186,9 @@ const View = (() => {
       for (let k = 1; k < 4; k++) { h.fillRect(x0, y0 + Math.round(hh * k / 4), w, 1); h.fillRect(x0 + Math.round(w * k / 4), y0, 1, hh); }
       h.fillStyle = '#062016';
       if (!isHole(x, y - 1) && y > 0) h.fillRect(x0, y0, w, edge);
-      if (!isHole(x, y + 1) && y < 7) h.fillRect(x0, y0 + hh - edge, w, edge);
+      if (!isHole(x, y + 1) && y < BH - 1) h.fillRect(x0, y0 + hh - edge, w, edge);
       if (!isHole(x - 1, y) && x > 0) h.fillRect(x0, y0, edge, hh);
-      if (!isHole(x + 1, y) && x < 7) h.fillRect(x0 + w - edge, y0, edge, hh);
+      if (!isHole(x + 1, y) && x < BW - 1) h.fillRect(x0 + w - edge, y0, edge, hh);
     }
   }
 
@@ -3074,7 +3196,7 @@ const View = (() => {
   function drawBoard16(b) {
     const u = cell / 32, R = Math.round;
     const rnd = E.rngFrom(((g.level && g.level.n) || 7) * 7919 + 13);
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       const x0 = R(x * cell), y0 = R(y * cell), w = R((x + 1) * cell) - x0, h = R((y + 1) * cell) - y0;
       const gr = b.createLinearGradient(0, y0, 0, y0 + h);
       const odd = (x + y) % 2;
@@ -3090,11 +3212,12 @@ const View = (() => {
       b.fillStyle = 'rgba(140,230,180,0.35)';
       if (y0 === y1) b.fillRect(R(x0), R(y0 - t / 2), R(x1 - x0), Math.max(1, R(u * 0.6))); else b.fillRect(R(x0 - t / 2), R(y0), Math.max(1, R(u * 0.6)), R(y1 - y0));
     };
-    for (let k = 1; k < 8; k++) for (let j = 0; j < 8; j++) {
-      if (rnd() < 0.3) trace(j * cell, k * cell, (j + 1) * cell, k * cell);
-      if (rnd() < 0.3) trace(k * cell, j * cell, k * cell, (j + 1) * cell);
+    for (let k = 1; k < Math.max(BW, BH); k++) for (let j = 0; j < Math.max(BW, BH); j++) {
+      const h = rnd() < 0.3, v = rnd() < 0.3;
+      if (h && k < BH && j < BW) trace(j * cell, k * cell, (j + 1) * cell, k * cell);
+      if (v && k < BW && j < BH) trace(k * cell, j * cell, k * cell, (j + 1) * cell);
     }
-    for (let y = 1; y < 8; y++) for (let x = 1; x < 8; x++) {
+    for (let y = 1; y < BH; y++) for (let x = 1; x < BW; x++) {
       if (rnd() > 0.28) continue;
       const cx = x * cell, cy = y * cell;
       b.fillStyle = '#7a5a1c'; b.beginPath(); b.arc(cx, cy, u * 3.4, 0, Math.PI * 2); b.fill();
@@ -3137,6 +3260,10 @@ const View = (() => {
         moveTo(B, ax, ay, 150, easeInOut, () => moveTo(B, bx, by, 150, easeInOut));
         after(150, () => Sound.play('bad'));
       } else { moveTo(A, bx, by, 150, easeInOut); moveTo(B, ax, ay, 150, easeInOut); }
+    } else if (st.t === 'tap') {
+      const pv = pieces.get(st.id);
+      if (pv) { pv.flash = t0; burst(pv.x, pv.y, '#ffffff', 4, 1.6); }
+      Sound.play('click');
     } else if (st.t === 'transform') {
       st.list.forEach((it, n) => {
         const doIt = () => { const pv = pieces.get(it.id); if (!pv) return; pv.k = it.k; pv.flash = performance.now(); burst(pv.x, pv.y, '#ffffff', 5, 2); if (st.bonus) { Sound.play('bonus', n, 0); Game.bonusTick(); } };
@@ -3152,6 +3279,7 @@ const View = (() => {
         if (f.type === 'beam') Sound.play('beam', null, 60);
         else if (f.type === 'blast') { Sound.play('blast', null, 80); shake(f.big ? 7 : 4); }
         else if (f.type === 'zap') Sound.play('zap', null, 80);
+        else if (f.type === 'ant') Sound.play('ant', null, 90);
         else if (f.type === 'nova') { Sound.play('nova'); shake(9); }
       });
       for (const c of st.cleared) after(c.t, () => {
@@ -3263,7 +3391,11 @@ const View = (() => {
       const p = (t - pv.land) / 140;
       if (p < 1) { const q = Math.sin(p * Math.PI) * 0.1; sy = 1 - q; sx = 1 + q * 0.6; } else pv.land = 0;
     }
-    if (hint && (pv.id === hint.ida || pv.id === hint.idb) && !REDUCED) {
+    if (hint && hint.a === hint.b && pv.id === hint.ida && !REDUCED) {
+      // pista de un toque: el especial late
+      const ph = ((t - hint.t0) / 1000) % 1.6;
+      if (ph < 0.6) s *= 1 + Math.sin(ph / 0.6 * Math.PI * 2) * 0.08;
+    } else if (hint && (pv.id === hint.ida || pv.id === hint.idb) && !REDUCED) {
       const ph = ((t - hint.t0) / 1000) % 1.6;
       if (ph < 0.6) {
         const w = Math.sin(ph / 0.6 * Math.PI * 3) * 0.08;
@@ -3282,7 +3414,7 @@ const View = (() => {
       gr.addColorStop(0, `rgba(255,240,140,${pulse})`); gr.addColorStop(1, 'rgba(255,190,40,0)');
       ctx.fillStyle = gr; ctx.fillRect(cx - cell, cy - cell, cell * 2, cell * 2);
     }
-    if (pv.k <= 3 && pv.c === 2 && !pv.pop) {
+    if ((pv.k <= 3 || pv.k === K.ANT) && pv.c === 2 && !pv.pop) {
       const ph = ((t / 1000) + pv.phase) % 4.5;
       if (ph < 0.35) {
         const a = Math.sin(ph / 0.35 * Math.PI) * 0.6;
@@ -3319,6 +3451,7 @@ const View = (() => {
         ctx.fillRect(Math.round(cx + Math.cos(a) * r - q / 2), Math.round(cy + Math.sin(a) * r - q / 2), q, q);
       }
     }
+    if (pv.k === K.ANT) antWaves(ctx, cx, cy, cell, t + pv.phase * 400, alpha);
     if (pv.k === K.TUBE) {
       const a = 0.28 + 0.12 * Math.sin(t / 90 + pv.phase) + 0.06 * Math.sin(t / 23);
       const gy = cy - h * 0.06;
@@ -3363,7 +3496,7 @@ const View = (() => {
           const xa = Math.max(0, ox - reach), xb = Math.min(Wd, ox + reach);
           bolt(jag(xa, oy, xb, oy, cell * 0.12), a);
         } else {
-          const ya = Math.max(0, oy - reach), yb = Math.min(Wd, oy + reach);
+          const ya = Math.max(0, oy - reach), yb = Math.min(Hd, oy + reach);
           bolt(jag(ox, ya, ox, yb, cell * 0.12), a);
         }
       } else if (f.type === 'blast') {
@@ -3380,10 +3513,29 @@ const View = (() => {
           const a = e < hitAt ? 1 : 1 - (e - hitAt) / 160;
           bolt(jag(ox, oy, (X(j) + 0.5) * cell, (Y(j) + 0.5) * cell, cell * 0.2), a);
         });
+      } else if (f.type === 'ant') {
+        // transmisión: anillos en la antena, un pulso de píxeles que viaja y un anillo en el blanco
+        const tx = (X(f.to) + 0.5) * cell, ty = (Y(f.to) + 0.5) * cell;
+        const q = Math.max(2, Math.round(cell / 10)), p = clamp(e / 170, 0, 1);
+        const ring = (x, y, r, a) => {
+          const n = Math.max(8, Math.round(r * 2 * Math.PI / (q * 1.6)));
+          ctx.fillStyle = `rgba(228,252,255,${a})`;
+          for (let k = 0; k < n; k++) { const ang = k / n * Math.PI * 2; ctx.fillRect(Math.round(x + Math.cos(ang) * r - q / 2), Math.round(y + Math.sin(ang) * r - q / 2), q, q); }
+        };
+        if (e < 320) ring(ox, oy, cell * (0.45 + 0.6 * e / 320), 1 - e / 320);
+        if (p < 1) {
+          const hx = lerp(ox, tx, p), hy = lerp(oy, ty, p), d = Math.hypot(tx - ox, ty - oy), n = Math.max(2, Math.round(d * p / (q * 2.2)));
+          for (let k = 0; k <= n; k++) {
+            const f2 = k / n, a = 0.15 + 0.75 * f2;
+            ctx.fillStyle = `rgba(150,235,255,${a})`;
+            ctx.fillRect(Math.round(lerp(ox, hx, f2) - q / 2), Math.round(lerp(oy, hy, f2) - q / 2), q, q);
+          }
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(hx - q), Math.round(hy - q), q * 2, q * 2);
+        } else if (e < 430) ring(tx, ty, cell * (0.2 + 0.5 * (e - 170) / 260), 1 - (e - 170) / 260);
       } else if (f.type === 'nova') {
         const p = clamp(e / 550, 0, 1);
         ctx.fillStyle = `rgba(255,255,255,${0.7 * (1 - p)})`;
-        ctx.beginPath(); ctx.arc(ox, oy, Wd * 1.2 * easeOut(p), 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ox, oy, Hd * 1.2 * easeOut(p), 0, Math.PI * 2); ctx.fill();
       }
     }
   }
@@ -3450,7 +3602,7 @@ const View = (() => {
       $('#boardFrame').style.transform = `translate(${(Math.random() - 0.5) * a}px, ${(Math.random() - 0.5) * a}px)`;
     } else if (shakeAmp) { shakeAmp = 0; $('#boardFrame').style.transform = ''; }
     ctx.drawImage(bg, 0, 0);
-    for (let i = 0; i < 64; i++) {
+    for (let i = 0; i < E.N; i++) {
       if (!padOrig[i]) continue;
       const name = padLv[i] >= 2 ? 'pad2' : padLv[i] === 1 ? 'pad1' : 'padDone';
       const x0 = Math.round(X(i) * cell), y0 = Math.round(Y(i) * cell);
@@ -3471,13 +3623,13 @@ const View = (() => {
       if (p >= 1 || REDUCED) mosaicT = 0;
       else {
         const blk = Math.max(1, Math.round(lerp(cell / 1.5, 1, easeOut(p))));
-        const w = Math.max(1, Math.round(Wd / blk));
-        mosaicCv.width = mosaicCv.height = w;
+        const w = Math.max(1, Math.round(Wd / blk)), h = Math.max(1, Math.round(Hd / blk));
+        mosaicCv.width = w; mosaicCv.height = h;
         const m = mosaicCv.getContext('2d');
         m.imageSmoothingEnabled = true;
-        m.drawImage(cv, 0, 0, w, w);
+        m.drawImage(cv, 0, 0, w, h);
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(mosaicCv, 0, 0, w, w, 0, 0, Wd, Wd);
+        ctx.drawImage(mosaicCv, 0, 0, w, h, 0, 0, Wd, Hd);
       }
     }
   }
@@ -3490,10 +3642,10 @@ const View = (() => {
     get hint() { return hint; },
     cellAt(clientX, clientY) {
       const r = cv.getBoundingClientRect();
-      const x = Math.floor((clientX - r.left) / r.width * 8), y = Math.floor((clientY - r.top) / r.height * 8);
-      return x >= 0 && x < 8 && y >= 0 && y < 8 ? y * 8 + x : -1;
+      const x = Math.floor((clientX - r.left) / r.width * BW), y = Math.floor((clientY - r.top) / r.height * BH);
+      return x >= 0 && x < BW && y >= 0 && y < BH ? y * BW + x : -1;
     },
-    cellCss() { return cv.getBoundingClientRect().width / 8; },
+    cellCss() { return cv.getBoundingClientRect().width / BW; },
     nudge(i) { const p = g && g.p[i]; if (!p) return; const pv = pieces.get(p.id); if (pv) { pv.flash = performance.now(); } },
     canvas: cv,
   };
@@ -3618,9 +3770,9 @@ const HUD = {
 // ------------------------------------------------------------ textos de ayuda
 const TIPS = {
   swap: { icon: ['piece', 2], title: 'Cómo se juega', text: 'Deslizá un componente hacia un vecino. Si quedan 3 o más iguales en línea, se van.' },
-  line: { icon: ['lineH', 2], title: 'Nuevo: rayo', text: '4 en línea arman un componente con rayo. Cuando lo eliminás, barre toda su fila o su columna, según indiquen las flechas.' },
-  bomb: { icon: ['bomb', 3], title: 'Nuevo: sobrecarga', text: 'Una línea en L o en T arma una sobrecarga. Cuando la eliminás, explota y limpia todo a su alrededor.' },
-  battery: { icon: ['battery'], title: 'Nuevo: batería', text: '5 en línea arman una batería. Intercambiala con un componente y se eliminan todos los de ese tipo. Probá combinar dos especiales entre sí.' },
+  line: { icon: ['lineH', 2], title: 'Nuevo: rayo', text: '4 en línea arman un componente con rayo. Cuando lo eliminás o lo tocás, barre toda su fila o su columna, según indiquen las flechas.' },
+  bomb: { icon: ['bomb', 3], title: 'Nuevo: sobrecarga', text: 'Una línea en L o en T arma una sobrecarga. Cuando la eliminás o la tocás, explota y limpia todo a su alrededor.' },
+  battery: { icon: ['battery'], title: 'Nuevo: batería', text: '5 en línea arman una batería. Intercambiala con un componente y se eliminan todos los de ese tipo; si la tocás, los del tipo que más hay. Probá combinar dos especiales entre sí.' },
   color6: { icon: ['piece', 5], title: 'Nuevo componente', text: 'Capacitor cerámico. Con seis tipos en la mesa hay menos combinaciones posibles.' },
   pads: { icon: ['pads', 1], title: 'Nuevo: pads', text: 'Pads de cobre sin soldar. Para estañarlos, formá una línea encima o hacé pasar un especial por ahí.' },
   pads2: { icon: ['pads', 2], title: 'Nuevo: doble faz', text: 'Los pads con remaches en las esquinas necesitan dos pasadas de estaño.' },
@@ -3728,6 +3880,7 @@ const UI = {
     this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.styleControl()}${this.soundControls()}
       <button class="btn ghost" id="mHelp">Cómo se juega</button>
       <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
+      <p class="aviso-avance">El avance se guarda solo en este teléfono. Si borrás los datos de navegación de Chrome, destildá «Cookies y datos de sitios» para no perderlo.</p>
       ${versionRowHTML()}
       <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
       this.wireSound(c); this.wireStyle(c);
@@ -3745,7 +3898,8 @@ const UI = {
     const items = [
       ['lineH:2', '<b>Rayo</b> (4 en línea): barre la fila o la columna que marcan las flechas.'],
       ['bomb:3', '<b>Sobrecarga</b> (línea en L o T): explota y limpia alrededor.'],
-      ['battery', '<b>Batería</b> (5 en línea): intercambiala con un componente y se van todos los de ese tipo.'],
+      ['battery', '<b>Batería</b> (5 en línea): intercambiala con un componente y se van todos los de ese tipo; si la tocás, los del tipo que más hay.'],
+      ['ant:1', '<b>Antena</b> (cuadrado de 2 × 2): rompe sus cuatro vecinas y transmite a distancia para romper la pieza que más te sirve.'],
     ];
     const obs = [
       ['pads:1', '<b>Pad de cobre</b>: hacé una línea encima para soldarlo. Con remaches, dos veces.'],
@@ -3755,7 +3909,7 @@ const UI = {
     ];
     const li = arr => arr.map(([ic, t]) => `<div class="it" data-icon="${ic}"><span>${t}</span></div>`).join('');
     this.modal(`<span class="eyebrow">MANUAL</span><h2>Cómo se juega</h2>
-      <p>Deslizá un componente hacia una pieza vecina (o tocá una y después la otra). Si quedan 3 o más iguales en línea, se eliminan y caen piezas nuevas. Cumplí el pedido de cada nivel antes de quedarte sin movimientos o sin tiempo.</p>
+      <p>Deslizá un componente hacia una pieza vecina (o tocá una y después la otra). Si quedan 3 o más iguales en línea, se eliminan y caen piezas nuevas. Los especiales también se activan tocándolos: cuenta como un movimiento. Cumplí el pedido de cada nivel antes de quedarte sin movimientos o sin tiempo.</p>
       <div class="legend"><h3>Componentes</h3><div class="parts">${parts}</div>
       <h3>Especiales</h3>${li(items)}<p>Combiná dos especiales entre sí para efectos más grandes: dos baterías limpian toda la placa.</p>
       <h3>Obstáculos</h3>${li(obs)}
@@ -3852,6 +4006,7 @@ const Game = {
     const g = this.g, s = View.sel;
     const p = g.p[i];
     if (s < 0) {
+      if (E.canTap(p)) { this.move(i, i); return; }   // sin nada seleccionado, tocar un especial lo activa
       if (p && E.swappable(p)) { View.sel = i; Sound.play('click'); }
       else if (p) { View.nudge(i); Sound.play('bad'); }
       return;
@@ -4028,8 +4183,8 @@ const Game = {
     let tx = x, ty = y;
     if (Math.abs(dx) > Math.abs(dy)) tx += dx > 0 ? 1 : -1; else ty += dy > 0 ? 1 : -1;
     View.sel = -1;
-    if (tx < 0 || tx > 7 || ty < 0 || ty > 7) return;
-    Game.move(down.c, ty * 8 + tx);
+    if (tx < 0 || tx >= E.W || ty < 0 || ty >= E.H) return;
+    Game.move(down.c, ty * E.W + tx);
   });
   const up = e => {
     if (!down || e.pointerId !== down.id) return;

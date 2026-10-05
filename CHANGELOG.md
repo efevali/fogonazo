@@ -2,6 +2,18 @@
 
 Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico que explica el [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.2.0 — 4/10/2026
+
+Tablero 8 × 10 y antena ([milestone](https://github.com/efevali/fogonazo/milestone/2)).
+
+- Placa de 8 × 10: dos filas más arriba, con casilleros del mismo tamaño. En «Placa dañada», los huecos siguen en las cuatro esquinas.
+- Especial nuevo, la antena: se arma con un cuadrado de 2 × 2, rompe sus cuatro vecinas y transmite a la pieza que más sirve para el pedido. Combina con los otros especiales.
+- Los especiales se activan también tocándolos; el toque cuenta como un movimiento. La batería tocada elimina el tipo que más hay.
+- El rayo sale perpendicular a la línea de 4 que lo arma.
+- Componentes de 8 bits más finos.
+- Ajustes: aviso de que el avance vive en el teléfono y de cómo no borrarlo desde Chrome.
+- Pedidos más grandes en 20 niveles (más piezas a juntar, más válvulas y diseños más altos), para que las partidas no se acorten con la placa más grande, la antena y el toque. Los 30 niveles, recalibrados; los de puntaje piden más puntos.
+
 ## 0.1.0 — 4/10/2026
 
 Versión instalable ([milestone](https://github.com/efevali/fogonazo/milestone/1)).

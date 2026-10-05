@@ -142,6 +142,7 @@ const Sound = (() => {
     beam() { tone({ f: 1800, f2: 160, dur: 0.28, vol: 0.06, type: 'sawtooth' }); noise({ dur: 0.25, vol: 0.09, filter: 'bandpass', freq: 3000, freq2: 600, q: 2 }); },
     blast() { noise({ dur: 0.45, vol: 0.22, filter: 'lowpass', freq: 1400, freq2: 120 }); tone({ f: 140, f2: 40, dur: 0.35, vol: 0.18, type: 'triangle' }); },
     zap() { tone({ f: 300, f2: 2400, dur: 0.35, vol: 0.06, duty: 0.125 }); for (let i = 0; i < 5; i++) noise({ t: i * 0.06, dur: 0.04, vol: 0.08, filter: 'highpass', freq: 2500 }); },
+    ant() { [0, 0.07, 0.14].forEach(t => tone({ f: 1568, f2: 2093, t, dur: 0.05, vol: 0.06, duty: 0.25 })); tone({ f: 2400, f2: 600, t: 0.2, dur: 0.18, vol: 0.04, duty: 0.125 }); },
     nova() { tone({ f: 80, f2: 1600, dur: 0.6, vol: 0.08, duty: 0.5 }); noise({ dur: 0.8, vol: 0.2, filter: 'lowpass', freq: 3000, freq2: 100 }); },
     solder() { noise({ dur: 0.22, vol: 0.05, filter: 'bandpass', freq: 5200, q: 3 }); tone({ f: 2100, dur: 0.05, vol: 0.025, type: 'triangle' }); },
     crack() { noise({ dur: 0.12, vol: 0.14, filter: 'lowpass', freq: 900 }); tone({ f: 95, dur: 0.1, vol: 0.1 }); },
@@ -207,6 +208,10 @@ const Sound = (() => {
     zap() {
       fm({ f: 200, f2: 3200, ratio: 7, index: 3, indexEnd: 6, indexTime: 0.4, dur: 0.42, vol: 0.06 });
       for (let i = 0; i < 6; i++) noise({ t: i * 0.055, dur: 0.035, vol: 0.07, filter: 'highpass', freq: 3500, pan: (i % 2 ? 0.4 : -0.4) });
+    },
+    ant() {
+      [0, 0.07, 0.14].forEach((t, i) => fm({ f: 1568, f2: 2093, slide: 0.04, t, ratio: 2, index: 1.5, indexEnd: 0.3, dur: 0.06, vol: 0.05, pan: (i - 1) * 0.4 }));
+      fm({ f: 2400, f2: 500, t: 0.2, ratio: 3.5, index: 3, indexEnd: 0.5, indexTime: 0.2, dur: 0.2, vol: 0.04 });
     },
     nova() {
       fm({ f: 60, f2: 1800, ratio: 2, index: 8, indexEnd: 1, indexTime: 0.7, dur: 0.75, vol: 0.08 });

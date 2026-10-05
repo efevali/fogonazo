@@ -13,7 +13,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.1.0', fecha: '4/10/2026' };
+const FOGONAZO_VERSION = { v: '0.2.0', fecha: '4/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -301,6 +301,21 @@ function pieceSprite(c, k, hp) {
   if (k === K.BURNT) return hp >= 2 ? 'burnt2' : 'burnt1';
   return PIECE_SPRITES[c];
 }
+// Antena: ondas en píxeles que salen de los dos costados de la pieza (las mismas en 8 y 16 bits).
+function antWaves(ctx, cx, cy, cell, t, alpha) {
+  const q = Math.max(2, Math.round(cell / 12)), o = Math.max(1, Math.round(q / 3));
+  for (let n = 0; n < 2; n++) {
+    const p = ((t / 900) + n * 0.5) % 1, r = cell * (0.36 + 0.2 * p);
+    const step = q / r, span = 0.72, pts = [];
+    for (const sg of [-1, 1]) for (let a = -span; a <= span + 1e-6; a += step) pts.push([Math.round(cx + sg * Math.cos(a) * r - q / 2), Math.round(cy + Math.sin(a) * r - q / 2)]);
+    ctx.globalAlpha = alpha * (0.4 + 0.6 * (1 - p));
+    ctx.fillStyle = '#062029';
+    for (const [x, y] of pts) ctx.fillRect(x - o, y - o, q + 2 * o, q + 2 * o);
+    ctx.fillStyle = '#e4fcff';
+    for (const [x, y] of pts) ctx.fillRect(x, y, q, q);
+  }
+  ctx.globalAlpha = alpha;
+}
 // ícono suelto (canvas) para HUD y modales
 function iconCanvas(kind, arg, css) {
   const px = Math.round(css * Math.min(3, window.devicePixelRatio || 1));
@@ -323,7 +338,8 @@ function iconCanvas(kind, arg, css) {
     g.addColorStop(0, 'rgba(255,240,140,0.95)'); g.addColorStop(1, 'rgba(255,200,40,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, px, px);
     put(PIECE_SPRITES[arg || 3]);
-  } else if (kind === 'score') put('battery');
+  } else if (kind === 'ant') { put(PIECE_SPRITES[arg === undefined ? 1 : arg]); antWaves(ctx, px / 2, px / 2, px, 300, 1); }
+  else if (kind === 'score') put('battery');
   return cv;
 }
 
@@ -371,10 +387,11 @@ function setStyle(st) {
 const View = (() => {
   const cv = $('#board'), ctx = cv.getContext('2d');
   let g = null;
-  let dpr = 1, cssS = 320, Wd = 320, cell = 40, sp = 36, bg = null, holeLayer = null;
+  const BW = E.W, BH = E.H;   // casilleros: 8 de ancho por 10 de alto
+  let dpr = 1, cssS = 320, Wd = 320, Hd = 400, cell = 40, sp = 36, bg = null, holeLayer = null;
   const pieces = new Map();
-  let padLv = new Uint8Array(64), padOrig = new Uint8Array(64);
-  const padFlash = new Float64Array(64);
+  let padLv = new Uint8Array(E.N), padOrig = new Uint8Array(E.N);
+  const padFlash = new Float64Array(E.N);
   let fx = [], parts = [], texts = [], timeline = [];
   let sel = -1, hint = null, shakeT = 0, shakeAmp = 0, mosaicT = 0;
   const mosaicCv = document.createElement('canvas');
@@ -386,7 +403,7 @@ const View = (() => {
     g = game;
     pieces.clear(); fx = []; parts = []; texts = []; timeline = []; sel = -1; hint = null;
     padOrig = g.padOrig.slice(); padLv = g.pad.slice(); padFlash.fill(0);
-    for (let i = 0; i < 64; i++) { const p = g.p[i]; if (p) addPiece(p.id, p.c, p.k, X(i), Y(i), p); }
+    for (let i = 0; i < E.N; i++) { const p = g.p[i]; if (p) addPiece(p.id, p.c, p.k, X(i), Y(i), p); }
     buildLayers();
   }
   function addPiece(id, c, k, x, y, src) {
@@ -421,26 +438,26 @@ const View = (() => {
   function resize() {
     const wrap = $('#boardWrap');
     const r = wrap.getBoundingClientRect();
-    const avail = Math.floor(Math.min(r.width - 16, r.height - 46));
-    const s = clamp(avail, 200, 560);
+    // el casillero es el mayor que entra a lo ancho (8) y a lo alto (10)
+    const cs = clamp(Math.floor(Math.min((r.width - 16) / BW, (r.height - 46) / BH)), 25, 70);
     dpr = Math.min(3, window.devicePixelRatio || 1);
-    const dev = Math.round(s * dpr / 8) * 8;
-    if (dev === Wd && Math.abs(cssS - dev / dpr) < 0.5) return;
-    Wd = dev; cssS = dev / dpr; cell = dev / 8;
+    const dc = Math.round(cs * dpr);
+    if (dc * BW === Wd && Math.abs(cssS - dc * BW / dpr) < 0.5) return;
+    cell = dc; Wd = dc * BW; Hd = dc * BH; cssS = Wd / dpr;
     sp = Math.round(cell * 0.94);
-    cv.width = cv.height = dev;
-    cv.style.width = cv.style.height = cssS + 'px';
+    cv.width = Wd; cv.height = Hd;
+    cv.style.width = cssS + 'px'; cv.style.height = (Hd / dpr) + 'px';
     Spr.clear();
     buildLayers();
   }
 
   function buildLayers() {
     if (!g) return;
-    bg = document.createElement('canvas'); bg.width = bg.height = Wd;
+    bg = document.createElement('canvas'); bg.width = Wd; bg.height = Hd;
     const b = bg.getContext('2d');
     const px = cell / 16;
     if (ART.style === '16') drawBoard16(b);
-    else for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    else for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       const x0 = Math.round(x * cell), y0 = Math.round(y * cell), x1 = Math.round((x + 1) * cell), y1 = Math.round((y + 1) * cell);
       b.fillStyle = (x + y) % 2 ? '#11523a' : '#0f4a33';
       b.fillRect(x0, y0, x1 - x0, y1 - y0);
@@ -450,11 +467,11 @@ const View = (() => {
       b.fillStyle = 'rgba(210,240,225,0.18)';
       b.fillRect(x0 + Math.round(px), y0 + Math.round(px), Math.ceil(px), Math.ceil(px));
     }
-    holeLayer = document.createElement('canvas'); holeLayer.width = holeLayer.height = Wd;
+    holeLayer = document.createElement('canvas'); holeLayer.width = Wd; holeLayer.height = Hd;
     const h = holeLayer.getContext('2d');
-    const isHole = (x, y) => x >= 0 && x < 8 && y >= 0 && y < 8 && g.hole[y * 8 + x];
+    const isHole = (x, y) => x >= 0 && x < BW && y >= 0 && y < BH && g.hole[y * BW + x];
     const edge = Math.max(2, Math.round(px * 1.5));
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       if (!isHole(x, y)) continue;
       const x0 = Math.round(x * cell), y0 = Math.round(y * cell), w = Math.round((x + 1) * cell) - x0, hh = Math.round((y + 1) * cell) - y0;
       h.fillStyle = '#1a252d'; h.fillRect(x0, y0, w, hh);
@@ -462,9 +479,9 @@ const View = (() => {
       for (let k = 1; k < 4; k++) { h.fillRect(x0, y0 + Math.round(hh * k / 4), w, 1); h.fillRect(x0 + Math.round(w * k / 4), y0, 1, hh); }
       h.fillStyle = '#062016';
       if (!isHole(x, y - 1) && y > 0) h.fillRect(x0, y0, w, edge);
-      if (!isHole(x, y + 1) && y < 7) h.fillRect(x0, y0 + hh - edge, w, edge);
+      if (!isHole(x, y + 1) && y < BH - 1) h.fillRect(x0, y0 + hh - edge, w, edge);
       if (!isHole(x - 1, y) && x > 0) h.fillRect(x0, y0, edge, hh);
-      if (!isHole(x + 1, y) && x < 7) h.fillRect(x0 + w - edge, y0, edge, hh);
+      if (!isHole(x + 1, y) && x < BW - 1) h.fillRect(x0 + w - edge, y0, edge, hh);
     }
   }
 
@@ -472,7 +489,7 @@ const View = (() => {
   function drawBoard16(b) {
     const u = cell / 32, R = Math.round;
     const rnd = E.rngFrom(((g.level && g.level.n) || 7) * 7919 + 13);
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) {
       const x0 = R(x * cell), y0 = R(y * cell), w = R((x + 1) * cell) - x0, h = R((y + 1) * cell) - y0;
       const gr = b.createLinearGradient(0, y0, 0, y0 + h);
       const odd = (x + y) % 2;
@@ -488,11 +505,12 @@ const View = (() => {
       b.fillStyle = 'rgba(140,230,180,0.35)';
       if (y0 === y1) b.fillRect(R(x0), R(y0 - t / 2), R(x1 - x0), Math.max(1, R(u * 0.6))); else b.fillRect(R(x0 - t / 2), R(y0), Math.max(1, R(u * 0.6)), R(y1 - y0));
     };
-    for (let k = 1; k < 8; k++) for (let j = 0; j < 8; j++) {
-      if (rnd() < 0.3) trace(j * cell, k * cell, (j + 1) * cell, k * cell);
-      if (rnd() < 0.3) trace(k * cell, j * cell, k * cell, (j + 1) * cell);
+    for (let k = 1; k < Math.max(BW, BH); k++) for (let j = 0; j < Math.max(BW, BH); j++) {
+      const h = rnd() < 0.3, v = rnd() < 0.3;
+      if (h && k < BH && j < BW) trace(j * cell, k * cell, (j + 1) * cell, k * cell);
+      if (v && k < BW && j < BH) trace(k * cell, j * cell, k * cell, (j + 1) * cell);
     }
-    for (let y = 1; y < 8; y++) for (let x = 1; x < 8; x++) {
+    for (let y = 1; y < BH; y++) for (let x = 1; x < BW; x++) {
       if (rnd() > 0.28) continue;
       const cx = x * cell, cy = y * cell;
       b.fillStyle = '#7a5a1c'; b.beginPath(); b.arc(cx, cy, u * 3.4, 0, Math.PI * 2); b.fill();
@@ -535,6 +553,10 @@ const View = (() => {
         moveTo(B, ax, ay, 150, easeInOut, () => moveTo(B, bx, by, 150, easeInOut));
         after(150, () => Sound.play('bad'));
       } else { moveTo(A, bx, by, 150, easeInOut); moveTo(B, ax, ay, 150, easeInOut); }
+    } else if (st.t === 'tap') {
+      const pv = pieces.get(st.id);
+      if (pv) { pv.flash = t0; burst(pv.x, pv.y, '#ffffff', 4, 1.6); }
+      Sound.play('click');
     } else if (st.t === 'transform') {
       st.list.forEach((it, n) => {
         const doIt = () => { const pv = pieces.get(it.id); if (!pv) return; pv.k = it.k; pv.flash = performance.now(); burst(pv.x, pv.y, '#ffffff', 5, 2); if (st.bonus) { Sound.play('bonus', n, 0); Game.bonusTick(); } };
@@ -550,6 +572,7 @@ const View = (() => {
         if (f.type === 'beam') Sound.play('beam', null, 60);
         else if (f.type === 'blast') { Sound.play('blast', null, 80); shake(f.big ? 7 : 4); }
         else if (f.type === 'zap') Sound.play('zap', null, 80);
+        else if (f.type === 'ant') Sound.play('ant', null, 90);
         else if (f.type === 'nova') { Sound.play('nova'); shake(9); }
       });
       for (const c of st.cleared) after(c.t, () => {
@@ -661,7 +684,11 @@ const View = (() => {
       const p = (t - pv.land) / 140;
       if (p < 1) { const q = Math.sin(p * Math.PI) * 0.1; sy = 1 - q; sx = 1 + q * 0.6; } else pv.land = 0;
     }
-    if (hint && (pv.id === hint.ida || pv.id === hint.idb) && !REDUCED) {
+    if (hint && hint.a === hint.b && pv.id === hint.ida && !REDUCED) {
+      // pista de un toque: el especial late
+      const ph = ((t - hint.t0) / 1000) % 1.6;
+      if (ph < 0.6) s *= 1 + Math.sin(ph / 0.6 * Math.PI * 2) * 0.08;
+    } else if (hint && (pv.id === hint.ida || pv.id === hint.idb) && !REDUCED) {
       const ph = ((t - hint.t0) / 1000) % 1.6;
       if (ph < 0.6) {
         const w = Math.sin(ph / 0.6 * Math.PI * 3) * 0.08;
@@ -680,7 +707,7 @@ const View = (() => {
       gr.addColorStop(0, `rgba(255,240,140,${pulse})`); gr.addColorStop(1, 'rgba(255,190,40,0)');
       ctx.fillStyle = gr; ctx.fillRect(cx - cell, cy - cell, cell * 2, cell * 2);
     }
-    if (pv.k <= 3 && pv.c === 2 && !pv.pop) {
+    if ((pv.k <= 3 || pv.k === K.ANT) && pv.c === 2 && !pv.pop) {
       const ph = ((t / 1000) + pv.phase) % 4.5;
       if (ph < 0.35) {
         const a = Math.sin(ph / 0.35 * Math.PI) * 0.6;
@@ -717,6 +744,7 @@ const View = (() => {
         ctx.fillRect(Math.round(cx + Math.cos(a) * r - q / 2), Math.round(cy + Math.sin(a) * r - q / 2), q, q);
       }
     }
+    if (pv.k === K.ANT) antWaves(ctx, cx, cy, cell, t + pv.phase * 400, alpha);
     if (pv.k === K.TUBE) {
       const a = 0.28 + 0.12 * Math.sin(t / 90 + pv.phase) + 0.06 * Math.sin(t / 23);
       const gy = cy - h * 0.06;
@@ -761,7 +789,7 @@ const View = (() => {
           const xa = Math.max(0, ox - reach), xb = Math.min(Wd, ox + reach);
           bolt(jag(xa, oy, xb, oy, cell * 0.12), a);
         } else {
-          const ya = Math.max(0, oy - reach), yb = Math.min(Wd, oy + reach);
+          const ya = Math.max(0, oy - reach), yb = Math.min(Hd, oy + reach);
           bolt(jag(ox, ya, ox, yb, cell * 0.12), a);
         }
       } else if (f.type === 'blast') {
@@ -778,10 +806,29 @@ const View = (() => {
           const a = e < hitAt ? 1 : 1 - (e - hitAt) / 160;
           bolt(jag(ox, oy, (X(j) + 0.5) * cell, (Y(j) + 0.5) * cell, cell * 0.2), a);
         });
+      } else if (f.type === 'ant') {
+        // transmisión: anillos en la antena, un pulso de píxeles que viaja y un anillo en el blanco
+        const tx = (X(f.to) + 0.5) * cell, ty = (Y(f.to) + 0.5) * cell;
+        const q = Math.max(2, Math.round(cell / 10)), p = clamp(e / 170, 0, 1);
+        const ring = (x, y, r, a) => {
+          const n = Math.max(8, Math.round(r * 2 * Math.PI / (q * 1.6)));
+          ctx.fillStyle = `rgba(228,252,255,${a})`;
+          for (let k = 0; k < n; k++) { const ang = k / n * Math.PI * 2; ctx.fillRect(Math.round(x + Math.cos(ang) * r - q / 2), Math.round(y + Math.sin(ang) * r - q / 2), q, q); }
+        };
+        if (e < 320) ring(ox, oy, cell * (0.45 + 0.6 * e / 320), 1 - e / 320);
+        if (p < 1) {
+          const hx = lerp(ox, tx, p), hy = lerp(oy, ty, p), d = Math.hypot(tx - ox, ty - oy), n = Math.max(2, Math.round(d * p / (q * 2.2)));
+          for (let k = 0; k <= n; k++) {
+            const f2 = k / n, a = 0.15 + 0.75 * f2;
+            ctx.fillStyle = `rgba(150,235,255,${a})`;
+            ctx.fillRect(Math.round(lerp(ox, hx, f2) - q / 2), Math.round(lerp(oy, hy, f2) - q / 2), q, q);
+          }
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(hx - q), Math.round(hy - q), q * 2, q * 2);
+        } else if (e < 430) ring(tx, ty, cell * (0.2 + 0.5 * (e - 170) / 260), 1 - (e - 170) / 260);
       } else if (f.type === 'nova') {
         const p = clamp(e / 550, 0, 1);
         ctx.fillStyle = `rgba(255,255,255,${0.7 * (1 - p)})`;
-        ctx.beginPath(); ctx.arc(ox, oy, Wd * 1.2 * easeOut(p), 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ox, oy, Hd * 1.2 * easeOut(p), 0, Math.PI * 2); ctx.fill();
       }
     }
   }
@@ -848,7 +895,7 @@ const View = (() => {
       $('#boardFrame').style.transform = `translate(${(Math.random() - 0.5) * a}px, ${(Math.random() - 0.5) * a}px)`;
     } else if (shakeAmp) { shakeAmp = 0; $('#boardFrame').style.transform = ''; }
     ctx.drawImage(bg, 0, 0);
-    for (let i = 0; i < 64; i++) {
+    for (let i = 0; i < E.N; i++) {
       if (!padOrig[i]) continue;
       const name = padLv[i] >= 2 ? 'pad2' : padLv[i] === 1 ? 'pad1' : 'padDone';
       const x0 = Math.round(X(i) * cell), y0 = Math.round(Y(i) * cell);
@@ -869,13 +916,13 @@ const View = (() => {
       if (p >= 1 || REDUCED) mosaicT = 0;
       else {
         const blk = Math.max(1, Math.round(lerp(cell / 1.5, 1, easeOut(p))));
-        const w = Math.max(1, Math.round(Wd / blk));
-        mosaicCv.width = mosaicCv.height = w;
+        const w = Math.max(1, Math.round(Wd / blk)), h = Math.max(1, Math.round(Hd / blk));
+        mosaicCv.width = w; mosaicCv.height = h;
         const m = mosaicCv.getContext('2d');
         m.imageSmoothingEnabled = true;
-        m.drawImage(cv, 0, 0, w, w);
+        m.drawImage(cv, 0, 0, w, h);
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(mosaicCv, 0, 0, w, w, 0, 0, Wd, Wd);
+        ctx.drawImage(mosaicCv, 0, 0, w, h, 0, 0, Wd, Hd);
       }
     }
   }
@@ -888,10 +935,10 @@ const View = (() => {
     get hint() { return hint; },
     cellAt(clientX, clientY) {
       const r = cv.getBoundingClientRect();
-      const x = Math.floor((clientX - r.left) / r.width * 8), y = Math.floor((clientY - r.top) / r.height * 8);
-      return x >= 0 && x < 8 && y >= 0 && y < 8 ? y * 8 + x : -1;
+      const x = Math.floor((clientX - r.left) / r.width * BW), y = Math.floor((clientY - r.top) / r.height * BH);
+      return x >= 0 && x < BW && y >= 0 && y < BH ? y * BW + x : -1;
     },
-    cellCss() { return cv.getBoundingClientRect().width / 8; },
+    cellCss() { return cv.getBoundingClientRect().width / BW; },
     nudge(i) { const p = g && g.p[i]; if (!p) return; const pv = pieces.get(p.id); if (pv) { pv.flash = performance.now(); } },
     canvas: cv,
   };
@@ -1016,9 +1063,9 @@ const HUD = {
 // ------------------------------------------------------------ textos de ayuda
 const TIPS = {
   swap: { icon: ['piece', 2], title: 'Cómo se juega', text: 'Deslizá un componente hacia un vecino. Si quedan 3 o más iguales en línea, se van.' },
-  line: { icon: ['lineH', 2], title: 'Nuevo: rayo', text: '4 en línea arman un componente con rayo. Cuando lo eliminás, barre toda su fila o su columna, según indiquen las flechas.' },
-  bomb: { icon: ['bomb', 3], title: 'Nuevo: sobrecarga', text: 'Una línea en L o en T arma una sobrecarga. Cuando la eliminás, explota y limpia todo a su alrededor.' },
-  battery: { icon: ['battery'], title: 'Nuevo: batería', text: '5 en línea arman una batería. Intercambiala con un componente y se eliminan todos los de ese tipo. Probá combinar dos especiales entre sí.' },
+  line: { icon: ['lineH', 2], title: 'Nuevo: rayo', text: '4 en línea arman un componente con rayo. Cuando lo eliminás o lo tocás, barre toda su fila o su columna, según indiquen las flechas.' },
+  bomb: { icon: ['bomb', 3], title: 'Nuevo: sobrecarga', text: 'Una línea en L o en T arma una sobrecarga. Cuando la eliminás o la tocás, explota y limpia todo a su alrededor.' },
+  battery: { icon: ['battery'], title: 'Nuevo: batería', text: '5 en línea arman una batería. Intercambiala con un componente y se eliminan todos los de ese tipo; si la tocás, los del tipo que más hay. Probá combinar dos especiales entre sí.' },
   color6: { icon: ['piece', 5], title: 'Nuevo componente', text: 'Capacitor cerámico. Con seis tipos en la mesa hay menos combinaciones posibles.' },
   pads: { icon: ['pads', 1], title: 'Nuevo: pads', text: 'Pads de cobre sin soldar. Para estañarlos, formá una línea encima o hacé pasar un especial por ahí.' },
   pads2: { icon: ['pads', 2], title: 'Nuevo: doble faz', text: 'Los pads con remaches en las esquinas necesitan dos pasadas de estaño.' },
@@ -1126,6 +1173,7 @@ const UI = {
     this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.styleControl()}${this.soundControls()}
       <button class="btn ghost" id="mHelp">Cómo se juega</button>
       <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
+      <p class="aviso-avance">El avance se guarda solo en este teléfono. Si borrás los datos de navegación de Chrome, destildá «Cookies y datos de sitios» para no perderlo.</p>
       ${versionRowHTML()}
       <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
       this.wireSound(c); this.wireStyle(c);
@@ -1143,7 +1191,8 @@ const UI = {
     const items = [
       ['lineH:2', '<b>Rayo</b> (4 en línea): barre la fila o la columna que marcan las flechas.'],
       ['bomb:3', '<b>Sobrecarga</b> (línea en L o T): explota y limpia alrededor.'],
-      ['battery', '<b>Batería</b> (5 en línea): intercambiala con un componente y se van todos los de ese tipo.'],
+      ['battery', '<b>Batería</b> (5 en línea): intercambiala con un componente y se van todos los de ese tipo; si la tocás, los del tipo que más hay.'],
+      ['ant:1', '<b>Antena</b> (cuadrado de 2 × 2): rompe sus cuatro vecinas y transmite a distancia para romper la pieza que más te sirve.'],
     ];
     const obs = [
       ['pads:1', '<b>Pad de cobre</b>: hacé una línea encima para soldarlo. Con remaches, dos veces.'],
@@ -1153,7 +1202,7 @@ const UI = {
     ];
     const li = arr => arr.map(([ic, t]) => `<div class="it" data-icon="${ic}"><span>${t}</span></div>`).join('');
     this.modal(`<span class="eyebrow">MANUAL</span><h2>Cómo se juega</h2>
-      <p>Deslizá un componente hacia una pieza vecina (o tocá una y después la otra). Si quedan 3 o más iguales en línea, se eliminan y caen piezas nuevas. Cumplí el pedido de cada nivel antes de quedarte sin movimientos o sin tiempo.</p>
+      <p>Deslizá un componente hacia una pieza vecina (o tocá una y después la otra). Si quedan 3 o más iguales en línea, se eliminan y caen piezas nuevas. Los especiales también se activan tocándolos: cuenta como un movimiento. Cumplí el pedido de cada nivel antes de quedarte sin movimientos o sin tiempo.</p>
       <div class="legend"><h3>Componentes</h3><div class="parts">${parts}</div>
       <h3>Especiales</h3>${li(items)}<p>Combiná dos especiales entre sí para efectos más grandes: dos baterías limpian toda la placa.</p>
       <h3>Obstáculos</h3>${li(obs)}
@@ -1250,6 +1299,7 @@ const Game = {
     const g = this.g, s = View.sel;
     const p = g.p[i];
     if (s < 0) {
+      if (E.canTap(p)) { this.move(i, i); return; }   // sin nada seleccionado, tocar un especial lo activa
       if (p && E.swappable(p)) { View.sel = i; Sound.play('click'); }
       else if (p) { View.nudge(i); Sound.play('bad'); }
       return;
@@ -1426,8 +1476,8 @@ const Game = {
     let tx = x, ty = y;
     if (Math.abs(dx) > Math.abs(dy)) tx += dx > 0 ? 1 : -1; else ty += dy > 0 ? 1 : -1;
     View.sel = -1;
-    if (tx < 0 || tx > 7 || ty < 0 || ty > 7) return;
-    Game.move(down.c, ty * 8 + tx);
+    if (tx < 0 || tx >= E.W || ty < 0 || ty >= E.H) return;
+    Game.move(down.c, ty * E.W + tx);
   });
   const up = e => {
     if (!down || e.pointerId !== down.id) return;

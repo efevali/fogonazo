@@ -1,6 +1,6 @@
 # Fogonazo
 
-Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos para armar sobre una placa de 8 × 8, en 8 o 16 bits.
+Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos para armar sobre una placa de 8 × 10, en 8 o 16 bits.
 
 - **Juego:** https://efevali.github.io/fogonazo/ (se abre en Chrome y se instala con el botón «Instalar» del mapa, o desde el menú ⋮ → «Instalar app»). Funciona sin conexión.
 - **Vista previa:** el artefacto «Fogonazo» en claude.ai, donde se prueba cada cambio antes de publicarlo acá.

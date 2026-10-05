@@ -4,14 +4,14 @@
   "name": "Blink",
   "tune": "score",
   "target": 0.97,
-  "scoreTarget": 7100,
+  "scoreTarget": 14500,
   "stars": [
-   7100,
-   15800,
-   23800
+   14500,
+   33500,
+   48000
   ],
-  "winRate": 0.9725,
-  "medianScore": 14760,
+  "winRate": 0.97,
+  "medianScore": 30470,
   "moves": 18
  },
  "2": {
@@ -19,14 +19,14 @@
   "name": "Divisor de tensión",
   "tune": "score",
   "target": 0.95,
-  "scoreTarget": 8600,
+  "scoreTarget": 18000,
   "stars": [
-   8600,
-   17400,
-   24700
+   18000,
+   37000,
+   52500
   ],
-  "winRate": 0.9525,
-  "medianScore": 16520,
+  "winRate": 0.95,
+  "medianScore": 34970,
   "moves": 20
  },
  "3": {
@@ -37,12 +37,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   10000,
-   13500
+   19000,
+   27000
   ],
-  "winRate": 0.9525,
-  "moves": 16,
-  "medianDone": 11
+  "winRate": 0.935,
+  "moves": 14,
+  "medianDone": 9
  },
  "4": {
   "id": 4,
@@ -52,26 +52,26 @@
   "neverRate": 0,
   "stars": [
    0,
-   11100,
-   14700
+   19300,
+   26900
   ],
-  "winRate": 0.95,
-  "moves": 18,
-  "medianDone": 14
+  "winRate": 0.8275,
+  "moves": 14,
+  "medianDone": 11
  },
  "5": {
   "id": 5,
   "name": "Multivibrador astable",
   "tune": "score",
   "target": 0.82,
-  "scoreTarget": 10000,
+  "scoreTarget": 20000,
   "stars": [
-   10000,
-   15400,
-   21000
+   20000,
+   30000,
+   41000
   ],
-  "winRate": 0.8325,
-  "medianScore": 13680,
+  "winRate": 0.8225,
+  "medianScore": 26690,
   "time": 60
  },
  "6": {
@@ -82,11 +82,11 @@
   "neverRate": 0,
   "stars": [
    0,
-   6000,
-   7900
+   10900,
+   13900
   ],
-  "winRate": 0.9675,
-  "moves": 24,
+  "winRate": 0.895,
+  "moves": 21,
   "medianDone": 16
  },
  "7": {
@@ -97,26 +97,26 @@
   "neverRate": 0,
   "stars": [
    0,
-   6400,
-   8200
+   10400,
+   13500
   ],
-  "winRate": 0.895,
-  "moves": 21,
-  "medianDone": 16
+  "winRate": 0.79,
+  "moves": 18,
+  "medianDone": 14
  },
  "8": {
   "id": 8,
   "name": "Flip-flop",
   "tune": "score",
   "target": 0.76,
-  "scoreTarget": 6000,
+  "scoreTarget": 10700,
   "stars": [
-   6000,
-   8700,
-   11200
+   10700,
+   16500,
+   21200
   ],
   "winRate": 0.7675,
-  "medianScore": 7500,
+  "medianScore": 13810,
   "moves": 22
  },
  "9": {
@@ -127,12 +127,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   6200,
-   8200
+   9700,
+   13500
   ],
-  "winRate": 0.8675,
-  "time": 70,
-  "medianDone": 32.20243075567951
+  "winRate": 0.875,
+  "time": 65,
+  "medianDone": 52.855186536623165
  },
  "10": {
   "id": 10,
@@ -142,11 +142,11 @@
   "neverRate": 0,
   "stars": [
    0,
-   7100,
-   9400
+   10900,
+   14100
   ],
-  "winRate": 0.7025,
-  "moves": 20,
+  "winRate": 0.7675,
+  "moves": 18,
   "medianDone": 15
  },
  "11": {
@@ -157,12 +157,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   10500,
-   15300
+   17900,
+   26500
   ],
-  "winRate": 0.8675,
-  "moves": 17,
-  "medianDone": 11
+  "winRate": 0.9075,
+  "moves": 14,
+  "medianDone": 9
  },
  "12": {
   "id": 12,
@@ -172,12 +172,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   7400,
-   9700
+   11700,
+   15800
   ],
-  "winRate": 0.825,
-  "moves": 25,
-  "medianDone": 18
+  "winRate": 0.8525,
+  "moves": 20,
+  "medianDone": 15
  },
  "13": {
   "id": 13,
@@ -187,12 +187,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   10600,
-   13200
+   16400,
+   20200
   ],
-  "winRate": 0.7675,
-  "moves": 29,
-  "medianDone": 23
+  "winRate": 0.66,
+  "moves": 23,
+  "medianDone": 20
  },
  "14": {
   "id": 14,
@@ -202,12 +202,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   4800,
-   6700
+   8300,
+   11700
   ],
-  "winRate": 0.725,
+  "winRate": 0.6825,
   "time": 50,
-  "medianDone": 42.3956013065111
+  "medianDone": 44.273855977439325
  },
  "15": {
   "id": 15,
@@ -217,12 +217,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   8600,
-   11800
+   14000,
+   17600
   ],
-  "winRate": 0.5525,
-  "moves": 27,
-  "medianDone": 26
+  "winRate": 0.5575,
+  "moves": 21,
+  "medianDone": 20
  },
  "16": {
   "id": 16,
@@ -232,12 +232,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   8100,
-   11900
+   14600,
+   22800
   ],
-  "winRate": 0.83,
-  "moves": 12,
-  "medianDone": 8
+  "winRate": 0.8375,
+  "moves": 11,
+  "medianDone": 7
  },
  "17": {
   "id": 17,
@@ -247,12 +247,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   7200,
-   9800
+   11500,
+   15700
   ],
-  "winRate": 0.7025,
-  "moves": 29,
-  "medianDone": 22
+  "winRate": 0.7675,
+  "moves": 23,
+  "medianDone": 18
  },
  "18": {
   "id": 18,
@@ -262,12 +262,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   5400,
-   7200
+   7900,
+   10900
   ],
-  "winRate": 0.58,
-  "moves": 20,
-  "medianDone": 18
+  "winRate": 0.6975,
+  "moves": 18,
+  "medianDone": 16
  },
  "19": {
   "id": 19,
@@ -277,12 +277,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   5400,
-   7600
+   9000,
+   13000
   ],
-  "winRate": 0.66,
-  "time": 60,
-  "medianDone": 54.24161910760775
+  "winRate": 0.65,
+  "time": 55,
+  "medianDone": 48.432377472293574
  },
  "20": {
   "id": 20,
@@ -292,12 +292,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   6500,
-   8800
+   9500,
+   13300
   ],
-  "winRate": 0.5,
-  "moves": 15,
-  "medianDone": 15
+  "winRate": 0.53,
+  "moves": 14,
+  "medianDone": 14
  },
  "21": {
   "id": 21,
@@ -307,12 +307,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   13300,
-   18500
+   22500,
+   31500
   ],
-  "winRate": 0.7375,
-  "moves": 25,
-  "medianDone": 16
+  "winRate": 0.8125,
+  "moves": 18,
+  "medianDone": 13
  },
  "22": {
   "id": 22,
@@ -322,12 +322,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   11300,
-   15500
+   20500,
+   27500
   ],
-  "winRate": 0.6175,
-  "moves": 33,
-  "medianDone": 27
+  "winRate": 0.605,
+  "moves": 22,
+  "medianDone": 20
  },
  "23": {
   "id": 23,
@@ -337,26 +337,26 @@
   "neverRate": 0,
   "stars": [
    0,
-   13300,
-   18200
+   25000,
+   34000
   ],
-  "winRate": 0.55,
-  "moves": 20,
-  "medianDone": 19
+  "winRate": 0.59,
+  "moves": 16,
+  "medianDone": 15
  },
  "24": {
   "id": 24,
   "name": "Theremin",
   "tune": "score",
   "target": 0.52,
-  "scoreTarget": 7600,
+  "scoreTarget": 13700,
   "stars": [
-   7600,
-   9800,
-   12100
+   13700,
+   17200,
+   21300
   ],
-  "winRate": 0.535,
-  "medianScore": 7770,
+  "winRate": 0.525,
+  "medianScore": 13900,
   "time": 75
  },
  "25": {
@@ -367,12 +367,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   17100,
-   22000
+   28000,
+   37500
   ],
-  "winRate": 0.4625,
-  "moves": 22,
-  "medianDone": 23
+  "winRate": 0.535,
+  "moves": 17,
+  "medianDone": 18
  },
  "26": {
   "id": 26,
@@ -382,12 +382,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   4900,
-   6200
+   8000,
+   10400
   ],
-  "winRate": 0.69,
-  "moves": 26,
-  "medianDone": 25
+  "winRate": 0.59,
+  "moves": 24,
+  "medianDone": 23.5
  },
  "27": {
   "id": 27,
@@ -397,26 +397,26 @@
   "neverRate": 0,
   "stars": [
    0,
-   10400,
-   13600
+   16100,
+   21100
   ],
-  "winRate": 0.53,
-  "moves": 29,
-  "medianDone": 28.5
+  "winRate": 0.5725,
+  "moves": 24,
+  "medianDone": 24
  },
  "28": {
   "id": 28,
   "name": "Sintetizador",
   "tune": "score",
   "target": 0.45,
-  "scoreTarget": 5700,
+  "scoreTarget": 9200,
   "stars": [
-   5700,
-   7000,
-   8800
+   9200,
+   11100,
+   13700
   ],
   "winRate": 0.465,
-  "medianScore": 5560,
+  "medianScore": 8900,
   "time": 90
  },
  "29": {
@@ -427,12 +427,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   12700,
-   18300
+   22500,
+   33000
   ],
-  "winRate": 0.435,
-  "moves": 18,
-  "medianDone": 21
+  "winRate": 0.3925,
+  "moves": 13,
+  "medianDone": 16
  },
  "30": {
   "id": 30,
@@ -442,11 +442,11 @@
   "neverRate": 0,
   "stars": [
    0,
-   16300,
-   21100
+   29500,
+   39000
   ],
-  "winRate": 0.37,
-  "moves": 20,
-  "medianDone": 24
+  "winRate": 0.2775,
+  "moves": 15,
+  "medianDone": 18
  }
 }
