@@ -8,7 +8,7 @@ Bocetos aprobados de Fogonazo. Cada uno es el juego real con los cambios propues
 | B-02 | Tablero, componentes de 8 bits | [a · nivel 26](B-02a-componentes-8bits.png), [b · antes y después](B-02b-antes-y-despues-8bits.png) | #9 | 4/10/2026 | Vigente (0.2.0) |
 | B-03 | Tablero y manual: la antena | [a · tablero, 8 bits](B-03a-antena-8bits.png), [b · tablero, 16 bits](B-03b-antena-16bits.png), [c · manual, 8 bits](B-03c-manual-8bits.png), [d · manual, 16 bits](B-03d-manual-16bits.png) | #12, #13 | 4/10/2026 | Vigente (0.2.0) |
 | B-04 | Ajustes: aviso de dónde vive el avance | [a · 8 bits](B-04a-ajustes-8bits.png), [b · 16 bits](B-04b-ajustes-16bits.png) | #8 | 4/10/2026 | Vigente (0.2.0) |
-| B-05 | Mapa, Ajustes y Récords: modos de dificultad | [a · mapa, 8 bits](B-05a-mapa-8bits.png), [b · mapa, 16 bits](B-05b-mapa-16bits.png), [c · Ajustes, 8 bits](B-05c-ajustes-8bits.png), [d · Ajustes, 16 bits](B-05d-ajustes-16bits.png), [e · Récords, 8 bits](B-05e-records-8bits.png), [f · Récords, 16 bits](B-05f-records-16bits.png) | #15 | — | Propuesto |
+| B-05 | Mapa, Ajustes y Récords: modos de dificultad | [a · mapa, 8 bits](B-05a-mapa-8bits.png), [b · mapa, 16 bits](B-05b-mapa-16bits.png), [c · Ajustes, 8 bits](B-05c-ajustes-8bits.png), [d · Ajustes, 16 bits](B-05d-ajustes-16bits.png), [e · Récords, 8 bits](B-05e-records-8bits.png), [f · Récords, 16 bits](B-05f-records-16bits.png) | #15 | 5/10/2026 | Aprobado (0.3.0) |
 
 Cómo se capturó cada imagen de B-01 (`node herramientas/boceto.js docs/bocetos/<imagen> …`):
 
