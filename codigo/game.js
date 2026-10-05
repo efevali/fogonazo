@@ -1118,6 +1118,7 @@ const UI = {
     if (name === 'game') requestAnimationFrame(() => View.resize());
   },
   renderMap() {
+    this.renderZen();
     $('#starTotal').innerHTML = svgStar(true).replace('<svg', '<svg width="16" height="16"') + `<span>${Save.total()}/${LEVELS.length * 3}</span>`;
     const M = modeOf(Save.settings.mode);
     $('#modeRow').innerHTML = `<span class="lbl">Modo ${M.name}</span><span class="v">${Save.modeTotal()}/${LEVELS.length * 3}</span>`;
@@ -1154,6 +1155,16 @@ const UI = {
     if (bInst) bInst.onclick = () => { Sound.ensure(); Sound.play('click'); instalar(); };
     const cur = wrap.querySelector('.node.current');
     if (cur && this._scrolled !== current) { this._scrolled = current; cur.scrollIntoView({ block: 'center' }); }
+  },
+  renderZen() {   // B-07: la tarjeta del modo zen, arriba del mapa
+    const z = Save.data.zen || { best: 0, time: 0 };
+    const t = z.time ? Math.floor(z.time / 60) + ':' + String(z.time % 60).padStart(2, '0') : '—';
+    let wave = 'M0 23';
+    for (let x = 0; x <= 400; x += 4) wave += ` L${x} ${(23 + 14 * Math.sin(x / 22) * Math.sin(x / 140 + 1)).toFixed(1)}`;
+    $('#zen').innerHTML = `<section class="zen" aria-label="Modo zen"><svg class="zen-wave" viewBox="0 0 400 46" preserveAspectRatio="none" aria-hidden="true"><path d="${wave}"/></svg>
+      <div class="zen-top"><span class="zt"><h2>MODO ZEN</h2><small>Sin movimientos ni reloj en contra. Jugá hasta que quieras.</small></span><button class="btn small" id="btnZen">${pixSvg(IC.play, 'currentColor', 'width="12" height="12"')} Jugar</button></div>
+      <div class="zen-rec"><div><span class="k">Récord de puntos</span><span class="v">${z.best ? fmt(z.best) : '—'}</span></div><div><span class="k">Récord de tiempo</span><span class="v">${t}</span></div></div></section>`;
+    $('#btnZen').onclick = () => { Sound.ensure(); Sound.play('click'); Game.openZen(); };
   },
   modal(html, onMount) {
     const m = $('#modal'), c = $('#card');
@@ -1289,6 +1300,27 @@ const Game = {
     this.hideBanner();
     UI.show('game');
     this.intro();
+  },
+  openZen() {   // B-07: solo la pantalla, para el boceto; la partida sin fin se implementa en la tanda
+    const z = Save.data.zen || { best: 0, time: 0 };
+    this.n = 0;
+    this.def = { n: 0, block: 0, name: 'Libre', colors: 6, moves: 99, goals: [{ type: 'collect', color: 2, n: 15 }], stars: [0, z.best || 5000, z.best || 5000], zen: true };
+    this.g = E.createGame(this.def, (Math.random() * 1e9) | 0);
+    this.playing = true; this.busy = false; this.paused = false; this.ended = false;
+    View.reset(this.g);
+    HUD.init(this.def, this.g);
+    $('#lvlNum').textContent = 'MODO ZEN';
+    $('#movesLabel').textContent = 'TIEMPO';
+    Seg.build($('#segMoves'), 4, 1);
+    Seg.set($('#segMoves'), '0000');
+    $('#vuStars').innerHTML = `<span data-v="${z.best || 5000}" style="position:absolute;left:96%;top:0">${pixSvg(IC.star, '#4ef2c9', 'width="12" height="12"')}</span>`;
+    const ch = HUD.chips[0].chip;
+    ch.classList.add('opt');
+    ch.insertAdjacentHTML('afterbegin', '<span class="lbl">Encargo</span>');
+    ch.insertAdjacentHTML('beforeend', '<span class="bon">+500</span>');
+    $('#tipStrip').textContent = 'Encargo optativo: si lo completás, suma 500 puntos';
+    this.hideBanner();
+    UI.show('game');
   },
   intro() {
     const d = this.def, g = this.g;
@@ -1580,7 +1612,7 @@ function boot() {
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
 // Para las pruebas y los bocetos (herramientas/boceto.js)
-window.__fogonazo = { Game, Save, UI, View, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
+window.__fogonazo = { Game, Save, UI, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;

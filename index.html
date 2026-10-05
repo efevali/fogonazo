@@ -529,6 +529,40 @@ html[data-art="16"] .rec { border-radius: 8px; }
 html[data-art="16"] .rec-top .k { font-size: 17px; }
 html[data-art="16"] .rec-top .v { font-size: 21px; }
 html[data-art="16"] .rec-sub { font-size: 15px; }
+
+/* Modo zen (B-07): la tarjeta va arriba del mapa, como la pantalla de un osciloscopio */
+.zen {
+  position: relative; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 14px; border-radius: 8px; overflow: hidden;
+  background: #071612; box-shadow: inset 0 0 0 2px #1d4a40, 0 3px 0 #0006;
+  background-image: linear-gradient(#4ef2c912 1px, transparent 1px), linear-gradient(90deg, #4ef2c912 1px, transparent 1px);
+  background-size: 18px 18px; background-position: -1px -1px;
+}
+.zen-wave { position: absolute; left: 0; right: 0; top: 4px; height: 40px; opacity: .3; pointer-events: none; }
+.zen-wave path { fill: none; stroke: var(--vfd); stroke-width: 2; filter: drop-shadow(0 0 3px var(--vfd)); }
+.zen-top { position: relative; display: flex; align-items: center; gap: 10px; }
+.zen-top .zt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.zen-top h2 { margin: 0; font-family: var(--font-display); font-size: 20px; letter-spacing: .04em; color: var(--vfd); text-shadow: 0 0 8px #4ef2c966, 2px 2px 0 #000; }
+.zen-top small { font-size: 14px; line-height: 1.3; color: #a8cfc4; }
+.zen-rec { position: relative; display: flex; gap: 8px; }
+.zen-rec div { flex: 1; display: flex; flex-direction: column; gap: 2px; background: #03100c; border-radius: 4px; padding: 6px 8px; box-shadow: inset 0 0 0 2px #143a31; }
+.zen-rec .k { font-family: var(--font-ui); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #6fa597; }
+.zen-rec .v { font-family: var(--font-display); font-size: 16px; color: var(--vfd); }
+.goal.opt { background: transparent; box-shadow: inset 0 0 0 2px #2b3a44; outline: 2px dashed #4ef2c955; outline-offset: -2px; }
+.goal.opt .bon { font-family: var(--font-ui); font-size: 12px; color: var(--vfd); }
+.goal.opt .lbl { font-size: 12px; }
+html[data-art="16"] .zen {
+  border-radius: 10px; padding: 14px 16px 16px;
+  background: var(--screw) 3px 3px / 12px 12px no-repeat, var(--screw) calc(100% - 3px) 3px / 12px 12px no-repeat,
+    var(--screw) 3px calc(100% - 3px) / 12px 12px no-repeat, var(--screw) calc(100% - 3px) calc(100% - 3px) / 12px 12px no-repeat,
+    radial-gradient(ellipse at 50% 40%, #0d2a24 0%, #061411 75%);
+  box-shadow: inset 0 0 18px #000c, inset 0 0 0 3px #0c1216, inset 0 0 0 4px #33444f, 0 0 0 2px #05080a, 0 0 0 4px #4c5f6c, 0 4px 0 4px #000a;
+}
+html[data-art="16"] .zen-top h2 { font-size: 30px; font-weight: 400; line-height: 1; }
+html[data-art="16"] .zen-top small { font-size: 18px; line-height: 1.15; }
+html[data-art="16"] .zen-rec div { border-radius: 6px; }
+html[data-art="16"] .zen-rec .k { font-size: 15px; }
+html[data-art="16"] .zen-rec .v { font-size: 24px; line-height: 1; }
+html[data-art="16"] .goal.opt .bon, html[data-art="16"] .goal.opt .lbl { font-size: 16px; }
 </style>
 </head>
 <body>
@@ -538,9 +572,9 @@ html[data-art="16"] .rec-sub { font-size: 15px; }
       <div class="brand"><span class="led-dot" aria-hidden="true"></span><h1>Fogonazo</h1></div>
       <button class="icon-btn" id="btnSettings" aria-label="Ajustes"></button>
     </header>
+    <div id="zen"></div>
     <div class="progress-row"><button class="star-total" id="starTotal" aria-label="Estrellas: ver récords por modo"></button><div class="prog" id="prog" aria-hidden="true"></div></div>
     <div class="mode-row" id="modeRow"></div>
-    <p class="tagline">Juntá componentes de a tres en la placa. Treinta circuitos, de un LED que titila a una computadora de 8 bits.</p>
     <div id="blocks" style="display:flex;flex-direction:column;gap:14px"></div>
     <button class="btn ghost help-link" id="btnHelp">Cómo se juega</button>
   </section>
@@ -3864,6 +3898,7 @@ const UI = {
     if (name === 'game') requestAnimationFrame(() => View.resize());
   },
   renderMap() {
+    this.renderZen();
     $('#starTotal').innerHTML = svgStar(true).replace('<svg', '<svg width="16" height="16"') + `<span>${Save.total()}/${LEVELS.length * 3}</span>`;
     const M = modeOf(Save.settings.mode);
     $('#modeRow').innerHTML = `<span class="lbl">Modo ${M.name}</span><span class="v">${Save.modeTotal()}/${LEVELS.length * 3}</span>`;
@@ -3900,6 +3935,16 @@ const UI = {
     if (bInst) bInst.onclick = () => { Sound.ensure(); Sound.play('click'); instalar(); };
     const cur = wrap.querySelector('.node.current');
     if (cur && this._scrolled !== current) { this._scrolled = current; cur.scrollIntoView({ block: 'center' }); }
+  },
+  renderZen() {   // B-07: la tarjeta del modo zen, arriba del mapa
+    const z = Save.data.zen || { best: 0, time: 0 };
+    const t = z.time ? Math.floor(z.time / 60) + ':' + String(z.time % 60).padStart(2, '0') : '—';
+    let wave = 'M0 23';
+    for (let x = 0; x <= 400; x += 4) wave += ` L${x} ${(23 + 14 * Math.sin(x / 22) * Math.sin(x / 140 + 1)).toFixed(1)}`;
+    $('#zen').innerHTML = `<section class="zen" aria-label="Modo zen"><svg class="zen-wave" viewBox="0 0 400 46" preserveAspectRatio="none" aria-hidden="true"><path d="${wave}"/></svg>
+      <div class="zen-top"><span class="zt"><h2>MODO ZEN</h2><small>Sin movimientos ni reloj en contra. Jugá hasta que quieras.</small></span><button class="btn small" id="btnZen">${pixSvg(IC.play, 'currentColor', 'width="12" height="12"')} Jugar</button></div>
+      <div class="zen-rec"><div><span class="k">Récord de puntos</span><span class="v">${z.best ? fmt(z.best) : '—'}</span></div><div><span class="k">Récord de tiempo</span><span class="v">${t}</span></div></div></section>`;
+    $('#btnZen').onclick = () => { Sound.ensure(); Sound.play('click'); Game.openZen(); };
   },
   modal(html, onMount) {
     const m = $('#modal'), c = $('#card');
@@ -4035,6 +4080,27 @@ const Game = {
     this.hideBanner();
     UI.show('game');
     this.intro();
+  },
+  openZen() {   // B-07: solo la pantalla, para el boceto; la partida sin fin se implementa en la tanda
+    const z = Save.data.zen || { best: 0, time: 0 };
+    this.n = 0;
+    this.def = { n: 0, block: 0, name: 'Libre', colors: 6, moves: 99, goals: [{ type: 'collect', color: 2, n: 15 }], stars: [0, z.best || 5000, z.best || 5000], zen: true };
+    this.g = E.createGame(this.def, (Math.random() * 1e9) | 0);
+    this.playing = true; this.busy = false; this.paused = false; this.ended = false;
+    View.reset(this.g);
+    HUD.init(this.def, this.g);
+    $('#lvlNum').textContent = 'MODO ZEN';
+    $('#movesLabel').textContent = 'TIEMPO';
+    Seg.build($('#segMoves'), 4, 1);
+    Seg.set($('#segMoves'), '0000');
+    $('#vuStars').innerHTML = `<span data-v="${z.best || 5000}" style="position:absolute;left:96%;top:0">${pixSvg(IC.star, '#4ef2c9', 'width="12" height="12"')}</span>`;
+    const ch = HUD.chips[0].chip;
+    ch.classList.add('opt');
+    ch.insertAdjacentHTML('afterbegin', '<span class="lbl">Encargo</span>');
+    ch.insertAdjacentHTML('beforeend', '<span class="bon">+500</span>');
+    $('#tipStrip').textContent = 'Encargo optativo: si lo completás, suma 500 puntos';
+    this.hideBanner();
+    UI.show('game');
   },
   intro() {
     const d = this.def, g = this.g;
@@ -4326,7 +4392,7 @@ function boot() {
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
 // Para las pruebas y los bocetos (herramientas/boceto.js)
-window.__fogonazo = { Game, Save, UI, View, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
+window.__fogonazo = { Game, Save, UI, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;
