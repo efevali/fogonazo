@@ -36,6 +36,7 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 ## Niveles y dificultad
 
 - **Tablero de 8 × 10, en vertical** (4/10, #10). El de 8 × 8 lo limita el ancho y debajo sobraban unos 240 px. Las dos filas nuevas van arriba para conservar los diseños, que están pensados contra el borde inferior. Obliga a recalibrar los 30 niveles. *Descartado:* pasar a horizontal (#4).
+- **Pedidos más grandes con la placa de 8 × 10** (4/10). Con la placa más grande, la antena y el toque, la recalibración bajó mucho los movimientos (hasta 10 en algunos niveles). En 20 niveles se agrandó el pedido a ojo para volver a partidas de largo parecido a las de antes: más piezas a juntar (3, 4, 6, 7, 9, 10, 23 y 26), más válvulas (21, 22, 23, 25, 29 y 30) y diseños más altos con más pads, cinta o quemados (12, 13, 14, 15, 17, 19 y 27). Después se recalibraron. *Descartado:* aceptar niveles de 10 a 13 movimientos.
 - **Calibración con un bot imperfecto** (3/10): 62 % la mejor jugada, 20 % la segunda, 18 % cualquiera; 400 partidas por nivel.
 - **Pads fuera del borde inferior y de las esquinas** (3/10). Ahí las líneas se forman entre 3 y 5 veces menos, y los últimos pads tardaban demasiado.
 - **Nivel 19 con dos pasos por fila de quemados** (3/10): `bb.bb.bb`. Con la caída nueva, las filas enteras encerraban 24 lugares que quedaban vacíos, y en contrarreloj eso frustra más de lo que desafía. *Descartado:* dejarlo como un nivel de abrir paso.
