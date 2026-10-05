@@ -9,6 +9,7 @@ Bocetos aprobados de Fogonazo. Cada uno es el juego real con los cambios propues
 | B-03 | Tablero y manual: la antena | [a · tablero, 8 bits](B-03a-antena-8bits.png), [b · tablero, 16 bits](B-03b-antena-16bits.png), [c · manual, 8 bits](B-03c-manual-8bits.png), [d · manual, 16 bits](B-03d-manual-16bits.png) | #12, #13 | 4/10/2026 | Vigente (0.2.0) |
 | B-04 | Ajustes: aviso de dónde vive el avance | [a · 8 bits](B-04a-ajustes-8bits.png), [b · 16 bits](B-04b-ajustes-16bits.png) | #8 | 4/10/2026 | Vigente (0.2.0) |
 | B-05 | Mapa, Ajustes y Récords: modos de dificultad | [a · mapa, 8 bits](B-05a-mapa-8bits.png), [b · mapa, 16 bits](B-05b-mapa-16bits.png), [c · Ajustes, 8 bits](B-05c-ajustes-8bits.png), [d · Ajustes, 16 bits](B-05d-ajustes-16bits.png), [e · Récords, 8 bits](B-05e-records-8bits.png), [f · Récords, 16 bits](B-05f-records-16bits.png) | #15 | 5/10/2026 | Aprobado (0.3.0) |
+| B-06 | Mapa: lugar de la tarjeta «Instalar» | [a · 8 bits](B-06a-instalar-8bits.png), [b · 16 bits](B-06b-instalar-16bits.png) | #18 | 5/10/2026 | Aprobado (0.3.0) |
 
 Cómo se capturó cada imagen de B-01 (`node herramientas/boceto.js docs/bocetos/<imagen> …`):
 
@@ -45,3 +46,5 @@ Lo que fija B-03: la marca de la antena (ondas que salen de los dos costados de 
 Cómo se capturó B-05 (`node herramientas/boceto.js docs/bocetos/<imagen> [--16] --accion "<avance> " --accion "<pantalla>"`). El avance por modo se carga a mano: `const D={1:1,2:1,3:1,4:1,5:2,6:1,7:2,8:1,9:1,10:1,11:1,12:1,13:1,14:1}, N={1:3,2:2,3:3,4:2,5:2,6:1,7:3,8:2}, Fa={1:3,2:3}; const S=F.Save; S.settings.mode='normal'; S.data.modes={dificil:{stars:D,best:{}},normal:{stars:N,best:{}},facil:{stars:Fa,best:{}}}; const t={}; for(const m of [D,N,Fa]) for(const k in m) t[k]=Math.max(t[k]||0,m[k]); S.data.stars=t; F.UI.renderMap()`. Pantalla: a y b, `document.querySelector('#scr-map').scrollTo(0,0)`; c y d, `F.UI.settings()`; e y f, `F.UI.records()`.
 
 Lo que fija B-05: el selector de tres posiciones arriba de todo en Ajustes; la fila «Modo …» bajo el total, con las estrellas de ese modo; que el mapa muestre las estrellas del modo elegido; la ventana «Récords» que se abre tocando el total, y sus textos. Es solo ejemplo el avance simulado.
+
+B-06 se capturó con el mismo avance que B-05 (pantalla a y b). Fija que la tarjeta «Instalar» va siempre antes de U1; supera a B-01 solo en ese punto.

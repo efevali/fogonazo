@@ -1158,7 +1158,7 @@ const UI = {
         if (un) btn.addEventListener('click', () => { Sound.ensure(); Sound.play('click'); Game.open(n); });
         nodes.appendChild(btn);
       }
-      if (bi === Math.floor((current - 1) / 5)) {
+      if (bi === 0) {   // la tarjeta «Instalar» va siempre antes del primer bloque
         const inst = instalarHTML();
         if (inst) wrap.insertAdjacentHTML('beforeend', inst);
       }
