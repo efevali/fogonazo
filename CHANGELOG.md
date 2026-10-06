@@ -2,6 +2,10 @@
 
 Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico que explica el [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.4.1 — 5/10/2026
+
+- Modo zen: la línea de abajo de la placa dice «El encargo es optativo: si no lo hacés, no pasa nada». Antes decía cuánto suma, y en 8 bits el 500 se leía como 800 ([#22](https://github.com/efevali/fogonazo/issues/22)).
+
 ## 0.4.0 — 5/10/2026
 
 Modo zen ([milestone](https://github.com/efevali/fogonazo/milestone/4)).

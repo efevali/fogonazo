@@ -9,7 +9,7 @@
 
    Fogonazo comparte el origen efevali.github.io con Kasa: lo guardado lleva el prefijo «fogonazo-» y solo se
    borra lo propio. */
-const VERSION = '0.4.0';
+const VERSION = '0.4.1';
 const CACHE = 'fogonazo-v' + VERSION;
 const ARCHIVOS = [
   './',

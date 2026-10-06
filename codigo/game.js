@@ -13,7 +13,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.4.0', fecha: '5/10/2026' };
+const FOGONAZO_VERSION = { v: '0.4.1', fecha: '5/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -1435,7 +1435,7 @@ const Game = {
     if (ART.style === '16') View.mosaic();
     if (this.def.tip === 'swap') this.idle = 4000;
     const strips = { swap: 'Deslizá una pieza hacia su vecina', tubes: 'Hacé líneas debajo de la válvula', locks: 'Las piezas encintadas no se mueven', burnt: 'Hacé líneas pegadas a los quemados' };
-    $('#tipStrip').textContent = this.def.zen ? `Encargo optativo: si lo completás, suma ${fmt(this.def.order.bonus)} puntos` : strips[this.def.tip] || '';
+    $('#tipStrip').textContent = this.def.zen ? 'El encargo es optativo: si no lo hacés, no pasa nada' : strips[this.def.tip] || '';
   },
   toMap() {
     UI.close();
