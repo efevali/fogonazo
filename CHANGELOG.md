@@ -4,7 +4,7 @@ Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Si
 
 ## 0.5.0 — 6/10/2026
 
-Clave de producto para resguardar el avance.
+Clave de producto para resguardar el avance ([milestone](https://github.com/efevali/fogonazo/milestone/5), [#23](https://github.com/efevali/fogonazo/issues/23)).
 
 - Ajustes: botón «Progreso», que abre una pantalla nueva con el resumen de estrellas de cada modo y los récords zen.
 - Clave de producto: todo el avance en un serial con el formato de las claves de Windows XP, que empieza con FCKGW. Tres renglones de cinco grupos; «Copiar clave» los copia juntos, para guardarlos en las notas, un chat o un mail. Cambia cada vez que se avanza.
