@@ -8,8 +8,10 @@ Bocetos aprobados de Fogonazo. Cada uno es el juego real con los cambios propues
 | B-02 | Tablero, componentes de 8 bits | [a · nivel 26](B-02a-componentes-8bits.png), [b · antes y después](B-02b-antes-y-despues-8bits.png) | #9 | 4/10/2026 | Vigente (0.2.0) |
 | B-03 | Tablero y manual: la antena | [a · tablero, 8 bits](B-03a-antena-8bits.png), [b · tablero, 16 bits](B-03b-antena-16bits.png), [c · manual, 8 bits](B-03c-manual-8bits.png), [d · manual, 16 bits](B-03d-manual-16bits.png) | #12, #13 | 4/10/2026 | Vigente (0.2.0) |
 | B-04 | Ajustes: aviso de dónde vive el avance | [a · 8 bits](B-04a-ajustes-8bits.png), [b · 16 bits](B-04b-ajustes-16bits.png) | #8 | 4/10/2026 | Vigente (0.2.0) |
-| B-05 | Mapa, Ajustes y Récords: modos de dificultad | [a · mapa, 8 bits](B-05a-mapa-8bits.png), [b · mapa, 16 bits](B-05b-mapa-16bits.png), [c · Ajustes, 8 bits](B-05c-ajustes-8bits.png), [d · Ajustes, 16 bits](B-05d-ajustes-16bits.png), [e · Récords, 8 bits](B-05e-records-8bits.png), [f · Récords, 16 bits](B-05f-records-16bits.png) | #15 | 5/10/2026 | Aprobado (0.3.0) |
-| B-06 | Mapa: lugar de la tarjeta «Instalar» | [a · 8 bits](B-06a-instalar-8bits.png), [b · 16 bits](B-06b-instalar-16bits.png) | #18 | 5/10/2026 | Aprobado (0.3.0) |
+| B-05 | Mapa, Ajustes y Récords: modos de dificultad | [a · mapa, 8 bits](B-05a-mapa-8bits.png), [b · mapa, 16 bits](B-05b-mapa-16bits.png), [c · Ajustes, 8 bits](B-05c-ajustes-8bits.png), [d · Ajustes, 16 bits](B-05d-ajustes-16bits.png), [e · Récords, 8 bits](B-05e-records-8bits.png), [f · Récords, 16 bits](B-05f-records-16bits.png) | #15 | 5/10/2026 | Vigente (0.3.0) |
+| B-06 | Mapa: lugar de la tarjeta «Instalar» | [a · 8 bits](B-06a-instalar-8bits.png), [b · 16 bits](B-06b-instalar-16bits.png) | #18 | 5/10/2026 | Vigente (0.3.0) |
+| B-07 | Mapa y partida: modo zen | [a · mapa, 8 bits](B-07a-mapa-zen-8bits.png), [b · mapa, 16 bits](B-07b-mapa-zen-16bits.png), [c · partida, 8 bits](B-07c-partida-zen-8bits.png), [d · partida, 16 bits](B-07d-partida-zen-16bits.png) | #19 | 5/10/2026 | Vigente (0.4.0) |
+| B-08 | Música del modo zen | [página de prueba](B-08-musica-zen.html): tres opciones en 8 y 16 bits, y «Placa» para comparar | #19 | 5/10/2026 | Vigente (0.4.0): la A, «Siesta» |
 
 Cómo se capturó cada imagen de B-01 (`node herramientas/boceto.js docs/bocetos/<imagen> …`):
 
@@ -48,3 +50,9 @@ Cómo se capturó B-05 (`node herramientas/boceto.js docs/bocetos/<imagen> [--16
 Lo que fija B-05: el selector de tres posiciones arriba de todo en Ajustes; la fila «Modo …» bajo el total, con las estrellas de ese modo; que el mapa muestre las estrellas del modo elegido; la ventana «Récords» que se abre tocando el total, y sus textos. Es solo ejemplo el avance simulado.
 
 B-06 se capturó con el mismo avance que B-05 (pantalla a y b). Fija que la tarjeta «Instalar» va siempre antes de U1; supera a B-01 solo en ese punto.
+
+Cómo se capturó B-07 (`node herramientas/boceto.js docs/bocetos/<imagen> [--16] --avance "1-7:3,8:1" --accion "…"`), con el código del commit «B-07», que solo armaba la pantalla de la partida: a y b, `F.Save.data.zen={best:12480,time:1112}; F.UI.renderMap(); document.querySelector('#scr-map').scrollTo(0,0)`; c y d, la semilla de B-02 y después `F.Save.data.zen={best:12480,time:1112}; F.Game.openZen(); F.Seg.set(document.querySelector('#segMoves'),'1247'); F.HUD.target=F.HUD.shown=7350; F.Seg.set(document.querySelector('#segScore'),7350); F.HUD.renderVU(7350); F.HUD.setGoals([9])`.
+
+Lo que fija B-07: el lugar, el aspecto y los textos de la tarjeta del modo zen (que reemplaza el texto de presentación); en la partida, el reloj que cuenta hacia arriba, el vúmetro hacia el récord con su estrella verde agua y el encargo con borde punteado, «Encargo» y «+500». Es solo ejemplo: los récords, el tiempo, los puntos, el componente y la cantidad del encargo.
+
+B-08 es una página para escuchar, no una captura: se abre en Chrome y tiene adentro una copia de `codigo/audio.js` de la rama de la versión. Las tres opciones tienen el tempo de «Placa» (104 ppm), tonalidad mayor e instrumentos suaves, y van unos 2 dB por debajo de «Placa». Fija los instrumentos suaves y el tempo. Se eligió la A, «Siesta»; la B y la C quedan descartadas y solo viven en esta página.

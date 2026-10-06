@@ -102,6 +102,12 @@ const BLOCKS = [
   { name: 'Prototipo final', desc: 'Todo junto' },
 ];
 
+/* Modo zen (#19): una partida sin límite de movimientos ni de tiempo, en la placa libre, con los seis primeros
+   componentes. El encargo es optativo: al completarlo suma `bonus` puntos y el motor pide otro (Engine.zenOrder),
+   de otro componente y con una cantidad entre `min` y `max`, de a `step`. No da estrellas. */
+const ZEN = { name: 'Libre', colors: 6, zen: true, goals: [{ type: 'collect', color: 2, n: 15 }],
+  order: { bonus: 500, min: 12, max: 20, step: 2 } };
+
 /* Modos de dificultad (Ajustes). La estrella vale lo mismo en cualquier modo; cada modo guarda sus propios
    récords. Difícil es la calibración de calibrated.json tal cual; los otros dos multiplican los movimientos
    (o el tiempo) y los umbrales de estrellas. Se miden con herramientas/modos.js. */
@@ -123,6 +129,6 @@ function applyMode(d, M) {
   return d;
 }
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, BLOCKS, MODES, modeOf, applyMode };
-else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; root.MODES = MODES; root.modeOf = modeOf; root.applyMode = applyMode; }
+if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, BLOCKS, ZEN, MODES, modeOf, applyMode };
+else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; root.ZEN = ZEN; root.MODES = MODES; root.modeOf = modeOf; root.applyMode = applyMode; }
 })(typeof window !== 'undefined' ? window : this);

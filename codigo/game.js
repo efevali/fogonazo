@@ -13,7 +13,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.3.0', fecha: '5/10/2026' };
+const FOGONAZO_VERSION = { v: '0.4.0', fecha: '5/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -32,6 +32,13 @@ const IC = {
   share: ['....#....', '...###...', '..#.#.#..', '....#....', '....#....', '##..#..##', '#.......#', '#.......#', '#########'],
 };
 const svgStar = on => pixSvg(IC.star, on ? '#ffbf2e' : '#2c3a44');
+const zenStar = on => pixSvg(IC.star, on ? '#4ef2c9' : '#2a6e60');   // la marca del récord en el vúmetro del modo zen
+// Tiempo de una partida zen: m:ss, o h:mm:ss desde la hora
+function fmtTime(sec) {
+  sec = Math.floor(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, ss = String(sec % 60).padStart(2, '0');
+  return h ? h + ':' + String(m).padStart(2, '0') + ':' + ss : m + ':' + ss;
+}
 
 // ------------------------------------------------------------ niveles calibrados
 function levelDef(n, modeId) {
@@ -53,7 +60,8 @@ function levelDef(n, modeId) {
 const KEY = 'chispazo.v1';
 const Save = {
   // stars y best: lo mejor de cualquier modo (desbloqueo y total). modes: los récords de cada modo.
-  data: { stars: {}, best: {}, modes: {} },
+  // zen: los récords del modo zen (#19), los puntos y los segundos de la mejor partida.
+  data: { stars: {}, best: {}, modes: {}, zen: { best: 0, time: 0 } },
   settings: { sfx: 0.7, music: 0.35, mute: false, style: '8', mode: 'normal' },
   load() {
     this.fixModes();
@@ -61,7 +69,7 @@ const Save = {
       const raw = localStorage.getItem(KEY);
       if (!raw) return;
       const d = JSON.parse(raw);
-      if (d.progress && d.progress.stars) this.data = { stars: d.progress.stars || {}, best: d.progress.best || {}, modes: d.progress.modes || {} };
+      if (d.progress && d.progress.stars) this.data = { stars: d.progress.stars || {}, best: d.progress.best || {}, modes: d.progress.modes || {}, zen: this.zenOf(d.progress.zen) };
       if (d.settings) Object.assign(this.settings, d.settings);
     } catch (e) {}
     this.fixModes();
@@ -85,9 +93,21 @@ const Save = {
     this.persist();
     if (changed) Cloud.push();
   },
+  zenOf(z) { return { best: Math.max(0, +(z && z.best) || 0), time: Math.max(0, +(z && z.time) || 0) }; },
+  zen() { return this.data.zen || (this.data.zen = this.zenOf()); },
+  // Récords del modo zen: se anotan mientras se juega, para no perderlos si se cierra el juego.
+  zenRecord(score, time, save) {
+    const z = this.zen();
+    let changed = false;
+    if (score > z.best) { z.best = score; changed = true; }
+    if (time > z.time) { z.time = time; changed = true; }
+    if (changed && save) this.persist();
+    return changed;
+  },
   merge(o) {
     let changed = false;
     if (!o) return false;
+    if (o.zen) { const z = this.zenOf(o.zen); if (this.zenRecord(z.best, z.time)) changed = true; }
     for (const [k, v] of Object.entries(o.stars || {})) if ((+v || 0) > (this.data.stars[k] || 0)) { this.data.stars[k] = +v; changed = true; }
     for (const [k, v] of Object.entries(o.best || {})) if ((+v || 0) > (this.data.best[k] || 0)) { this.data.best[k] = +v; changed = true; }
     this.fixModes();
@@ -103,7 +123,7 @@ const Save = {
   modeTotal(id) { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.modeStars(n, id); return t; },
   unlocked(n) { return n === 1 || this.stars(n - 1) > 0; },
   total() { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.stars(n); return t; },
-  reset() { this.data = { stars: {}, best: {}, modes: {} }; this.fixModes(); this.persist(); Cloud.push(true); },
+  reset() { this.data = { stars: {}, best: {}, modes: {}, zen: this.zenOf() }; this.fixModes(); this.persist(); Cloud.push(true); },
 };
 
 // Sincronización opcional con la cuenta (si el visor la ofrece): el avance te sigue entre dispositivos.
@@ -122,14 +142,14 @@ const Cloud = {
       const gotNew = Save.merge(remote);
       if (gotNew) { Save.persist(); if (UI.screen === 'map') UI.renderMap(); }
       const same = remote && JSON.stringify(remote.stars || {}) === JSON.stringify(Save.data.stars) && JSON.stringify(remote.best || {}) === JSON.stringify(Save.data.best);
-      if (!same && Save.total() > 0) this.push();
+      if (!same && (Save.total() > 0 || Save.zen().best > 0)) this.push();
     } catch (e) { this.ref = null; }
   },
   async push(force) {
     if (!this.ref) return;
     if (this.busy) { this.pending = true; return; }
     this.busy = true;
-    try { await this.ref.set({ stars: Save.data.stars, best: Save.data.best, modes: Save.data.modes }); } catch (e) {}
+    try { await this.ref.set({ stars: Save.data.stars, best: Save.data.best, modes: Save.data.modes, zen: Save.zen() }); } catch (e) {}
     this.busy = false;
     if (this.pending) { this.pending = false; this.push(); }
   },
@@ -1004,23 +1024,24 @@ const HUD = {
     $('#lvlNum').textContent = 'NIVEL ' + def.n + ' · ' + BLOCKS[def.block].name.toUpperCase();
     $('#lvlName').textContent = def.name;
     $('#lvlName').classList.toggle('long', def.name.length > 18);
-    const timed = g.mode === 'time';
-    $('#movesLabel').textContent = timed ? 'TIEMPO' : 'MOV';
-    if (timed) Seg.build($('#segMoves'), 3, 0); else Seg.build($('#segMoves'), 2);
+    const timed = g.mode === 'time', zen = g.mode === 'zen';
+    $('#movesLabel').textContent = timed || zen ? 'TIEMPO' : 'MOV';
+    if (zen) Seg.build($('#segMoves'), 4, 1); else if (timed) Seg.build($('#segMoves'), 3, 0); else Seg.build($('#segMoves'), 2);
     $('#segMoves').classList.remove('warn');
     Seg.build($('#segScore'), 6);
     Seg.set($('#segScore'), '0');
-    if (timed) this.setTime(def.time); else this.setMoves(g.moves);
+    if (zen) this.setClock(0); else if (timed) this.setTime(def.time); else this.setMoves(g.moves);
     const vu = $('#vu');
     vu.innerHTML = '';
     for (let k = 0; k < this.segs; k++) vu.insertAdjacentHTML('beforeend', `<i class="${k >= 10 ? 'r' : k >= 7 ? 'y' : ''}"></i>`);
     const st = $('#vuStars');
     st.innerHTML = '';
     const max = def.stars[2];
-    const marks = g.scoreOnly ? def.stars : [def.stars[1], def.stars[2]];
+    // en el modo zen, una sola marca: el récord de puntos (si hay)
+    const marks = zen ? (def.record ? [def.record] : []) : g.scoreOnly ? def.stars : [def.stars[1], def.stars[2]];
     marks.forEach((v, k) => {
       const pct = clamp(v / max * 100, 4, 96);
-      st.insertAdjacentHTML('beforeend', `<span data-v="${v}" style="position:absolute;left:${pct}%;top:0">${svgStar(false)}</span>`);
+      st.insertAdjacentHTML('beforeend', `<span data-v="${v}" style="position:absolute;left:${pct}%;top:0">${zen ? zenStar(false) : svgStar(false)}</span>`);
     });
     const goals = $('#goals');
     goals.innerHTML = '';
@@ -1033,6 +1054,11 @@ const HUD = {
       if (o.type === 'score') chip.insertAdjacentHTML('beforeend', `<span class="lbl">Meta</span>`);
       const cnt = document.createElement('span'); cnt.className = 'cnt';
       chip.appendChild(cnt);
+      if (zen) {   // el encargo optativo: borde punteado, «Encargo» y lo que suma
+        chip.classList.add('opt');
+        chip.insertAdjacentHTML('afterbegin', '<span class="lbl">Encargo</span>');
+        chip.insertAdjacentHTML('beforeend', `<span class="bon">+${def.order.bonus}</span>`);
+      }
       goals.appendChild(chip);
       return { chip, cnt, o, last: -1, mkIcon };
     });
@@ -1045,6 +1071,19 @@ const HUD = {
     const s = Math.max(0, Math.ceil(sec));
     Seg.set($('#segMoves'), Math.floor(s / 60) + String(s % 60).padStart(2, '0'));
     $('#segMoves').classList.toggle('warn', s <= 10 && s > 0);
+  },
+  setClock(sec) {   // modo zen: el reloj cuenta hacia arriba (mm:ss; pasada la hora y media, se queda en 99:59)
+    const s = Math.min(5999, Math.floor(sec));
+    Seg.set($('#segMoves'), String(Math.floor(s / 60)).padStart(2, '0') + String(s % 60).padStart(2, '0'));
+  },
+  // modo zen: el encargo cambió de componente; se dibuja de nuevo, sin el sonido de «cumplido»
+  renewOrder() {
+    for (const c of this.chips) {
+      if (c.mkIcon) { const old = c.chip.querySelector('canvas'); if (old) old.replaceWith(c.mkIcon()); }
+      c.chip.classList.remove('done'); c.last = -1;
+      c.chip.classList.remove('bump'); void c.chip.offsetWidth; c.chip.classList.add('bump');
+    }
+    this.setGoals(this.chips.map(c => c.o.have));
   },
   setScore(v) { this.target = v; },
   setGoals(have) {
@@ -1068,7 +1107,7 @@ const HUD = {
     $('#vu').querySelectorAll('i').forEach((el, k) => el.classList.toggle('lit', k < lit));
     $('#vuStars').querySelectorAll('span').forEach(sp => {
       const on = v >= +sp.dataset.v;
-      if (sp._on !== on) { sp.innerHTML = svgStar(on); sp._on = on; }
+      if (sp._on !== on) { sp.innerHTML = this.def.zen ? zenStar(on) : svgStar(on); sp._on = on; }
     });
   },
   tick(dt) {
@@ -1076,6 +1115,7 @@ const HUD = {
       const d = this.target - this.shown;
       this.shown += Math.sign(d) * Math.max(1, Math.abs(d) * Math.min(1, dt / 120));
       if (Math.abs(this.target - this.shown) < 1) this.shown = this.target;
+      if (this.shown >= 1e6 && $('#segScore')._n < 7) Seg.build($('#segScore'), 7);   // una partida zen muy larga
       Seg.set($('#segScore'), Math.round(this.shown));
       this.renderVU(this.shown);
     }
@@ -1118,6 +1158,7 @@ const UI = {
     if (name === 'game') requestAnimationFrame(() => View.resize());
   },
   renderMap() {
+    this.renderZen();
     $('#starTotal').innerHTML = svgStar(true).replace('<svg', '<svg width="16" height="16"') + `<span>${Save.total()}/${LEVELS.length * 3}</span>`;
     const M = modeOf(Save.settings.mode);
     $('#modeRow').innerHTML = `<span class="lbl">Modo ${M.name}</span><span class="v">${Save.modeTotal()}/${LEVELS.length * 3}</span>`;
@@ -1154,6 +1195,15 @@ const UI = {
     if (bInst) bInst.onclick = () => { Sound.ensure(); Sound.play('click'); instalar(); };
     const cur = wrap.querySelector('.node.current');
     if (cur && this._scrolled !== current) { this._scrolled = current; cur.scrollIntoView({ block: 'center' }); }
+  },
+  renderZen() {   // B-07: la tarjeta del modo zen, arriba del mapa
+    const z = Save.zen(), t = z.time ? fmtTime(z.time) : '—';
+    let wave = 'M0 23';
+    for (let x = 0; x <= 400; x += 4) wave += ` L${x} ${(23 + 14 * Math.sin(x / 22) * Math.sin(x / 140 + 1)).toFixed(1)}`;
+    $('#zen').innerHTML = `<section class="zen" aria-label="Modo zen"><svg class="zen-wave" viewBox="0 0 400 46" preserveAspectRatio="none" aria-hidden="true"><path d="${wave}"/></svg>
+      <div class="zen-top"><span class="zt"><h2>MODO ZEN</h2><small>Sin movimientos ni reloj en contra. Jugá hasta que quieras.</small></span><button class="btn small" id="btnZen">${pixSvg(IC.play, 'currentColor', 'width="12" height="12"')} Jugar</button></div>
+      <div class="zen-rec"><div><span class="k">Récord de puntos</span><span class="v">${z.best ? fmt(z.best) : '—'}</span></div><div><span class="k">Récord de tiempo</span><span class="v">${t}</span></div></div></section>`;
+    $('#btnZen').onclick = () => { Sound.ensure(); Sound.play('click'); Game.openZen(); };
   },
   modal(html, onMount) {
     const m = $('#modal'), c = $('#card');
@@ -1260,7 +1310,8 @@ const UI = {
       <h3>Especiales</h3>${li(items)}<p>Combiná dos especiales entre sí para efectos más grandes: dos baterías limpian toda la placa.</p>
       <h3>Obstáculos</h3>${li(obs)}
       <h3>Estrellas</h3><p>Una estrella por cumplir el pedido; dos y tres según el puntaje. Lo que sobra de movimientos o de tiempo se convierte en rayos de bonus.</p>
-      <h3>Dificultad</h3><p>En Ajustes elegís entre Fácil, Normal y Difícil: cambian los movimientos (o el tiempo) y los puntos de cada estrella. Una estrella vale lo mismo en cualquier modo y cada uno guarda sus récords: tocá el total de estrellas del mapa para verlos.</p></div>
+      <h3>Dificultad</h3><p>En Ajustes elegís entre Fácil, Normal y Difícil: cambian los movimientos (o el tiempo) y los puntos de cada estrella. Una estrella vale lo mismo en cualquier modo y cada uno guarda sus récords: tocá el total de estrellas del mapa para verlos.</p>
+      <h3>Modo zen</h3><p>Una placa libre, sin límite de movimientos ni reloj en contra: jugás hasta que quieras y terminás desde la pausa. El reloj cuenta cuánto llevás y el vúmetro, cuánto te falta para tu récord de puntos. El encargo es optativo: si lo completás, suma 500 puntos y aparece otro. Se guardan dos récords, el de puntos y el de tiempo. No da estrellas.</p></div>
       <button class="btn" id="mClose" data-focus>Entendido</button>`, c => {
       c.querySelectorAll('[data-icon]').forEach(el => {
         const [k, a] = el.dataset.icon.split(':');
@@ -1290,6 +1341,68 @@ const Game = {
     UI.show('game');
     this.intro();
   },
+  // Modo zen (#19, boceto B-07): sin movimientos ni reloj en contra; termina cuando el jugador quiere.
+  openZen() {
+    const z = Save.zen();
+    this.n = 0;
+    this.zenPrev = { best: z.best, time: z.time };   // los récords al empezar, para el «¡Nuevo!»
+    this.elapsed = 0; this.recShown = false; this._saved = 0;
+    const d = Object.assign({}, ZEN, { n: 0, block: 0, goals: ZEN.goals.map(o => Object.assign({}, o)) });
+    d.record = z.best;
+    const max = z.best || 50000;   // el vúmetro llega al récord; sin récord, a una escala fija
+    d.stars = [0, max, max];
+    this.def = d;
+    this.g = E.createGame(d, (Math.random() * 1e9) | 0);
+    const o = this.g.goals[0];   // el primer encargo también es al azar
+    o.color = (Math.random() * d.colors) | 0;
+    o.need = d.order.min + d.order.step * ((Math.random() * ((d.order.max - d.order.min) / d.order.step + 1)) | 0);
+    this.playing = false; this.busy = false; this.paused = false; this.ended = false;
+    this.timeLeft = 0; this.timeUp = false; this.idle = 0; this.warned = 99;
+    View.reset(this.g);
+    HUD.init(d, this.g);
+    $('#lvlNum').textContent = 'MODO ZEN';
+    $('#tipStrip').textContent = '';
+    this.hideBanner();
+    UI.show('game');
+    this.begin();
+  },
+  // Después de cada jugada zen: el encargo cumplido suma y se renueva; los récords se anotan.
+  afterZen() {
+    const g = this.g, bonus = E.zenOrder(g);
+    if (bonus) { HUD.renewOrder(); HUD.setScore(g.score); View.addText((E.W - 1) / 2, (E.H - 1) / 2, 'Encargo +' + fmt(bonus), true); }   // sin cartel: el modo zen no interrumpe
+    if (!this.recShown && this.zenPrev.best > 0 && g.score > this.zenPrev.best) {
+      this.recShown = true;
+      this.banner('¡Nuevo récord!', 1400);
+      Sound.play('star', 2, 0);
+    }
+    Save.zenRecord(g.score, Math.floor(this.elapsed), true);
+    this._saved = Math.floor(this.elapsed);
+  },
+  endZen() {
+    if (this.ended) return;
+    this.ended = true; this.playing = false; this.busy = true;
+    View.setHint(null); View.sel = -1;
+    const g = this.g, time = Math.floor(this.elapsed), p = this.zenPrev;
+    Save.zenRecord(g.score, time, true);
+    Cloud.push();
+    Sound.duck(true);
+    const recP = g.score > p.best && g.score > 0, recT = time > p.time && time > 0;
+    UI.modal(`<span class="eyebrow">MODO ZEN</span><h2>Partida terminada</h2>
+      <div class="spec" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div class="score-line"><span>Puntaje</span><span>${fmt(g.score)}</span></div>
+        <div class="score-line"><span>Tiempo</span><span>${fmtTime(time)}</span></div>
+      </div>
+      <div class="spec" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div class="k">Récords</div>
+        <div class="score-line"><span>Puntos</span><span class="${recP ? 'rec' : ''}">${recP ? '¡Nuevo! ' : ''}${fmt(Math.max(g.score, p.best))}</span></div>
+        <div class="score-line"><span>Tiempo</span><span class="${recT ? 'rec' : ''}">${recT ? '¡Nuevo! ' : ''}${fmtTime(Math.max(time, p.time))}</span></div>
+      </div>
+      <div class="row"><button class="btn" id="mAgain" data-focus>Otra partida</button><button class="btn ghost" id="mMap">Mapa</button></div>`, c => {
+      c.querySelector('#mAgain').onclick = () => { Sound.play('click'); UI.close(); this.openZen(); };
+      c.querySelector('#mMap').onclick = () => { Sound.play('click'); this.toMap(); };
+    });
+    if (recP || recT) Sound.play('win');
+  },
   intro() {
     const d = this.def, g = this.g;
     const tip = d.tip && TIPS[d.tip];
@@ -1318,11 +1431,11 @@ const Game = {
   },
   begin() {
     this.playing = true; this.idle = 0;
-    Sound.duck(false); Sound.music(this.def.time ? 'timed' : 'game');
+    Sound.duck(false); Sound.music(this.def.zen ? 'zen' : this.def.time ? 'timed' : 'game');
     if (ART.style === '16') View.mosaic();
     if (this.def.tip === 'swap') this.idle = 4000;
     const strips = { swap: 'Deslizá una pieza hacia su vecina', tubes: 'Hacé líneas debajo de la válvula', locks: 'Las piezas encintadas no se mueven', burnt: 'Hacé líneas pegadas a los quemados' };
-    $('#tipStrip').textContent = strips[this.def.tip] || '';
+    $('#tipStrip').textContent = this.def.zen ? `Encargo optativo: si lo completás, suma ${fmt(this.def.order.bonus)} puntos` : strips[this.def.tip] || '';
   },
   toMap() {
     UI.close();
@@ -1332,6 +1445,19 @@ const Game = {
   pause() {
     if (!this.playing || this.ended) return;
     this.paused = true;
+    if (this.def.zen) {
+      UI.modal(`<span class="eyebrow">MODO ZEN · EN PAUSA</span><h2>Pausa</h2>
+        <button class="btn" id="mRes" data-focus>${pixSvg(IC.play, 'currentColor', 'width="14" height="14"')} Seguir</button>
+        <button class="btn ghost" id="mEnd">Terminar</button>
+        ${UI.styleControl()}${UI.soundControls()}
+        <button class="btn ghost" id="mHelp">Cómo se juega</button>`, c => {
+        UI.wireSound(c); UI.wireStyle(c);
+        c.querySelector('#mRes').onclick = () => { Sound.play('click'); this.resume(); };
+        c.querySelector('#mEnd').onclick = () => { Sound.play('click'); this.paused = false; this.endZen(); };
+        c.querySelector('#mHelp').onclick = () => { Sound.play('click'); UI.help(() => this.pause()); };
+      });
+      return;
+    }
     UI.modal(`<span class="eyebrow">NIVEL ${this.def.n} · EN PAUSA</span><h2>Pausa</h2>
       <button class="btn" id="mRes" data-focus>${pixSvg(IC.play, 'currentColor', 'width="14" height="14"')} Seguir</button>
       <div class="row"><button class="btn ghost" id="mRe">Reiniciar</button><button class="btn ghost" id="mMap">Mapa</button></div>
@@ -1373,6 +1499,7 @@ const Game = {
     await View.play(r.steps);
     if (!r.valid) { this.busy = false; return; }
     HUD.setScore(g.score); HUD.setGoals(g.goals.map(o => o.have));
+    if (g.mode === 'zen') { this.afterZen(); this.busy = false; this.idle = 0; return; }
     if (g.mode === 'time') { g.timeLeft = this.timeLeft; E.evaluateEnd(g, this.timeUp); }
     else E.evaluateEnd(g);
     if (g.over || this.timeUp) await this.finish();
@@ -1482,6 +1609,12 @@ const Game = {
   tick(dt) {
     HUD.tick(dt);
     if (UI.screen !== 'game' || !this.playing || this.paused || this.ended || UI.open) return;
+    if (this.g.mode === 'zen') {
+      this.elapsed += dt / 1000;
+      HUD.setClock(this.elapsed);
+      const sec = Math.floor(this.elapsed);   // el récord de tiempo se anota cada 10 s, además de en cada jugada
+      if (sec - this._saved >= 10) { this._saved = sec; Save.zenRecord(this.g.score, sec, true); }
+    }
     if (this.g.mode === 'time' && !this.timeUp) {
       this.timeLeft -= dt / 1000;
       const sec = Math.ceil(this.timeLeft);
@@ -1494,7 +1627,7 @@ const Game = {
     }
     if (!this.busy) {
       this.idle += dt;
-      const delay = this.n <= 3 ? 5000 : 8000;
+      const delay = this.n >= 1 && this.n <= 3 ? 5000 : 8000;
       if (this.idle > delay && !View.hint) {
         const ranked = E.rankMoves(this.g, null);
         if (ranked.length) {
@@ -1580,7 +1713,7 @@ function boot() {
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
 // Para las pruebas y los bocetos (herramientas/boceto.js)
-window.__fogonazo = { Game, Save, UI, View, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
+window.__fogonazo = { Game, Save, UI, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;

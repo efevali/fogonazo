@@ -4,7 +4,7 @@ Qué es Fogonazo, cómo se juega y por qué camino avanza. Ante una duda de dise
 
 ## Qué es Fogonazo
 
-Un juego de juntar tres para el celular, con componentes electrónicos en pixel art. Se juega sobre una placa de 8 × 10 (8 columnas por 10 filas) y tiene 30 niveles con nombres de circuitos reales, de un LED que titila a una computadora de 8 bits. Es parte de un proyecto más amplio: hacer juegos simples, divertidos y visualmente atractivos.
+Un juego de juntar tres para el celular, con componentes electrónicos en pixel art. Se juega sobre una placa de 8 × 10 (8 columnas por 10 filas) y tiene 30 niveles con nombres de circuitos reales, de un LED que titila a una computadora de 8 bits, y un modo zen para jugar sin límite. Es parte de un proyecto más amplio: hacer juegos simples, divertidos y visualmente atractivos.
 
 Lo que se acordó al empezar, y vale para todo el juego:
 
@@ -55,6 +55,10 @@ Las piezas bajan de a un casillero y las nuevas entran solo por arriba. Un lugar
 Una estrella por cumplir el pedido; dos y tres según el puntaje. Al cumplir el pedido, cada movimiento que sobra (o cada 5 segundos) se convierte en un rayo de bonus. En los niveles de puntaje, al terminar explotan los especiales que quedaron en la placa.
 
 Hay tres modos de dificultad, que se eligen en Ajustes: Fácil, Normal (el de entrada) y Difícil. Una estrella vale lo mismo en cualquier modo, pero cada modo guarda sus propias estrellas y récords; el mapa muestra las del modo elegido y el total suma lo mejor de cada nivel. Tocando el total se ven las de cada modo. Un nivel que se pasó en cualquier modo queda abierto en todos.
+
+### Modo zen
+
+Una placa libre, sin obstáculos, con los seis primeros componentes y todos los especiales. No hay límite de movimientos ni de tiempo: un reloj cuenta cuánto lleva la partida y el puntaje sube hasta que el jugador termina desde la pausa. Si no quedan jugadas, la placa se rebaraja sola. El encargo es optativo: un pedido de un componente, de 12 a 20 piezas, que al cumplirse suma 500 puntos y se renueva con otro componente. Se guardan dos récords, el de puntos (la mejor partida) y el de tiempo (la más larga). No da estrellas y es igual en todos los modos de dificultad. La definición está en `ZEN`, en `codigo/levels.js`.
 
 ### Ayuda de piezas del pedido
 

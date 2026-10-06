@@ -55,9 +55,13 @@ body { margin: 0; padding: 0; touch-action: manipulation; }
    - Ícono del juego: el LED de 16 bits con un destello detrás, sobre la placa verde.
 
    Sonido y música (audio.js): todo se sintetiza en el navegador, sin archivos de audio
-   - Tres temas, cada uno con dos arreglos de las mismas notas: Placa (el original; niveles por
+   - Cuatro temas, cada uno con dos arreglos de las mismas notas: Placa (el original; niveles por
      movimientos; la menor, Am F C G, 104 ppm), Taller (mapa; do mayor, C G Am F, arpegio a
-     corcheas, 92 ppm) y Urgente (contrarreloj; la menor con final en mi mayor, Am F Dm E, 144 ppm).
+     corcheas, 92 ppm), Urgente (contrarreloj; la menor con final en mi mayor, Am F Dm E, 144 ppm)
+     y Siesta (modo zen; fa mayor, Fmaj7 Em7 Dm7 C, 104 ppm; elegida en B-08).
+   - Siesta usa instrumentos suaves (soft: true): en 8 bits, bajo triangular, arpegio de pulso fino
+     y melodía de pulso al 25 %; en 16, bajo FM redondo, arpegio tipo marimba y piano eléctrico FM.
+     Va unos 2 dB por debajo de Placa.
    - 8 bits: los instrumentos del tema original (bajo cuadrado, arpegio triangular, hi-hats de
      ruido y melodía cuadrada, que entra cada dos vueltas en Placa y Taller).
    - 16 bits: FM tipo Genesis (bajo slap, melodía tipo bronce, arpegio que alterna entre parlantes,
@@ -66,9 +70,20 @@ body { margin: 0; padding: 0; touch-action: manipulation; }
    - Los efectos de 16 bits están nivelados con los de 8. La música baja al terminar un nivel para
      que se escuche la fanfarria. Volúmenes por defecto: efectos 70, música 35; «Silenciar todo».
 
+   Mapa (de arriba abajo)
+   - Título y engranaje; la tarjeta del modo zen; el total de estrellas con su barra y «Modo …»; la tarjeta
+     «Instalar» (solo en el navegador); los seis bloques de niveles; «Cómo se juega».
+
+   Modo zen (0.4.0)
+   - Tarjeta como la pantalla de un osciloscopio: grilla y onda verde agua (el color del display de puntos),
+     «Jugar» y los dos récords. En 16 bits, con bisel y tornillos.
+   - En la partida, el display rojo es un reloj que cuenta hacia arriba (mm:ss). El vúmetro mide la
+     distancia al récord de puntos, marcado con una estrella verde agua. El encargo lleva borde punteado,
+     «Encargo» y «+500»; al cumplirlo, «Encargo +500» flota sobre la placa, sin cartel.
+
    Versión instalable (0.1.0)
    - Tarjeta «Instalá Fogonazo en tu teléfono», solo en el navegador (no desde el ícono ni en la vista previa
-     de claude.ai), arriba del bloque del nivel actual: ícono, título, «Queda entre tus apps y funciona sin
+     de claude.ai), antes del primer bloque de niveles: ícono, título, «Queda entre tus apps y funciona sin
      conexión.» e «Instalar». Abre el cuadro de Chrome si ya está disponible; si no, la ventana «Instalar
      Fogonazo» con los dos pasos del menú ⋮ (o los de Safari en iPhone). En Samsung Internet, la ventana
      ofrece «Abrir en Chrome». Instalado, la tarjeta pasa a «Listo», con borde verde.
@@ -529,6 +544,40 @@ html[data-art="16"] .rec { border-radius: 8px; }
 html[data-art="16"] .rec-top .k { font-size: 17px; }
 html[data-art="16"] .rec-top .v { font-size: 21px; }
 html[data-art="16"] .rec-sub { font-size: 15px; }
+
+/* Modo zen (B-07): la tarjeta va arriba del mapa, como la pantalla de un osciloscopio */
+.zen {
+  position: relative; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 14px; border-radius: 8px; overflow: hidden;
+  background: #071612; box-shadow: inset 0 0 0 2px #1d4a40, 0 3px 0 #0006;
+  background-image: linear-gradient(#4ef2c912 1px, transparent 1px), linear-gradient(90deg, #4ef2c912 1px, transparent 1px);
+  background-size: 18px 18px; background-position: -1px -1px;
+}
+.zen-wave { position: absolute; left: 0; right: 0; top: 4px; height: 40px; opacity: .3; pointer-events: none; }
+.zen-wave path { fill: none; stroke: var(--vfd); stroke-width: 2; filter: drop-shadow(0 0 3px var(--vfd)); }
+.zen-top { position: relative; display: flex; align-items: center; gap: 10px; }
+.zen-top .zt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.zen-top h2 { margin: 0; font-family: var(--font-display); font-size: 20px; letter-spacing: .04em; color: var(--vfd); text-shadow: 0 0 8px #4ef2c966, 2px 2px 0 #000; }
+.zen-top small { font-size: 14px; line-height: 1.3; color: #a8cfc4; }
+.zen-rec { position: relative; display: flex; gap: 8px; }
+.zen-rec div { flex: 1; display: flex; flex-direction: column; gap: 2px; background: #03100c; border-radius: 4px; padding: 6px 8px; box-shadow: inset 0 0 0 2px #143a31; }
+.zen-rec .k { font-family: var(--font-ui); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #6fa597; }
+.zen-rec .v { font-family: var(--font-display); font-size: 16px; color: var(--vfd); }
+.goal.opt { background: transparent; box-shadow: inset 0 0 0 2px #2b3a44; outline: 2px dashed #4ef2c955; outline-offset: -2px; }
+.goal.opt .bon { font-family: var(--font-ui); font-size: 12px; color: var(--vfd); }
+.goal.opt .lbl { font-size: 12px; }
+html[data-art="16"] .zen {
+  border-radius: 10px; padding: 14px 16px 16px;
+  background: var(--screw) 3px 3px / 12px 12px no-repeat, var(--screw) calc(100% - 3px) 3px / 12px 12px no-repeat,
+    var(--screw) 3px calc(100% - 3px) / 12px 12px no-repeat, var(--screw) calc(100% - 3px) calc(100% - 3px) / 12px 12px no-repeat,
+    radial-gradient(ellipse at 50% 40%, #0d2a24 0%, #061411 75%);
+  box-shadow: inset 0 0 18px #000c, inset 0 0 0 3px #0c1216, inset 0 0 0 4px #33444f, 0 0 0 2px #05080a, 0 0 0 4px #4c5f6c, 0 4px 0 4px #000a;
+}
+html[data-art="16"] .zen-top h2 { font-size: 30px; font-weight: 400; line-height: 1; }
+html[data-art="16"] .zen-top small { font-size: 18px; line-height: 1.15; }
+html[data-art="16"] .zen-rec div { border-radius: 6px; }
+html[data-art="16"] .zen-rec .k { font-size: 15px; }
+html[data-art="16"] .zen-rec .v { font-size: 24px; line-height: 1; }
+html[data-art="16"] .goal.opt .bon, html[data-art="16"] .goal.opt .lbl { font-size: 16px; }
 </style>
 </head>
 <body>
@@ -538,9 +587,9 @@ html[data-art="16"] .rec-sub { font-size: 15px; }
       <div class="brand"><span class="led-dot" aria-hidden="true"></span><h1>Fogonazo</h1></div>
       <button class="icon-btn" id="btnSettings" aria-label="Ajustes"></button>
     </header>
+    <div id="zen"></div>
     <div class="progress-row"><button class="star-total" id="starTotal" aria-label="Estrellas: ver récords por modo"></button><div class="prog" id="prog" aria-hidden="true"></div></div>
     <div class="mode-row" id="modeRow"></div>
-    <p class="tagline">Juntá componentes de a tres en la placa. Treinta circuitos, de un LED que titila a una computadora de 8 bits.</p>
     <div id="blocks" style="display:flex;flex-direction:column;gap:14px"></div>
     <button class="btn ghost help-link" id="btnHelp">Cómo se juega</button>
   </section>
@@ -608,7 +657,7 @@ function createGame(level, seed) {
     hole: new Uint8Array(N), pad: new Uint8Array(N), padOrig: new Uint8Array(N),
     p: new Array(N).fill(null),
     colors: level.colors, score: 0,
-    mode: level.time ? 'time' : 'moves',
+    mode: level.zen ? 'zen' : level.time ? 'time' : 'moves',
     moves: level.moves || 0, movesUsed: 0, timeLeft: level.time || 0,
     goals: [], tubes: null, preview: false, over: false, won: false, scoreOnly: false,
   };
@@ -1308,10 +1357,23 @@ function afterMove(g, steps) {
 function goalsDone(g) { return g.goals.every(o => o.have >= o.need); }
 
 function evaluateEnd(g, timeUp) {
-  if (g.over) return;
+  if (g.over || g.mode === 'zen') return;   // el modo zen no termina: lo termina quien juega
   if (!g.scoreOnly && goalsDone(g)) { g.over = true; g.won = true; return; }
   if (g.mode === 'moves' && g.moves <= 0) { g.over = true; g.won = goalsDone(g); return; }
   if (g.mode === 'time' && timeUp) { g.over = true; g.won = goalsDone(g); }
+}
+
+// Modo zen: si el encargo está completo, suma su bonus y pide otro, de otro componente. Devuelve el bonus o 0.
+function zenOrder(g) {
+  const o = g.goals[0], R = g.level.order;
+  if (g.mode !== 'zen' || !o || !R || o.have < o.need) return 0;
+  g.score += R.bonus;
+  let c = o.color;
+  while (c === o.color) c = (g.rng() * g.colors) | 0;
+  o.color = c;
+  o.need = R.min + R.step * ((g.rng() * ((R.max - R.min) / R.step + 1)) | 0);
+  o.have = 0;
+  return R.bonus;
 }
 
 // Final: los movimientos (o segundos) sobrantes se convierten en rayos.
@@ -1458,7 +1520,7 @@ function stepDuration(s) {
 
 const Engine = {
   W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, tryTap, canTap, isSpecialK, listMoves, hasValidMove, moveKind,
-  evaluateEnd, goalsDone, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
+  evaluateEnd, goalsDone, zenOrder, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
   isStable, shadowed,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
@@ -1569,6 +1631,12 @@ const BLOCKS = [
   { name: 'Prototipo final', desc: 'Todo junto' },
 ];
 
+/* Modo zen (#19): una partida sin límite de movimientos ni de tiempo, en la placa libre, con los seis primeros
+   componentes. El encargo es optativo: al completarlo suma `bonus` puntos y el motor pide otro (Engine.zenOrder),
+   de otro componente y con una cantidad entre `min` y `max`, de a `step`. No da estrellas. */
+const ZEN = { name: 'Libre', colors: 6, zen: true, goals: [{ type: 'collect', color: 2, n: 15 }],
+  order: { bonus: 500, min: 12, max: 20, step: 2 } };
+
 /* Modos de dificultad (Ajustes). La estrella vale lo mismo en cualquier modo; cada modo guarda sus propios
    récords. Difícil es la calibración de calibrated.json tal cual; los otros dos multiplican los movimientos
    (o el tiempo) y los umbrales de estrellas. Se miden con herramientas/modos.js. */
@@ -1590,8 +1658,8 @@ function applyMode(d, M) {
   return d;
 }
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, BLOCKS, MODES, modeOf, applyMode };
-else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; root.MODES = MODES; root.modeOf = modeOf; root.applyMode = applyMode; }
+if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, BLOCKS, ZEN, MODES, modeOf, applyMode };
+else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; root.ZEN = ZEN; root.MODES = MODES; root.modeOf = modeOf; root.applyMode = applyMode; }
 })(typeof window !== 'undefined' ? window : this);
 
 const CAL = {"1":{"moves":18,"scoreTarget":14500,"stars":[14500,33500,48000]},"2":{"moves":20,"scoreTarget":18000,"stars":[18000,37000,52500]},"3":{"moves":14,"stars":[0,19000,27000]},"4":{"moves":14,"stars":[0,19300,26900]},"5":{"time":60,"scoreTarget":20000,"stars":[20000,30000,41000]},"6":{"moves":21,"stars":[0,10900,13900]},"7":{"moves":18,"stars":[0,10400,13500]},"8":{"moves":22,"scoreTarget":10700,"stars":[10700,16500,21200]},"9":{"time":65,"stars":[0,9700,13500]},"10":{"moves":18,"stars":[0,10900,14100]},"11":{"moves":14,"stars":[0,17900,26500]},"12":{"moves":20,"stars":[0,11700,15800]},"13":{"moves":23,"stars":[0,16400,20200]},"14":{"time":50,"stars":[0,8300,11700]},"15":{"moves":21,"stars":[0,14000,17600]},"16":{"moves":11,"stars":[0,14600,22800]},"17":{"moves":23,"stars":[0,11500,15700]},"18":{"moves":18,"stars":[0,7900,10900]},"19":{"time":55,"stars":[0,9000,13000]},"20":{"moves":14,"stars":[0,9500,13300]},"21":{"moves":18,"stars":[0,22500,31500]},"22":{"moves":22,"stars":[0,20500,27500]},"23":{"moves":16,"stars":[0,25000,34000]},"24":{"time":75,"scoreTarget":13700,"stars":[13700,17200,21300]},"25":{"moves":17,"stars":[0,28000,37500]},"26":{"moves":24,"stars":[0,8000,10400]},"27":{"moves":24,"stars":[0,16100,21100]},"28":{"time":90,"scoreTarget":9200,"stars":[9200,11100,13700]},"29":{"moves":13,"stars":[0,22500,33000]},"30":{"moves":15,"stars":[0,29500,39000]}};
@@ -2583,8 +2651,10 @@ const Sound = (() => {
   }
 
   // ------------------------------------------------------------ música
-  // Tres temas de 4 compases (64 semicorcheas). "Placa" es el tema original del juego;
+  // Temas de 4 compases (64 semicorcheas). "Placa" es el tema original del juego;
   // "Taller" (mapa) y "Urgente" (contrarreloj) salen de la misma familia.
+  // "Siesta" (modo zen) es más tranquilo: tonalidad mayor, acordes con séptima, sin hi-hats seguidos,
+  // bajo largo e instrumentos suaves (soft: true, ver ARR['8s'] y ARR['16s']).
   const SONGS = {
     map: {
       name: 'Taller', bpm: 92,
@@ -2619,12 +2689,25 @@ const Sound = (() => {
         [32, 'F5', 2], [34, 'E5', 2], [36, 'D5', 2], [38, 'A4', 2], [40, 'D5', 2], [42, 'F5', 2], [44, 'E5', 2], [46, 'D5', 2],
         [48, 'E5', 2], [50, 'F5', 2], [52, 'G#5', 4], [56, 'B5', 2], [58, 'G#5', 2], [60, 'E5', 4]],
     },
+    zen: {
+      name: 'Siesta', bpm: 104, soft: true,
+      chords: [['F3', 'A3', 'C4', 'E4'], ['E3', 'G3', 'B3', 'D4'], ['D3', 'F3', 'A3', 'C4'], ['C3', 'E3', 'G3', 'D4']],
+      roots: ['F2', 'E2', 'D2', 'C2'],
+      bass: [0, 10], bassLen: 5, octave: [],
+      arpEvery: 2, hats: [4, 12], hatAccent: [], kick: [], snare: [], leadPasses: 'odd',
+      lead: [[0, 'A5', 6], [8, 'G5', 2], [10, 'E5', 4],
+        [16, 'D5', 6], [24, 'E5', 2], [26, 'G5', 4],
+        [32, 'F5', 6], [40, 'E5', 2], [42, 'C5', 4],
+        [48, 'D5', 4], [52, 'E5', 2], [54, 'G5', 2], [56, 'E5', 6]],
+    },
   };
-  for (const s of Object.values(SONGS)) {
+  function defineSong(id, s) {
     s.chordsM = s.chords.map(c => c.map(N));
     s.rootsM = s.roots.map(N);
     s.leadByStep = new Map(s.lead.map(([st, n, len]) => [st, [N(n), len]]));
+    SONGS[id] = s;
   }
+  for (const [id, s] of Object.entries(SONGS)) defineSong(id, s);
 
   // 8 bits: exactamente los instrumentos del tema original (pulsos percusivos, cuadrada, triangular, ruido)
   function pluck(f, t, dur, vol, type, dest, duty) {
@@ -2651,6 +2734,14 @@ const Sound = (() => {
       snare(t, dest) { hiss(t, 0.08, dest, 0.11, 1500, 'bandpass'); },
       lead(f, t, d, dest) { pluck(f, t, d, 0.045, 'square', dest); },
     },
+    // 8 bits suave (modo zen): bajo triangular, arpegio de pulso fino tipo caja de música, melodía de pulso al 25 %
+    '8s': {
+      bass(f, t, d, dest) { pluck(f, t, Math.min(d, 1.2), 0.13, 'triangle', dest); },
+      arp(f, t, d, dest) { pluck(f, t, d * 1.6, 0.022, null, dest, 0.125); },
+      hat(t, acc, dest) { hiss(t, 0.014, dest, 0.03, 9000); },
+      kick() {}, snare() {},
+      lead(f, t, d, dest) { pluck(f, t, d, 0.04, null, dest, 0.25); },
+    },
     '16': {
       bass(f, t, d, dest) { fm({ at: t, f, ratio: 1, mod: 'square', index: 2.6, indexEnd: 0.8, indexTime: 0.14, dur: d, vol: 0.15, dec: d, sus: 0.08, rel: 0.03, dest }); },
       arp(f, t, d, dest, k) { fm({ at: t, f, ratio: 2, mod: 'triangle', index: 1.7, indexEnd: 0.3, indexTime: 0.12, dur: d, vol: 0.04, dec: d, sus: 0.1, rel: 0.02, pan: k % 2 ? 0.28 : -0.28, dest }); },
@@ -2660,6 +2751,17 @@ const Sound = (() => {
       lead(f, t, d, dest, k, send) {
         fm({ at: t, f, ratio: 1, mod: 'sawtooth', index: 1.8, indexEnd: 1.2, indexTime: 0.1, dur: d, vol: 0.06, attack: 0.008, dec: 0.25, sus: 0.65, rel: 0.06, vib: d > 0.35, pan: -0.12, dest, send });
         fm({ at: t, f, ratio: 1, mod: 'square', index: 0.9, indexEnd: 0.6, dur: d, vol: 0.022, detune: 10, attack: 0.012, dec: 0.3, sus: 0.6, rel: 0.06, pan: 0.15, dest });
+      },
+    },
+    // 16 bits suave (modo zen): bajo FM redondo, arpegio tipo marimba que alterna entre parlantes, piano eléctrico FM
+    '16s': {
+      bass(f, t, d, dest) { fm({ at: t, f, ratio: 1, index: 0.9, indexEnd: 0.2, indexTime: 0.25, dur: Math.min(d, 1.2), vol: 0.08, dec: Math.min(d, 1.2), sus: 0.12, rel: 0.08, dest }); },
+      arp(f, t, d, dest, k) { fm({ at: t, f, ratio: 4, index: 1.6, indexEnd: 0.02, indexTime: 0.12, dur: d * 1.5, vol: 0.032, dec: d, sus: 0.15, rel: 0.05, pan: k % 4 ? 0.3 : -0.3, dest }); },
+      hat(t, acc, dest) { hiss(t, 0.012, dest, 0.05, 7000, 'highpass', 0.25); },
+      kick() {}, snare() {},
+      lead(f, t, d, dest, k, send) {
+        fm({ at: t, f, ratio: 1, index: 1.5, indexEnd: 0.35, indexTime: 0.35, dur: d, vol: 0.045, attack: 0.01, dec: 0.7, sus: 0.45, rel: 0.12, vib: d > 0.35, pan: -0.1, dest, send });
+        fm({ at: t, f: f * 2, ratio: 3.5, index: 1, indexEnd: 0.02, indexTime: 0.2, dur: Math.min(d, 0.4), vol: 0.012, dec: 0.3, sus: 0.1, rel: 0.05, pan: 0.15, dest });
       },
     },
   };
@@ -2676,7 +2778,7 @@ const Sound = (() => {
       return { b, echoIn: d, delay: d };
     }
     function schedStep(c, t, S) {
-      const song = c.song, A = ARR[c.style], dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, b = k % 16;
+      const song = c.song, A = ARR[c.style + (song.soft ? 's' : '')], dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, b = k % 16;
       const chord = song.chordsM[bar], root = song.rootsM[bar];
       if (c.style === '16' && !c.bus.delay.delayTime.value) c.bus.delay.delayTime.value = S * 3;
       if (song.bass.includes(b)) A.bass(mtof(root + (song.octave.includes(b) ? 12 : 0)), t, S * song.bassLen, dest);
@@ -2734,6 +2836,7 @@ const Sound = (() => {
     ensure, configure, play, settings: set,
     music(track) { Music.want(track); },
     musicPreview(track, sty) { ensure(); Music.want(track, sty); },
+    song(id, def) { defineSong(id, def); },   // para la prueba de las opciones de música (bocetos)
     stopMusic() { Music.stop(); },
     restyle() { const c = Music.current(); if (c) Music.want(c.track, style()); },
     duck(on) { Music.duck(on); },
@@ -2759,7 +2862,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.3.0', fecha: '5/10/2026' };
+const FOGONAZO_VERSION = { v: '0.4.0', fecha: '5/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -2778,6 +2881,13 @@ const IC = {
   share: ['....#....', '...###...', '..#.#.#..', '....#....', '....#....', '##..#..##', '#.......#', '#.......#', '#########'],
 };
 const svgStar = on => pixSvg(IC.star, on ? '#ffbf2e' : '#2c3a44');
+const zenStar = on => pixSvg(IC.star, on ? '#4ef2c9' : '#2a6e60');   // la marca del récord en el vúmetro del modo zen
+// Tiempo de una partida zen: m:ss, o h:mm:ss desde la hora
+function fmtTime(sec) {
+  sec = Math.floor(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, ss = String(sec % 60).padStart(2, '0');
+  return h ? h + ':' + String(m).padStart(2, '0') + ':' + ss : m + ':' + ss;
+}
 
 // ------------------------------------------------------------ niveles calibrados
 function levelDef(n, modeId) {
@@ -2799,7 +2909,8 @@ function levelDef(n, modeId) {
 const KEY = 'chispazo.v1';
 const Save = {
   // stars y best: lo mejor de cualquier modo (desbloqueo y total). modes: los récords de cada modo.
-  data: { stars: {}, best: {}, modes: {} },
+  // zen: los récords del modo zen (#19), los puntos y los segundos de la mejor partida.
+  data: { stars: {}, best: {}, modes: {}, zen: { best: 0, time: 0 } },
   settings: { sfx: 0.7, music: 0.35, mute: false, style: '8', mode: 'normal' },
   load() {
     this.fixModes();
@@ -2807,7 +2918,7 @@ const Save = {
       const raw = localStorage.getItem(KEY);
       if (!raw) return;
       const d = JSON.parse(raw);
-      if (d.progress && d.progress.stars) this.data = { stars: d.progress.stars || {}, best: d.progress.best || {}, modes: d.progress.modes || {} };
+      if (d.progress && d.progress.stars) this.data = { stars: d.progress.stars || {}, best: d.progress.best || {}, modes: d.progress.modes || {}, zen: this.zenOf(d.progress.zen) };
       if (d.settings) Object.assign(this.settings, d.settings);
     } catch (e) {}
     this.fixModes();
@@ -2831,9 +2942,21 @@ const Save = {
     this.persist();
     if (changed) Cloud.push();
   },
+  zenOf(z) { return { best: Math.max(0, +(z && z.best) || 0), time: Math.max(0, +(z && z.time) || 0) }; },
+  zen() { return this.data.zen || (this.data.zen = this.zenOf()); },
+  // Récords del modo zen: se anotan mientras se juega, para no perderlos si se cierra el juego.
+  zenRecord(score, time, save) {
+    const z = this.zen();
+    let changed = false;
+    if (score > z.best) { z.best = score; changed = true; }
+    if (time > z.time) { z.time = time; changed = true; }
+    if (changed && save) this.persist();
+    return changed;
+  },
   merge(o) {
     let changed = false;
     if (!o) return false;
+    if (o.zen) { const z = this.zenOf(o.zen); if (this.zenRecord(z.best, z.time)) changed = true; }
     for (const [k, v] of Object.entries(o.stars || {})) if ((+v || 0) > (this.data.stars[k] || 0)) { this.data.stars[k] = +v; changed = true; }
     for (const [k, v] of Object.entries(o.best || {})) if ((+v || 0) > (this.data.best[k] || 0)) { this.data.best[k] = +v; changed = true; }
     this.fixModes();
@@ -2849,7 +2972,7 @@ const Save = {
   modeTotal(id) { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.modeStars(n, id); return t; },
   unlocked(n) { return n === 1 || this.stars(n - 1) > 0; },
   total() { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.stars(n); return t; },
-  reset() { this.data = { stars: {}, best: {}, modes: {} }; this.fixModes(); this.persist(); Cloud.push(true); },
+  reset() { this.data = { stars: {}, best: {}, modes: {}, zen: this.zenOf() }; this.fixModes(); this.persist(); Cloud.push(true); },
 };
 
 // Sincronización opcional con la cuenta (si el visor la ofrece): el avance te sigue entre dispositivos.
@@ -2868,14 +2991,14 @@ const Cloud = {
       const gotNew = Save.merge(remote);
       if (gotNew) { Save.persist(); if (UI.screen === 'map') UI.renderMap(); }
       const same = remote && JSON.stringify(remote.stars || {}) === JSON.stringify(Save.data.stars) && JSON.stringify(remote.best || {}) === JSON.stringify(Save.data.best);
-      if (!same && Save.total() > 0) this.push();
+      if (!same && (Save.total() > 0 || Save.zen().best > 0)) this.push();
     } catch (e) { this.ref = null; }
   },
   async push(force) {
     if (!this.ref) return;
     if (this.busy) { this.pending = true; return; }
     this.busy = true;
-    try { await this.ref.set({ stars: Save.data.stars, best: Save.data.best, modes: Save.data.modes }); } catch (e) {}
+    try { await this.ref.set({ stars: Save.data.stars, best: Save.data.best, modes: Save.data.modes, zen: Save.zen() }); } catch (e) {}
     this.busy = false;
     if (this.pending) { this.pending = false; this.push(); }
   },
@@ -3750,23 +3873,24 @@ const HUD = {
     $('#lvlNum').textContent = 'NIVEL ' + def.n + ' · ' + BLOCKS[def.block].name.toUpperCase();
     $('#lvlName').textContent = def.name;
     $('#lvlName').classList.toggle('long', def.name.length > 18);
-    const timed = g.mode === 'time';
-    $('#movesLabel').textContent = timed ? 'TIEMPO' : 'MOV';
-    if (timed) Seg.build($('#segMoves'), 3, 0); else Seg.build($('#segMoves'), 2);
+    const timed = g.mode === 'time', zen = g.mode === 'zen';
+    $('#movesLabel').textContent = timed || zen ? 'TIEMPO' : 'MOV';
+    if (zen) Seg.build($('#segMoves'), 4, 1); else if (timed) Seg.build($('#segMoves'), 3, 0); else Seg.build($('#segMoves'), 2);
     $('#segMoves').classList.remove('warn');
     Seg.build($('#segScore'), 6);
     Seg.set($('#segScore'), '0');
-    if (timed) this.setTime(def.time); else this.setMoves(g.moves);
+    if (zen) this.setClock(0); else if (timed) this.setTime(def.time); else this.setMoves(g.moves);
     const vu = $('#vu');
     vu.innerHTML = '';
     for (let k = 0; k < this.segs; k++) vu.insertAdjacentHTML('beforeend', `<i class="${k >= 10 ? 'r' : k >= 7 ? 'y' : ''}"></i>`);
     const st = $('#vuStars');
     st.innerHTML = '';
     const max = def.stars[2];
-    const marks = g.scoreOnly ? def.stars : [def.stars[1], def.stars[2]];
+    // en el modo zen, una sola marca: el récord de puntos (si hay)
+    const marks = zen ? (def.record ? [def.record] : []) : g.scoreOnly ? def.stars : [def.stars[1], def.stars[2]];
     marks.forEach((v, k) => {
       const pct = clamp(v / max * 100, 4, 96);
-      st.insertAdjacentHTML('beforeend', `<span data-v="${v}" style="position:absolute;left:${pct}%;top:0">${svgStar(false)}</span>`);
+      st.insertAdjacentHTML('beforeend', `<span data-v="${v}" style="position:absolute;left:${pct}%;top:0">${zen ? zenStar(false) : svgStar(false)}</span>`);
     });
     const goals = $('#goals');
     goals.innerHTML = '';
@@ -3779,6 +3903,11 @@ const HUD = {
       if (o.type === 'score') chip.insertAdjacentHTML('beforeend', `<span class="lbl">Meta</span>`);
       const cnt = document.createElement('span'); cnt.className = 'cnt';
       chip.appendChild(cnt);
+      if (zen) {   // el encargo optativo: borde punteado, «Encargo» y lo que suma
+        chip.classList.add('opt');
+        chip.insertAdjacentHTML('afterbegin', '<span class="lbl">Encargo</span>');
+        chip.insertAdjacentHTML('beforeend', `<span class="bon">+${def.order.bonus}</span>`);
+      }
       goals.appendChild(chip);
       return { chip, cnt, o, last: -1, mkIcon };
     });
@@ -3791,6 +3920,19 @@ const HUD = {
     const s = Math.max(0, Math.ceil(sec));
     Seg.set($('#segMoves'), Math.floor(s / 60) + String(s % 60).padStart(2, '0'));
     $('#segMoves').classList.toggle('warn', s <= 10 && s > 0);
+  },
+  setClock(sec) {   // modo zen: el reloj cuenta hacia arriba (mm:ss; pasada la hora y media, se queda en 99:59)
+    const s = Math.min(5999, Math.floor(sec));
+    Seg.set($('#segMoves'), String(Math.floor(s / 60)).padStart(2, '0') + String(s % 60).padStart(2, '0'));
+  },
+  // modo zen: el encargo cambió de componente; se dibuja de nuevo, sin el sonido de «cumplido»
+  renewOrder() {
+    for (const c of this.chips) {
+      if (c.mkIcon) { const old = c.chip.querySelector('canvas'); if (old) old.replaceWith(c.mkIcon()); }
+      c.chip.classList.remove('done'); c.last = -1;
+      c.chip.classList.remove('bump'); void c.chip.offsetWidth; c.chip.classList.add('bump');
+    }
+    this.setGoals(this.chips.map(c => c.o.have));
   },
   setScore(v) { this.target = v; },
   setGoals(have) {
@@ -3814,7 +3956,7 @@ const HUD = {
     $('#vu').querySelectorAll('i').forEach((el, k) => el.classList.toggle('lit', k < lit));
     $('#vuStars').querySelectorAll('span').forEach(sp => {
       const on = v >= +sp.dataset.v;
-      if (sp._on !== on) { sp.innerHTML = svgStar(on); sp._on = on; }
+      if (sp._on !== on) { sp.innerHTML = this.def.zen ? zenStar(on) : svgStar(on); sp._on = on; }
     });
   },
   tick(dt) {
@@ -3822,6 +3964,7 @@ const HUD = {
       const d = this.target - this.shown;
       this.shown += Math.sign(d) * Math.max(1, Math.abs(d) * Math.min(1, dt / 120));
       if (Math.abs(this.target - this.shown) < 1) this.shown = this.target;
+      if (this.shown >= 1e6 && $('#segScore')._n < 7) Seg.build($('#segScore'), 7);   // una partida zen muy larga
       Seg.set($('#segScore'), Math.round(this.shown));
       this.renderVU(this.shown);
     }
@@ -3864,6 +4007,7 @@ const UI = {
     if (name === 'game') requestAnimationFrame(() => View.resize());
   },
   renderMap() {
+    this.renderZen();
     $('#starTotal').innerHTML = svgStar(true).replace('<svg', '<svg width="16" height="16"') + `<span>${Save.total()}/${LEVELS.length * 3}</span>`;
     const M = modeOf(Save.settings.mode);
     $('#modeRow').innerHTML = `<span class="lbl">Modo ${M.name}</span><span class="v">${Save.modeTotal()}/${LEVELS.length * 3}</span>`;
@@ -3900,6 +4044,15 @@ const UI = {
     if (bInst) bInst.onclick = () => { Sound.ensure(); Sound.play('click'); instalar(); };
     const cur = wrap.querySelector('.node.current');
     if (cur && this._scrolled !== current) { this._scrolled = current; cur.scrollIntoView({ block: 'center' }); }
+  },
+  renderZen() {   // B-07: la tarjeta del modo zen, arriba del mapa
+    const z = Save.zen(), t = z.time ? fmtTime(z.time) : '—';
+    let wave = 'M0 23';
+    for (let x = 0; x <= 400; x += 4) wave += ` L${x} ${(23 + 14 * Math.sin(x / 22) * Math.sin(x / 140 + 1)).toFixed(1)}`;
+    $('#zen').innerHTML = `<section class="zen" aria-label="Modo zen"><svg class="zen-wave" viewBox="0 0 400 46" preserveAspectRatio="none" aria-hidden="true"><path d="${wave}"/></svg>
+      <div class="zen-top"><span class="zt"><h2>MODO ZEN</h2><small>Sin movimientos ni reloj en contra. Jugá hasta que quieras.</small></span><button class="btn small" id="btnZen">${pixSvg(IC.play, 'currentColor', 'width="12" height="12"')} Jugar</button></div>
+      <div class="zen-rec"><div><span class="k">Récord de puntos</span><span class="v">${z.best ? fmt(z.best) : '—'}</span></div><div><span class="k">Récord de tiempo</span><span class="v">${t}</span></div></div></section>`;
+    $('#btnZen').onclick = () => { Sound.ensure(); Sound.play('click'); Game.openZen(); };
   },
   modal(html, onMount) {
     const m = $('#modal'), c = $('#card');
@@ -4006,7 +4159,8 @@ const UI = {
       <h3>Especiales</h3>${li(items)}<p>Combiná dos especiales entre sí para efectos más grandes: dos baterías limpian toda la placa.</p>
       <h3>Obstáculos</h3>${li(obs)}
       <h3>Estrellas</h3><p>Una estrella por cumplir el pedido; dos y tres según el puntaje. Lo que sobra de movimientos o de tiempo se convierte en rayos de bonus.</p>
-      <h3>Dificultad</h3><p>En Ajustes elegís entre Fácil, Normal y Difícil: cambian los movimientos (o el tiempo) y los puntos de cada estrella. Una estrella vale lo mismo en cualquier modo y cada uno guarda sus récords: tocá el total de estrellas del mapa para verlos.</p></div>
+      <h3>Dificultad</h3><p>En Ajustes elegís entre Fácil, Normal y Difícil: cambian los movimientos (o el tiempo) y los puntos de cada estrella. Una estrella vale lo mismo en cualquier modo y cada uno guarda sus récords: tocá el total de estrellas del mapa para verlos.</p>
+      <h3>Modo zen</h3><p>Una placa libre, sin límite de movimientos ni reloj en contra: jugás hasta que quieras y terminás desde la pausa. El reloj cuenta cuánto llevás y el vúmetro, cuánto te falta para tu récord de puntos. El encargo es optativo: si lo completás, suma 500 puntos y aparece otro. Se guardan dos récords, el de puntos y el de tiempo. No da estrellas.</p></div>
       <button class="btn" id="mClose" data-focus>Entendido</button>`, c => {
       c.querySelectorAll('[data-icon]').forEach(el => {
         const [k, a] = el.dataset.icon.split(':');
@@ -4036,6 +4190,68 @@ const Game = {
     UI.show('game');
     this.intro();
   },
+  // Modo zen (#19, boceto B-07): sin movimientos ni reloj en contra; termina cuando el jugador quiere.
+  openZen() {
+    const z = Save.zen();
+    this.n = 0;
+    this.zenPrev = { best: z.best, time: z.time };   // los récords al empezar, para el «¡Nuevo!»
+    this.elapsed = 0; this.recShown = false; this._saved = 0;
+    const d = Object.assign({}, ZEN, { n: 0, block: 0, goals: ZEN.goals.map(o => Object.assign({}, o)) });
+    d.record = z.best;
+    const max = z.best || 50000;   // el vúmetro llega al récord; sin récord, a una escala fija
+    d.stars = [0, max, max];
+    this.def = d;
+    this.g = E.createGame(d, (Math.random() * 1e9) | 0);
+    const o = this.g.goals[0];   // el primer encargo también es al azar
+    o.color = (Math.random() * d.colors) | 0;
+    o.need = d.order.min + d.order.step * ((Math.random() * ((d.order.max - d.order.min) / d.order.step + 1)) | 0);
+    this.playing = false; this.busy = false; this.paused = false; this.ended = false;
+    this.timeLeft = 0; this.timeUp = false; this.idle = 0; this.warned = 99;
+    View.reset(this.g);
+    HUD.init(d, this.g);
+    $('#lvlNum').textContent = 'MODO ZEN';
+    $('#tipStrip').textContent = '';
+    this.hideBanner();
+    UI.show('game');
+    this.begin();
+  },
+  // Después de cada jugada zen: el encargo cumplido suma y se renueva; los récords se anotan.
+  afterZen() {
+    const g = this.g, bonus = E.zenOrder(g);
+    if (bonus) { HUD.renewOrder(); HUD.setScore(g.score); View.addText((E.W - 1) / 2, (E.H - 1) / 2, 'Encargo +' + fmt(bonus), true); }   // sin cartel: el modo zen no interrumpe
+    if (!this.recShown && this.zenPrev.best > 0 && g.score > this.zenPrev.best) {
+      this.recShown = true;
+      this.banner('¡Nuevo récord!', 1400);
+      Sound.play('star', 2, 0);
+    }
+    Save.zenRecord(g.score, Math.floor(this.elapsed), true);
+    this._saved = Math.floor(this.elapsed);
+  },
+  endZen() {
+    if (this.ended) return;
+    this.ended = true; this.playing = false; this.busy = true;
+    View.setHint(null); View.sel = -1;
+    const g = this.g, time = Math.floor(this.elapsed), p = this.zenPrev;
+    Save.zenRecord(g.score, time, true);
+    Cloud.push();
+    Sound.duck(true);
+    const recP = g.score > p.best && g.score > 0, recT = time > p.time && time > 0;
+    UI.modal(`<span class="eyebrow">MODO ZEN</span><h2>Partida terminada</h2>
+      <div class="spec" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div class="score-line"><span>Puntaje</span><span>${fmt(g.score)}</span></div>
+        <div class="score-line"><span>Tiempo</span><span>${fmtTime(time)}</span></div>
+      </div>
+      <div class="spec" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div class="k">Récords</div>
+        <div class="score-line"><span>Puntos</span><span class="${recP ? 'rec' : ''}">${recP ? '¡Nuevo! ' : ''}${fmt(Math.max(g.score, p.best))}</span></div>
+        <div class="score-line"><span>Tiempo</span><span class="${recT ? 'rec' : ''}">${recT ? '¡Nuevo! ' : ''}${fmtTime(Math.max(time, p.time))}</span></div>
+      </div>
+      <div class="row"><button class="btn" id="mAgain" data-focus>Otra partida</button><button class="btn ghost" id="mMap">Mapa</button></div>`, c => {
+      c.querySelector('#mAgain').onclick = () => { Sound.play('click'); UI.close(); this.openZen(); };
+      c.querySelector('#mMap').onclick = () => { Sound.play('click'); this.toMap(); };
+    });
+    if (recP || recT) Sound.play('win');
+  },
   intro() {
     const d = this.def, g = this.g;
     const tip = d.tip && TIPS[d.tip];
@@ -4064,11 +4280,11 @@ const Game = {
   },
   begin() {
     this.playing = true; this.idle = 0;
-    Sound.duck(false); Sound.music(this.def.time ? 'timed' : 'game');
+    Sound.duck(false); Sound.music(this.def.zen ? 'zen' : this.def.time ? 'timed' : 'game');
     if (ART.style === '16') View.mosaic();
     if (this.def.tip === 'swap') this.idle = 4000;
     const strips = { swap: 'Deslizá una pieza hacia su vecina', tubes: 'Hacé líneas debajo de la válvula', locks: 'Las piezas encintadas no se mueven', burnt: 'Hacé líneas pegadas a los quemados' };
-    $('#tipStrip').textContent = strips[this.def.tip] || '';
+    $('#tipStrip').textContent = this.def.zen ? `Encargo optativo: si lo completás, suma ${fmt(this.def.order.bonus)} puntos` : strips[this.def.tip] || '';
   },
   toMap() {
     UI.close();
@@ -4078,6 +4294,19 @@ const Game = {
   pause() {
     if (!this.playing || this.ended) return;
     this.paused = true;
+    if (this.def.zen) {
+      UI.modal(`<span class="eyebrow">MODO ZEN · EN PAUSA</span><h2>Pausa</h2>
+        <button class="btn" id="mRes" data-focus>${pixSvg(IC.play, 'currentColor', 'width="14" height="14"')} Seguir</button>
+        <button class="btn ghost" id="mEnd">Terminar</button>
+        ${UI.styleControl()}${UI.soundControls()}
+        <button class="btn ghost" id="mHelp">Cómo se juega</button>`, c => {
+        UI.wireSound(c); UI.wireStyle(c);
+        c.querySelector('#mRes').onclick = () => { Sound.play('click'); this.resume(); };
+        c.querySelector('#mEnd').onclick = () => { Sound.play('click'); this.paused = false; this.endZen(); };
+        c.querySelector('#mHelp').onclick = () => { Sound.play('click'); UI.help(() => this.pause()); };
+      });
+      return;
+    }
     UI.modal(`<span class="eyebrow">NIVEL ${this.def.n} · EN PAUSA</span><h2>Pausa</h2>
       <button class="btn" id="mRes" data-focus>${pixSvg(IC.play, 'currentColor', 'width="14" height="14"')} Seguir</button>
       <div class="row"><button class="btn ghost" id="mRe">Reiniciar</button><button class="btn ghost" id="mMap">Mapa</button></div>
@@ -4119,6 +4348,7 @@ const Game = {
     await View.play(r.steps);
     if (!r.valid) { this.busy = false; return; }
     HUD.setScore(g.score); HUD.setGoals(g.goals.map(o => o.have));
+    if (g.mode === 'zen') { this.afterZen(); this.busy = false; this.idle = 0; return; }
     if (g.mode === 'time') { g.timeLeft = this.timeLeft; E.evaluateEnd(g, this.timeUp); }
     else E.evaluateEnd(g);
     if (g.over || this.timeUp) await this.finish();
@@ -4228,6 +4458,12 @@ const Game = {
   tick(dt) {
     HUD.tick(dt);
     if (UI.screen !== 'game' || !this.playing || this.paused || this.ended || UI.open) return;
+    if (this.g.mode === 'zen') {
+      this.elapsed += dt / 1000;
+      HUD.setClock(this.elapsed);
+      const sec = Math.floor(this.elapsed);   // el récord de tiempo se anota cada 10 s, además de en cada jugada
+      if (sec - this._saved >= 10) { this._saved = sec; Save.zenRecord(this.g.score, sec, true); }
+    }
     if (this.g.mode === 'time' && !this.timeUp) {
       this.timeLeft -= dt / 1000;
       const sec = Math.ceil(this.timeLeft);
@@ -4240,7 +4476,7 @@ const Game = {
     }
     if (!this.busy) {
       this.idle += dt;
-      const delay = this.n <= 3 ? 5000 : 8000;
+      const delay = this.n >= 1 && this.n <= 3 ? 5000 : 8000;
       if (this.idle > delay && !View.hint) {
         const ranked = E.rankMoves(this.g, null);
         if (ranked.length) {
@@ -4326,7 +4562,7 @@ function boot() {
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
 // Para las pruebas y los bocetos (herramientas/boceto.js)
-window.__fogonazo = { Game, Save, UI, View, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
+window.__fogonazo = { Game, Save, UI, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;
