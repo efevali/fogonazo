@@ -251,8 +251,10 @@ const Sound = (() => {
   }
 
   // ------------------------------------------------------------ música
-  // Tres temas de 4 compases (64 semicorcheas). "Placa" es el tema original del juego;
+  // Temas de 4 compases (64 semicorcheas). "Placa" es el tema original del juego;
   // "Taller" (mapa) y "Urgente" (contrarreloj) salen de la misma familia.
+  // "Siesta" (modo zen) es más tranquilo: tonalidad mayor, acordes con séptima, sin hi-hats seguidos,
+  // bajo largo e instrumentos suaves (soft: true, ver ARR['8s'] y ARR['16s']).
   const SONGS = {
     map: {
       name: 'Taller', bpm: 92,
@@ -287,12 +289,25 @@ const Sound = (() => {
         [32, 'F5', 2], [34, 'E5', 2], [36, 'D5', 2], [38, 'A4', 2], [40, 'D5', 2], [42, 'F5', 2], [44, 'E5', 2], [46, 'D5', 2],
         [48, 'E5', 2], [50, 'F5', 2], [52, 'G#5', 4], [56, 'B5', 2], [58, 'G#5', 2], [60, 'E5', 4]],
     },
+    zen: {
+      name: 'Siesta', bpm: 104, soft: true,
+      chords: [['F3', 'A3', 'C4', 'E4'], ['E3', 'G3', 'B3', 'D4'], ['D3', 'F3', 'A3', 'C4'], ['C3', 'E3', 'G3', 'D4']],
+      roots: ['F2', 'E2', 'D2', 'C2'],
+      bass: [0, 10], bassLen: 5, octave: [],
+      arpEvery: 2, hats: [4, 12], hatAccent: [], kick: [], snare: [], leadPasses: 'odd',
+      lead: [[0, 'A5', 6], [8, 'G5', 2], [10, 'E5', 4],
+        [16, 'D5', 6], [24, 'E5', 2], [26, 'G5', 4],
+        [32, 'F5', 6], [40, 'E5', 2], [42, 'C5', 4],
+        [48, 'D5', 4], [52, 'E5', 2], [54, 'G5', 2], [56, 'E5', 6]],
+    },
   };
-  for (const s of Object.values(SONGS)) {
+  function defineSong(id, s) {
     s.chordsM = s.chords.map(c => c.map(N));
     s.rootsM = s.roots.map(N);
     s.leadByStep = new Map(s.lead.map(([st, n, len]) => [st, [N(n), len]]));
+    SONGS[id] = s;
   }
+  for (const [id, s] of Object.entries(SONGS)) defineSong(id, s);
 
   // 8 bits: exactamente los instrumentos del tema original (pulsos percusivos, cuadrada, triangular, ruido)
   function pluck(f, t, dur, vol, type, dest, duty) {
@@ -319,6 +334,14 @@ const Sound = (() => {
       snare(t, dest) { hiss(t, 0.08, dest, 0.11, 1500, 'bandpass'); },
       lead(f, t, d, dest) { pluck(f, t, d, 0.045, 'square', dest); },
     },
+    // 8 bits suave (modo zen): bajo triangular, arpegio de pulso fino tipo caja de música, melodía de pulso al 25 %
+    '8s': {
+      bass(f, t, d, dest) { pluck(f, t, d, 0.2, 'triangle', dest); },
+      arp(f, t, d, dest) { pluck(f, t, d * 1.6, 0.022, null, dest, 0.125); },
+      hat(t, acc, dest) { hiss(t, 0.014, dest, 0.03, 9000); },
+      kick() {}, snare() {},
+      lead(f, t, d, dest) { pluck(f, t, d, 0.04, null, dest, 0.25); },
+    },
     '16': {
       bass(f, t, d, dest) { fm({ at: t, f, ratio: 1, mod: 'square', index: 2.6, indexEnd: 0.8, indexTime: 0.14, dur: d, vol: 0.15, dec: d, sus: 0.08, rel: 0.03, dest }); },
       arp(f, t, d, dest, k) { fm({ at: t, f, ratio: 2, mod: 'triangle', index: 1.7, indexEnd: 0.3, indexTime: 0.12, dur: d, vol: 0.04, dec: d, sus: 0.1, rel: 0.02, pan: k % 2 ? 0.28 : -0.28, dest }); },
@@ -328,6 +351,17 @@ const Sound = (() => {
       lead(f, t, d, dest, k, send) {
         fm({ at: t, f, ratio: 1, mod: 'sawtooth', index: 1.8, indexEnd: 1.2, indexTime: 0.1, dur: d, vol: 0.06, attack: 0.008, dec: 0.25, sus: 0.65, rel: 0.06, vib: d > 0.35, pan: -0.12, dest, send });
         fm({ at: t, f, ratio: 1, mod: 'square', index: 0.9, indexEnd: 0.6, dur: d, vol: 0.022, detune: 10, attack: 0.012, dec: 0.3, sus: 0.6, rel: 0.06, pan: 0.15, dest });
+      },
+    },
+    // 16 bits suave (modo zen): bajo FM redondo, arpegio tipo marimba que alterna entre parlantes, piano eléctrico FM
+    '16s': {
+      bass(f, t, d, dest) { fm({ at: t, f, ratio: 1, index: 0.9, indexEnd: 0.2, indexTime: 0.25, dur: d, vol: 0.14, dec: d, sus: 0.25, rel: 0.08, dest }); },
+      arp(f, t, d, dest, k) { fm({ at: t, f, ratio: 4, index: 1.6, indexEnd: 0.02, indexTime: 0.12, dur: d * 1.5, vol: 0.032, dec: d, sus: 0.15, rel: 0.05, pan: k % 4 ? 0.3 : -0.3, dest }); },
+      hat(t, acc, dest) { hiss(t, 0.012, dest, 0.05, 7000, 'highpass', 0.25); },
+      kick() {}, snare() {},
+      lead(f, t, d, dest, k, send) {
+        fm({ at: t, f, ratio: 1, index: 1.5, indexEnd: 0.35, indexTime: 0.35, dur: d, vol: 0.055, attack: 0.01, dec: 0.7, sus: 0.45, rel: 0.12, vib: d > 0.35, pan: -0.1, dest, send });
+        fm({ at: t, f: f * 2, ratio: 3.5, index: 1, indexEnd: 0.02, indexTime: 0.2, dur: Math.min(d, 0.4), vol: 0.012, dec: 0.3, sus: 0.1, rel: 0.05, pan: 0.15, dest });
       },
     },
   };
@@ -344,7 +378,7 @@ const Sound = (() => {
       return { b, echoIn: d, delay: d };
     }
     function schedStep(c, t, S) {
-      const song = c.song, A = ARR[c.style], dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, b = k % 16;
+      const song = c.song, A = ARR[c.style + (song.soft ? 's' : '')], dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, b = k % 16;
       const chord = song.chordsM[bar], root = song.rootsM[bar];
       if (c.style === '16' && !c.bus.delay.delayTime.value) c.bus.delay.delayTime.value = S * 3;
       if (song.bass.includes(b)) A.bass(mtof(root + (song.octave.includes(b) ? 12 : 0)), t, S * song.bassLen, dest);
@@ -402,6 +436,7 @@ const Sound = (() => {
     ensure, configure, play, settings: set,
     music(track) { Music.want(track); },
     musicPreview(track, sty) { ensure(); Music.want(track, sty); },
+    song(id, def) { defineSong(id, def); },   // para la prueba de las opciones de música (bocetos)
     stopMusic() { Music.stop(); },
     restyle() { const c = Music.current(); if (c) Music.want(c.track, style()); },
     duck(on) { Music.duck(on); },

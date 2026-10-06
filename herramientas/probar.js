@@ -3,7 +3,7 @@
 // vacíos, los tapados por quemados o cinta.
 // node herramientas/probar.js
 const E = require('../codigo/engine.js');
-const { LEVELS } = require('../codigo/levels.js');
+const { LEVELS, ZEN } = require('../codigo/levels.js');
 
 let emptySeen = 0;
 function checkBoard(g, where) {
@@ -45,5 +45,27 @@ for (let li = 0; li < LEVELS.length; li++) {
     games++;
   }
 }
+// Modo zen: 6 partidas de 300 jugadas. No termina nunca y el encargo se renueva.
+let orders = 0;
+for (let s = 1; s <= 6; s++) {
+  const g = E.createGame(ZEN, s * 104729);
+  checkBoard(g, 'init zen');
+  const rnd = E.rngFrom(s * 17 + 3);
+  for (let k = 0; k < 300; k++) {
+    const m = E.botChoose(g, rnd, skill);
+    if (!m) throw new Error('sin jugadas en zen');
+    const r = E.trySwap(g, m.a, m.b);
+    if (!r.valid) throw new Error('jugada inválida elegida en zen');
+    moves++;
+    for (const st of r.steps) if (st.t === 'shuffle') shuffles++;
+    checkBoard(g, 'zen mov ' + g.movesUsed);
+    const before = g.goals[0].color;
+    if (E.zenOrder(g)) { orders++; if (g.goals[0].color === before || g.goals[0].have !== 0) throw new Error('encargo mal renovado'); }
+    E.evaluateEnd(g, true);
+    if (g.over) throw new Error('el modo zen terminó solo');
+  }
+  games++;
+}
+console.log(`zen: ${orders} encargos cumplidos en 1800 jugadas`);
 const dt = Date.now() - t0;
 console.log(`${games} partidas, ${moves} jugadas, ${shuffles} mezclas, ${dt} ms (${(dt / moves).toFixed(2)} ms/jugada), ${emptySeen} celdas vacías tapadas vistas`);

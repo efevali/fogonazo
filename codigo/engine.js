@@ -39,7 +39,7 @@ function createGame(level, seed) {
     hole: new Uint8Array(N), pad: new Uint8Array(N), padOrig: new Uint8Array(N),
     p: new Array(N).fill(null),
     colors: level.colors, score: 0,
-    mode: level.time ? 'time' : 'moves',
+    mode: level.zen ? 'zen' : level.time ? 'time' : 'moves',
     moves: level.moves || 0, movesUsed: 0, timeLeft: level.time || 0,
     goals: [], tubes: null, preview: false, over: false, won: false, scoreOnly: false,
   };
@@ -739,10 +739,23 @@ function afterMove(g, steps) {
 function goalsDone(g) { return g.goals.every(o => o.have >= o.need); }
 
 function evaluateEnd(g, timeUp) {
-  if (g.over) return;
+  if (g.over || g.mode === 'zen') return;   // el modo zen no termina: lo termina quien juega
   if (!g.scoreOnly && goalsDone(g)) { g.over = true; g.won = true; return; }
   if (g.mode === 'moves' && g.moves <= 0) { g.over = true; g.won = goalsDone(g); return; }
   if (g.mode === 'time' && timeUp) { g.over = true; g.won = goalsDone(g); }
+}
+
+// Modo zen: si el encargo está completo, suma su bonus y pide otro, de otro componente. Devuelve el bonus o 0.
+function zenOrder(g) {
+  const o = g.goals[0], R = g.level.order;
+  if (g.mode !== 'zen' || !o || !R || o.have < o.need) return 0;
+  g.score += R.bonus;
+  let c = o.color;
+  while (c === o.color) c = (g.rng() * g.colors) | 0;
+  o.color = c;
+  o.need = R.min + R.step * ((g.rng() * ((R.max - R.min) / R.step + 1)) | 0);
+  o.have = 0;
+  return R.bonus;
 }
 
 // Final: los movimientos (o segundos) sobrantes se convierten en rayos.
@@ -889,7 +902,7 @@ function stepDuration(s) {
 
 const Engine = {
   W, H, N, K, X, Y, I, rngFrom, createGame, trySwap, tryTap, canTap, isSpecialK, listMoves, hasValidMove, moveKind,
-  evaluateEnd, goalsDone, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
+  evaluateEnd, goalsDone, zenOrder, bonus, clone, evalMove, rankMoves, botChoose, stepDuration, DUR, tickStart, swappable, fixed,
   isStable, shadowed,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = Engine;
