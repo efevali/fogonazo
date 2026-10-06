@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico que explica el [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.4.0 — 5/10/2026
+
+Modo zen ([milestone](https://github.com/efevali/fogonazo/milestone/4)).
+
+- Modo zen: una placa libre, sin límite de movimientos ni reloj en contra. El reloj cuenta hacia arriba, el puntaje sube sin tope y el vúmetro mide cuánto falta para el récord. Se termina desde la pausa, con un cartel de puntos, tiempo y récords.
+- Encargo optativo: un pedido de un componente que, al cumplirse, suma 500 puntos y se renueva con otro.
+- Récords de puntos y de tiempo, que se guardan mientras se juega. No da estrellas y es igual en los tres modos de dificultad.
+- Mapa: la tarjeta del modo zen va arriba, en lugar del texto de presentación.
+- Música: tema nuevo para el modo zen, «Siesta», más tranquilo, con instrumentos suaves en 8 y 16 bits.
+- Manual: cómo funciona el modo zen.
+
 ## 0.3.0 — 5/10/2026
 
 Modos de dificultad ([milestone](https://github.com/efevali/fogonazo/milestone/3)).

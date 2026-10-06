@@ -10,8 +10,8 @@ Bocetos aprobados de Fogonazo. Cada uno es el juego real con los cambios propues
 | B-04 | Ajustes: aviso de dónde vive el avance | [a · 8 bits](B-04a-ajustes-8bits.png), [b · 16 bits](B-04b-ajustes-16bits.png) | #8 | 4/10/2026 | Vigente (0.2.0) |
 | B-05 | Mapa, Ajustes y Récords: modos de dificultad | [a · mapa, 8 bits](B-05a-mapa-8bits.png), [b · mapa, 16 bits](B-05b-mapa-16bits.png), [c · Ajustes, 8 bits](B-05c-ajustes-8bits.png), [d · Ajustes, 16 bits](B-05d-ajustes-16bits.png), [e · Récords, 8 bits](B-05e-records-8bits.png), [f · Récords, 16 bits](B-05f-records-16bits.png) | #15 | 5/10/2026 | Vigente (0.3.0) |
 | B-06 | Mapa: lugar de la tarjeta «Instalar» | [a · 8 bits](B-06a-instalar-8bits.png), [b · 16 bits](B-06b-instalar-16bits.png) | #18 | 5/10/2026 | Vigente (0.3.0) |
-| B-07 | Mapa y partida: modo zen | [a · mapa, 8 bits](B-07a-mapa-zen-8bits.png), [b · mapa, 16 bits](B-07b-mapa-zen-16bits.png), [c · partida, 8 bits](B-07c-partida-zen-8bits.png), [d · partida, 16 bits](B-07d-partida-zen-16bits.png) | #19 | 5/10/2026 | Aprobado (0.4.0) |
-| B-08 | Música del modo zen | [página de prueba](B-08-musica-zen.html): tres opciones en 8 y 16 bits, y «Placa» para comparar | #19 | — | Por elegir (0.4.0) |
+| B-07 | Mapa y partida: modo zen | [a · mapa, 8 bits](B-07a-mapa-zen-8bits.png), [b · mapa, 16 bits](B-07b-mapa-zen-16bits.png), [c · partida, 8 bits](B-07c-partida-zen-8bits.png), [d · partida, 16 bits](B-07d-partida-zen-16bits.png) | #19 | 5/10/2026 | Vigente (0.4.0) |
+| B-08 | Música del modo zen | [página de prueba](B-08-musica-zen.html): tres opciones en 8 y 16 bits, y «Placa» para comparar | #19 | 5/10/2026 | Vigente (0.4.0): la A, «Siesta» |
 
 Cómo se capturó cada imagen de B-01 (`node herramientas/boceto.js docs/bocetos/<imagen> …`):
 
@@ -55,4 +55,4 @@ Cómo se capturó B-07 (`node herramientas/boceto.js docs/bocetos/<imagen> [--16
 
 Lo que fija B-07: el lugar, el aspecto y los textos de la tarjeta del modo zen (que reemplaza el texto de presentación); en la partida, el reloj que cuenta hacia arriba, el vúmetro hacia el récord con su estrella verde agua y el encargo con borde punteado, «Encargo» y «+500». Es solo ejemplo: los récords, el tiempo, los puntos, el componente y la cantidad del encargo.
 
-B-08 es una página para escuchar, no una captura: se abre en Chrome y tiene adentro una copia de `codigo/audio.js` de la rama de la versión. Las tres opciones tienen el tempo de «Placa» (104 ppm), tonalidad mayor e instrumentos suaves, y van unos 2 dB por debajo de «Placa». Fija los instrumentos suaves y el tempo; se elige la melodía, la armonía y el ritmo de una de las tres.
+B-08 es una página para escuchar, no una captura: se abre en Chrome y tiene adentro una copia de `codigo/audio.js` de la rama de la versión. Las tres opciones tienen el tempo de «Placa» (104 ppm), tonalidad mayor e instrumentos suaves, y van unos 2 dB por debajo de «Placa». Fija los instrumentos suaves y el tempo. Se eligió la A, «Siesta»; la B y la C quedan descartadas y solo viven en esta página.
