@@ -1,3 +1,121 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Música zen de Fogonazo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Banco de trabajo de Fogonazo: tapete con grilla, paneles de instrumento y la pantalla de un osciloscopio
+   arriba, que dibuja la música que suena. Un solo tema oscuro, a propósito, como el juego. */
+:root {
+  --mat: #1a252d; --mat-line: #22303a; --panel: #0e1519; --panel-2: #141e24; --edge: #2b3a44;
+  --ink: #edf3ef; --muted: #8ea2ab; --vfd: #4ef2c9; --vfd-dim: #1d4a40; --scope: #071612;
+  --copper: #e08a3c; --copper-hi: #f7b77c; --copper-lo: #9c5520; --copper-ink: #2a1406; --amber: #ffbf2e;
+  --display: 'Silkscreen', 'Courier New', monospace;
+  --body: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background-color: var(--mat); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.45;
+  background-image: linear-gradient(var(--mat-line) 1px, transparent 1px), linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+  background-size: 16px 16px; font-variant-ligatures: none;
+}
+.wrap { max-width: 640px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; display: flex; flex-direction: column; gap: 20px; }
+.eyebrow { font-family: var(--display); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 8vw, 38px); line-height: 1.05; margin: 6px 0 0; text-shadow: 3px 3px 0 #000; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: .03em; margin: 0; text-transform: uppercase; }
+p { margin: 0; max-width: 62ch; }
+.lead { color: #c9d6dc; }
+.muted { color: var(--muted); font-size: 15px; }
+
+.scope {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2;
+  background: var(--scope); border-radius: 8px; padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px;
+  box-shadow: inset 0 0 0 2px var(--vfd-dim), 0 4px 0 #0008;
+}
+.scope canvas { width: 100%; height: 72px; display: block; border-radius: 4px; background-color: #03100c;
+  background-image: linear-gradient(#4ef2c914 1px, transparent 1px), linear-gradient(90deg, #4ef2c914 1px, transparent 1px); background-size: 18px 18px; }
+.now { font-family: var(--display); font-size: 13px; letter-spacing: .08em; color: var(--vfd); text-shadow: 0 0 6px #4ef2c977; min-height: 1.3em; }
+.ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ctl label { font-family: var(--display); font-size: 11px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.ctl input { flex: 1; min-width: 120px; accent-color: var(--copper); }
+.ctl output { font-family: var(--display); font-size: 12px; color: var(--muted); width: 3ch; text-align: right; font-variant-numeric: tabular-nums; }
+
+button { font: inherit; cursor: pointer; }
+.btn {
+  font-family: var(--display); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; min-height: 44px; padding: 8px 12px;
+  border: 0; border-radius: 5px; color: var(--ink); background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--edge), 0 3px 0 #0009;
+}
+.btn[aria-pressed="true"] { background: var(--copper); color: var(--copper-ink); box-shadow: inset 0 2px 0 var(--copper-hi), inset 0 -3px 0 var(--copper-lo), 0 3px 0 #0009; }
+.btn:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.btn.stop { flex: none; }
+
+.opts { display: flex; flex-direction: column; gap: 14px; }
+.opt { background: var(--panel); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: inset 0 0 0 2px var(--edge), 0 3px 0 #0006; }
+.opt.ref { background: transparent; box-shadow: inset 0 0 0 2px var(--edge); }
+.opt-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.tag { font-family: var(--display); font-weight: 700; font-size: 13px; color: var(--copper-ink); background: var(--copper); border-radius: 3px; padding: 1px 7px 2px; }
+.ref .tag { background: var(--edge); color: var(--ink); }
+.key { font-family: var(--display); font-size: 11px; letter-spacing: .06em; color: var(--vfd); }
+.opt ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; color: #c9d6dc; font-size: 15px; }
+.play { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.box { background: var(--panel); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: inset 0 0 0 2px var(--edge); }
+dl { margin: 0; display: grid; grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr); gap: 8px 12px; font-size: 15px; }
+dt { font-family: var(--display); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--vfd); padding-top: 3px; }
+dd { margin: 0; color: #c9d6dc; }
+@media (max-width: 420px) { dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } dd { margin-bottom: 8px; } }
+@media (prefers-reduced-motion: reduce) { .scope canvas { display: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Fogonazo · boceto B-08 · #19</p>
+    <h1>Música del modo zen</h1>
+  </header>
+  <p class="lead">Tres opciones para el tema del modo zen, más tranquilas y menos serias que la de los niveles, con el mismo tempo: 104 pulsos por minuto. Escuchalas en 8 y en 16 bits, comparalas con «Placa», la de los niveles, y elegí una.</p>
+  <p class="muted">Cada tema dura nueve segundos y se repite. La melodía entra en la segunda vuelta, como en el juego: escuchá al menos veinte segundos de cada uno. Con auriculares se nota más la diferencia.</p>
+
+  <section class="scope" aria-label="Reproducción">
+    <canvas id="scope" width="600" height="72" aria-hidden="true"></canvas>
+    <div class="now" id="now" aria-live="polite">— Detenido —</div>
+    <div class="ctl">
+      <label for="vol">Volumen</label><input type="range" id="vol" min="0" max="100" step="5" value="70"><output id="volOut" for="vol">70</output>
+      <button class="btn stop" id="stop">Detener</button>
+    </div>
+  </section>
+
+  <div class="opts" id="opts"></div>
+
+  <section class="box" aria-labelledby="todas">
+    <h2 id="todas">Lo que tienen las tres</h2>
+    <p class="muted">Tonalidad mayor y sin hi-hats seguidos. Instrumentos más suaves que los de los niveles:</p>
+    <dl>
+      <dt>8 bits</dt><dd>Bajo de onda triangular (el de los niveles es cuadrado), arpegio de pulso fino como una caja de música y melodía de pulso al 25 %, más redonda.</dd>
+      <dt>16 bits</dt><dd>Bajo FM redondo, arpegio tipo marimba que pasa de un parlante al otro y melodía de piano eléctrico FM con eco.</dd>
+    </dl>
+  </section>
+
+  <section class="box" aria-labelledby="palabras">
+    <h2 id="palabras">Palabras para pedir cambios</h2>
+    <p class="muted">No hace falta saber música: alcanza con decir qué te gusta de una y qué de otra. Si ayuda, estas son las perillas que se pueden mover.</p>
+    <dl>
+      <dt>Tempo</dt><dd>La velocidad, en pulsos por minuto. Las tres van a 104, como «Placa»; el mapa va a 92.</dd>
+      <dt>Tonalidad</dt><dd>Mayor suena luminosa; menor, más seria o melancólica. «Placa» está en menor; las tres opciones, en mayor.</dd>
+      <dt>Acordes</dt><dd>Las notas de fondo. Con «séptima» suenan más suaves y soñadoras, como en A y en C.</dd>
+      <dt>Densidad</dt><dd>Cuántas notas suenan por segundo. Menos notas, más calma: C es la menos densa.</dd>
+      <dt>Ritmo</dt><dd>La percusión y el bajo. B tiene un bajo que rebota y un shaker a contratiempo; C no tiene percusión.</dd>
+      <dt>Registro</dt><dd>Grave o agudo. Una melodía más grave suena más cálida; una más aguda, más brillante.</dd>
+      <dt>Timbre</dt><dd>El «color» del instrumento: el mismo do suena distinto en un piano que en una flauta.</dd>
+    </dl>
+  </section>
+</div>
+
+<script>
+/* Copia del sonido de Fogonazo (codigo/audio.js, rama tanda/0.4.0) */
 /* Fogonazo — sonido sintetizado con WebAudio.
    8 bits: canales tipo NES (pulso, triangular, ruido).
    16 bits: síntesis FM tipo Genesis (bajo slap, bronces, campanas, batería) con eco. */
@@ -446,3 +564,100 @@ const Sound = (() => {
     _tap() { return ctx ? { ctx, master } : null; },
   };
 })();
+
+</script>
+<script>
+// Opciones B y C del tema del modo zen (la A, «Siesta», es SONGS.zen de codigo/audio.js)
+const OPCIONES_ZEN = {
+  'zen-b': {
+    name: 'Pecera', bpm: 104, soft: true,
+    chords: [['G3', 'B3', 'D4'], ['E3', 'G3', 'B3', 'D4'], ['C4', 'E4', 'G4'], ['D3', 'F#3', 'A3']],
+    roots: ['G2', 'E2', 'C3', 'D2'],
+    bass: [0, 6, 8], bassLen: 1.6, octave: [8],
+    arpEvery: 2, hats: [2, 6, 10, 14], hatAccent: [], kick: [], snare: [], leadPasses: 'odd',
+    lead: [[0, 'B5', 1], [2, 'D6', 1], [4, 'B5', 2], [8, 'G5', 2], [12, 'A5', 2],
+      [16, 'B5', 3], [20, 'G5', 1], [22, 'E5', 2], [26, 'G5', 2],
+      [32, 'E5', 1], [34, 'G5', 1], [36, 'C6', 2], [40, 'B5', 2], [44, 'G5', 2],
+      [48, 'A5', 3], [52, 'F#5', 1], [54, 'D5', 2], [56, 'A5', 4]],
+  },
+  'zen-c': {
+    name: 'Atardecer', bpm: 104, soft: true,
+    chords: [['D3', 'F#3', 'A3', 'C#4'], ['G3', 'B3', 'D4', 'F#4'], ['E3', 'G3', 'B3', 'D4'], ['A3', 'D4', 'E4']],
+    roots: ['D2', 'G2', 'E2', 'A2'],
+    bass: [0], bassLen: 12, octave: [],
+    arpEvery: 2, hats: [], hatAccent: [], kick: [], snare: [], leadPasses: 'odd',
+    lead: [[0, 'F#5', 8], [8, 'E5', 4], [12, 'A5', 4],
+      [16, 'D5', 12], [28, 'B4', 4],
+      [32, 'E5', 8], [40, 'F#5', 4], [44, 'G5', 4],
+      [48, 'E5', 12], [60, 'A4', 4]],
+  },
+};
+
+</script>
+<script>
+const OPCIONES = [
+  { id: 'game', tag: 'Hoy', name: 'Placa', key: 'La menor · Am F C G', ref: true,
+    lines: ['La música de los niveles por movimientos, para comparar.', 'Bajo que marca el ritmo, arpegio a semicorcheas y hi-hats seguidos.'] },
+  { id: 'zen', tag: 'A', name: 'Siesta', key: 'Fa mayor · Fmaj7 Em7 Dm7 C',
+    lines: ['La más equilibrada: tranquila, con algo de movimiento.', 'Acordes con séptima que bajan de a un paso, bajo largo y un golpe suave de hi-hat por tiempo.', 'Melodía de notas largas que contesta al final de cada compás.'] },
+  { id: 'zen-b', tag: 'B', name: 'Pecera', key: 'Sol mayor · G Em C D',
+    lines: ['La más juguetona y liviana.', 'Bajo que rebota y un shaker suave a contratiempo.', 'Melodía de notas cortas y saltos, más aguda.'] },
+  { id: 'zen-c', tag: 'C', name: 'Atardecer', key: 'Re mayor · Dmaj7 Gmaj7 Em7 Asus4',
+    lines: ['La más calma, casi de fondo.', 'Sin percusión y con una sola nota de bajo por compás.', 'Melodía de notas muy largas; el arpegio sostiene el resto.'] },
+];
+const ESTILO = { '8': '8 bits', '16': '16 bits' };
+const $ = s => document.querySelector(s);
+
+$('#opts').innerHTML = OPCIONES.map(o => `<article class="opt${o.ref ? ' ref' : ''}">
+  <div class="opt-head"><span class="tag">${o.tag}</span><h2>${o.name}</h2><span class="key">${o.key}</span></div>
+  <ul>${o.lines.map(l => `<li>${l}</li>`).join('')}</ul>
+  <div class="play">${['8', '16'].map(s => `<button class="btn" data-t="${o.id}" data-s="${s}" aria-pressed="false">${ESTILO[s]}</button>`).join('')}</div>
+</article>`).join('');
+
+for (const id in OPCIONES_ZEN) Sound.song(id, OPCIONES_ZEN[id]);
+const vol = () => $('#vol').value / 100;
+let an = null, buf = null;
+function conectar() {
+  if (an) return;
+  const tap = Sound._tap();
+  if (!tap) return;
+  an = tap.ctx.createAnalyser(); an.fftSize = 2048; buf = new Float32Array(an.fftSize);
+  tap.master.connect(an);
+}
+function pintarEstado(t, s) {
+  document.querySelectorAll('[data-t]').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t && b.dataset.s === s));
+  const o = OPCIONES.find(x => x.id === t);
+  $('#now').textContent = o ? `▶ ${o.tag === 'Hoy' ? '' : o.tag + ' · '}${o.name} · ${ESTILO[s]}` : '— Detenido —';
+}
+$('#opts').addEventListener('click', e => {
+  const b = e.target.closest('[data-t]');
+  if (!b) return;
+  Sound.ensure(); Sound.configure({ music: vol(), sfx: vol(), mute: false }); conectar();
+  Sound.stopMusic();
+  setTimeout(() => Sound.musicPreview(b.dataset.t, b.dataset.s), 60);
+  pintarEstado(b.dataset.t, b.dataset.s);
+});
+$('#stop').addEventListener('click', () => { Sound.stopMusic(); pintarEstado(null); });
+$('#vol').addEventListener('input', e => { $('#volOut').textContent = e.target.value; Sound.configure({ music: vol(), sfx: vol(), mute: false }); });
+
+// Osciloscopio: la forma de onda de lo que suena, con ganancia automática
+const cv = $('#scope'), g = cv.getContext('2d');
+let escala = 8;
+function cuadro() {
+  const w = cv.width = cv.clientWidth * devicePixelRatio, h = cv.height = cv.clientHeight * devicePixelRatio;
+  g.clearRect(0, 0, w, h);
+  g.lineWidth = 2 * devicePixelRatio; g.strokeStyle = '#4ef2c9'; g.shadowColor = '#4ef2c9'; g.shadowBlur = 6 * devicePixelRatio;
+  g.beginPath();
+  if (an) {
+    an.getFloatTimeDomainData(buf);
+    let pico = 0; for (const v of buf) pico = Math.max(pico, Math.abs(v));
+    if (pico > 0.0005) escala += ((0.42 / pico) - escala) * 0.05;
+    const n = 600;
+    for (let k = 0; k < n; k++) { const v = buf[k] * escala, x = k / (n - 1) * w, y = h / 2 - v * h; k ? g.lineTo(x, y) : g.moveTo(x, y); }
+  } else { g.moveTo(0, h / 2); g.lineTo(w, h / 2); }
+  g.stroke();
+  requestAnimationFrame(cuadro);
+}
+requestAnimationFrame(cuadro);
+</script>
+</html>
