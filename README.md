@@ -1,6 +1,6 @@
 # Fogonazo
 
-Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos para armar sobre una placa de 8 × 10, en 8 o 16 bits.
+Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos para armar sobre una placa de 8 × 10 y un modo zen para jugar sin límite, en 8 o 16 bits.
 
 - **Juego:** https://efevali.github.io/fogonazo/ (se abre en Chrome y se instala con el botón «Instalar» del mapa, o desde el menú ⋮ → «Instalar app»). Funciona sin conexión.
 - **Vista previa:** el artefacto «Fogonazo» en claude.ai, donde se prueba cada cambio antes de publicarlo acá.
@@ -29,7 +29,7 @@ Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos
 | Archivo | Qué es |
 |---|---|
 | `codigo/engine.js` | El motor, sin pantalla: tablero, líneas, especiales, obstáculos, caída, válvulas, bonus, ayuda de piezas del pedido, el bot y la duración de cada animación. Corre igual en el navegador y en Node. |
-| `codigo/levels.js` | Los 30 niveles (nombre, componentes, pedido, diseño de la placa, texto y tasa de victoria buscada), los 6 bloques y los tres modos de dificultad. |
+| `codigo/levels.js` | Los 30 niveles (nombre, componentes, pedido, diseño de la placa, texto y tasa de victoria buscada), los 6 bloques, el modo zen y los tres modos de dificultad. |
 | `codigo/calibrated.json` | El resultado de la calibración: movimientos o tiempo, meta de puntos y umbrales de estrellas de cada nivel. Lo escribe `herramientas/calibrar.js`. |
 | `codigo/page.html` | Estilos (8 y 16 bits) y estructura de la página. |
 | `codigo/sprites.js`, `codigo/sprites16.js` | Los dibujos en 8 bits (16 × 16) y en 16 bits (32 × 32). |
@@ -69,7 +69,7 @@ Cada versión publicada se encuentra en el historial del repositorio («Commits�
 ## Herramientas
 
 - `herramientas/armar.js`: arma `index.html`.
-- `herramientas/probar.js`: juega 180 partidas con el bot y verifica que el tablero quede siempre consistente. Se corre después de tocar el motor.
+- `herramientas/probar.js`: juega 180 partidas con el bot y 6 partidas zen de 300 jugadas, y verifica que el tablero quede siempre consistente y que el modo zen no termine solo y renueve el encargo. Se corre después de tocar el motor.
 - `herramientas/calibrar.js`: recalibra la dificultad (`node herramientas/calibrar.js 400 0.62 16,17,18`: 400 partidas por nivel, con un bot que elige la mejor jugada el 62 % de las veces). Sin lista de niveles, recalibra los 30.
 - `herramientas/medir.js`: la tasa de victoria del bot con los valores calibrados actuales, para ver cuánto cambia un nivel después de tocar reglas.
 - `herramientas/modos.js`: cuántas partidas gana el bot y cuántas llegan a dos y tres estrellas en cada modo de dificultad (`node herramientas/modos.js 100`), para ajustar los factores de `MODES` en `codigo/levels.js`.

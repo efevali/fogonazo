@@ -33,6 +33,13 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **Quemados y cinta frenan lo que cae** (3/10). Antes, las piezas de arriba pasaban por detrás de las piezas inmovilizadas. Ahora los lugares tapados se llenan en diagonal, a 45°, desde las columnas vecinas, y un lugar sin camino desde arriba queda vacío hasta que se rompe lo que lo tapa. Los huecos de la placa se siguen atravesando: no hay nada que tape.
 - **Válvulas sin bajada libre** (3/10). Podían bajar solas de a un lugar, sin sentido físico; esa regla se había agregado porque tardaban demasiado en bajar. Ahora bajan solo cuando desaparecen las piezas de abajo, siempre derecho, y aparecen en columnas sin obstáculos fijos. Se intercambian como cualquier pieza, solo si el cambio forma una línea. *Descartado:* que nunca se muevan a mano, y tener que combinar de costado para que una válvula esquive un obstáculo.
 
+## Modo zen
+
+- **Modo zen** (5/10, #19, boceto B-07). Todo en el juego empujaba hacia la presión; faltaba una forma de jugar con el motor sin poder perder. Placa libre de 8 × 10 con seis componentes, sin límite de movimientos: el reloj cuenta hacia arriba y el puntaje sube hasta que el jugador termina desde la pausa. Récords de puntos (la mejor partida) y de tiempo (la más larga), que se anotan mientras se juega. No da estrellas, no cuenta para el total y es igual en los tres modos de dificultad. *Descartados:* un modo sin ningún número y metas obligatorias.
+- **La tarjeta del modo zen, arriba del mapa y desde el principio** (5/10, B-07). Reemplaza el texto de presentación. Ordenar las formas de jugar (una pantalla de inicio u otra organización del mapa) queda para el #20.
+- **Encargo optativo** (5/10, #19). Un pedido de un componente, de 12 a 20 piezas, que suma 500 puntos y se renueva con otro componente. Con el bot, los encargos son cerca del 12 % del puntaje: ayudan, pero ignorarlos no impide un récord. Al cumplirlo aparece «Encargo +500» sobre la placa, sin cartel, para no cortar el juego. *Descartado:* el cartel en el centro de la placa, que se probó y tapaba el tablero cada pocas jugadas.
+- **El vúmetro mide la distancia al récord de puntos** (5/10, B-07), con una estrella verde agua en el récord. Al superarlo aparece una sola vez «¡Nuevo récord!». Sin récord todavía, llega al tope a los 50.000 puntos.
+
 ## Niveles y dificultad
 
 - **Tablero de 8 × 10, en vertical** (4/10, #10). El de 8 × 8 lo limita el ancho y debajo sobraban unos 240 px. Las dos filas nuevas van arriba para conservar los diseños, que están pensados contra el borde inferior. Obliga a recalibrar los 30 niveles. *Descartado:* pasar a horizontal (#4).
@@ -65,6 +72,7 @@ Las fechas son de 2026. Hasta el 3/10 el proyecto vivió en claude.ai, en la bit
 - **El tema de 8 bits es el original, sin cambios** (3/10). El del mapa y el del contrarreloj se compusieron a partir de él. Los de 16 bits son arreglos FM de las mismas notas, «ensuciados» porque la primera versión sonaba demasiado suave y definida.
 - **Sonido de línea** (3/10): el original en 8 bits y la opción B «Bip» en 16. El de 16 bits anterior sonaba a campana, molestaba y salía 2,5 veces más fuerte que el resto. *Descartadas:* A «Chispa» y C «Descarga», que también se escuchan en el [muestrario](muestrario.html).
 - **Efectos de 16 bits nivelados con los de 8** (3/10): salían entre 3 y 8 veces más fuertes. La música de 16 bits va al 60 % para no tapar los efectos.
+- **Tema propio para el modo zen** (5/10, #19, boceto B-08). Más tranquilo y menos serio que los de los niveles, con el mismo tempo que «Placa» (104 ppm): tonalidad mayor, acordes con séptima, bajo largo, sin hi-hats seguidos e instrumentos suaves en los dos estilos. Se mezcló unos 2 dB por debajo de «Placa». Hay tres opciones para elegir escuchando (A «Siesta», B «Pecera», C «Atardecer»); mientras tanto, el juego usa la A.
 - **Volumen general 15 % más alto** (5/10): en el teléfono todo sonaba un poco bajo. Se revisó la cadena de sonido y no había nada raro (el compresor final evita que sature), así que se subió la ganancia general de 0,9 a 1,035. Los niveles de efectos y música de Ajustes no cambian.
 
 ## Versión instalable

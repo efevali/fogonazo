@@ -36,9 +36,13 @@
    - Ícono del juego: el LED de 16 bits con un destello detrás, sobre la placa verde.
 
    Sonido y música (audio.js): todo se sintetiza en el navegador, sin archivos de audio
-   - Tres temas, cada uno con dos arreglos de las mismas notas: Placa (el original; niveles por
+   - Cuatro temas, cada uno con dos arreglos de las mismas notas: Placa (el original; niveles por
      movimientos; la menor, Am F C G, 104 ppm), Taller (mapa; do mayor, C G Am F, arpegio a
-     corcheas, 92 ppm) y Urgente (contrarreloj; la menor con final en mi mayor, Am F Dm E, 144 ppm).
+     corcheas, 92 ppm), Urgente (contrarreloj; la menor con final en mi mayor, Am F Dm E, 144 ppm)
+     y Siesta (modo zen; fa mayor, Fmaj7 Em7 Dm7 C, 104 ppm; provisoria hasta elegir en B-08).
+   - Siesta usa instrumentos suaves (soft: true): en 8 bits, bajo triangular, arpegio de pulso fino
+     y melodía de pulso al 25 %; en 16, bajo FM redondo, arpegio tipo marimba y piano eléctrico FM.
+     Va unos 2 dB por debajo de Placa.
    - 8 bits: los instrumentos del tema original (bajo cuadrado, arpegio triangular, hi-hats de
      ruido y melodía cuadrada, que entra cada dos vueltas en Placa y Taller).
    - 16 bits: FM tipo Genesis (bajo slap, melodía tipo bronce, arpegio que alterna entre parlantes,
@@ -47,9 +51,20 @@
    - Los efectos de 16 bits están nivelados con los de 8. La música baja al terminar un nivel para
      que se escuche la fanfarria. Volúmenes por defecto: efectos 70, música 35; «Silenciar todo».
 
+   Mapa (de arriba abajo)
+   - Título y engranaje; la tarjeta del modo zen; el total de estrellas con su barra y «Modo …»; la tarjeta
+     «Instalar» (solo en el navegador); los seis bloques de niveles; «Cómo se juega».
+
+   Modo zen (0.4.0)
+   - Tarjeta como la pantalla de un osciloscopio: grilla y onda verde agua (el color del display de puntos),
+     «Jugar» y los dos récords. En 16 bits, con bisel y tornillos.
+   - En la partida, el display rojo es un reloj que cuenta hacia arriba (mm:ss). El vúmetro mide la
+     distancia al récord de puntos, marcado con una estrella verde agua. El encargo lleva borde punteado,
+     «Encargo» y «+500»; al cumplirlo, «Encargo +500» flota sobre la placa, sin cartel.
+
    Versión instalable (0.1.0)
    - Tarjeta «Instalá Fogonazo en tu teléfono», solo en el navegador (no desde el ícono ni en la vista previa
-     de claude.ai), arriba del bloque del nivel actual: ícono, título, «Queda entre tus apps y funciona sin
+     de claude.ai), antes del primer bloque de niveles: ícono, título, «Queda entre tus apps y funciona sin
      conexión.» e «Instalar». Abre el cuadro de Chrome si ya está disponible; si no, la ventana «Instalar
      Fogonazo» con los dos pasos del menú ⋮ (o los de Safari en iPhone). En Samsung Internet, la ventana
      ofrece «Abrir en Chrome». Instalado, la tarjeta pasa a «Listo», con borde verde.
