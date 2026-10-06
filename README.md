@@ -34,6 +34,7 @@ Juego de juntar tres con componentes electrónicos para el celular: 30 circuitos
 | `codigo/page.html` | Estilos (8 y 16 bits) y estructura de la página. |
 | `codigo/sprites.js`, `codigo/sprites16.js` | Los dibujos en 8 bits (16 × 16) y en 16 bits (32 × 32). |
 | `codigo/audio.js` | La música y los efectos, sintetizados en el navegador: 8 bits tipo NES y 16 bits FM tipo Genesis. |
+| `codigo/clave.js` | La clave de producto: el avance en un serial con formato de Windows XP, ida y vuelta, con control de errores. Corre igual en el navegador y en Node. |
 | `codigo/game.js` | Tablero, animaciones, instrumentos del tablero, menús, guardado y flujo del juego. |
 
 ## Cómo se arma
@@ -70,6 +71,7 @@ Cada versión publicada se encuentra en el historial del repositorio («Commits�
 
 - `herramientas/armar.js`: arma `index.html`.
 - `herramientas/probar.js`: juega 180 partidas con el bot y 6 partidas zen de 300 jugadas, y verifica que el tablero quede siempre consistente y que el modo zen no termine solo y renueve el encargo. Se corre después de tocar el motor.
+- `herramientas/probar_clave.js`: verifica que la clave de producto devuelva exactamente el mismo avance (2.000 avances al azar, pegados de seis formas), que rechace un carácter cambiado y que avise si la clave está incompleta. Se corre después de tocar `codigo/clave.js` o la cantidad de niveles.
 - `herramientas/calibrar.js`: recalibra la dificultad (`node herramientas/calibrar.js 400 0.62 16,17,18`: 400 partidas por nivel, con un bot que elige la mejor jugada el 62 % de las veces). Sin lista de niveles, recalibra los 30.
 - `herramientas/medir.js`: la tasa de victoria del bot con los valores calibrados actuales, para ver cuánto cambia un nivel después de tocar reglas.
 - `herramientas/modos.js`: cuántas partidas gana el bot y cuántas llegan a dos y tres estrellas en cada modo de dificultad (`node herramientas/modos.js 100`), para ajustar los factores de `MODES` en `codigo/levels.js`.
@@ -83,7 +85,7 @@ Cada versión publicada se encuentra en el historial del repositorio («Commits�
 
 ## Progreso
 
-Se guarda en el teléfono, dentro de los datos de Chrome para este sitio, con la clave `chispazo.v1` (el nombre anterior del juego). El juego le pide a Android que no lo borre por falta de espacio. Para empezar de cero está «Borrar progreso», en Ajustes, que borra solo el avance de Fogonazo.
+Se guarda en el teléfono, dentro de los datos de Chrome para este sitio, con la clave `chispazo.v1` (el nombre anterior del juego). El juego le pide a Android que no lo borre por falta de espacio. En Ajustes › Progreso está la **clave de producto**: un serial que guarda las estrellas de cada modo y los récords zen, para copiarlo y recuperar el avance pegándolo en «Cargar una clave» (en este u otro teléfono). Ahí mismo está «Borrar progreso», que borra solo el avance de Fogonazo.
 
 El sitio, `efevali.github.io`, es el mismo de Kasa: comparten los datos de Chrome, aunque cada uno guarda lo suyo con su propia clave y su service worker solo toca lo propio. Por eso, borrar los datos del sitio desde la configuración de Chrome borra el avance de los dos.
 

@@ -2,6 +2,15 @@
 
 Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico que explica el [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.5.0 — 6/10/2026
+
+Clave de producto para resguardar el avance.
+
+- Ajustes: botón «Progreso», que abre una pantalla nueva con el resumen de estrellas de cada modo y los récords zen.
+- Clave de producto: todo el avance en un serial con el formato de las claves de Windows XP, que empieza con FCKGW. Tres renglones de cinco grupos; «Copiar clave» los copia juntos, para guardarlos en las notas, un chat o un mail. Cambia cada vez que se avanza.
+- Cargar una clave: se pega el bloque tal cual (acepta saltos de línea, espacios, guiones y minúsculas). Antes de reemplazar el avance muestra qué trae la clave; si está incompleta o mal copiada, lo avisa y no toca nada. Los récords de puntos de cada nivel no viajan en la clave: arrancan de cero.
+- «Borrar progreso» y el aviso de cómo no perder el avance desde Chrome pasaron de Ajustes a Progreso.
+
 ## 0.4.1 — 5/10/2026
 
 - Modo zen: la línea de abajo de la placa dice «El encargo es optativo: si no lo hacés, no pasa nada». Antes decía cuánto suma, y en 8 bits el 500 se leía como 800 ([#22](https://github.com/efevali/fogonazo/issues/22)).

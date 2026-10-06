@@ -302,6 +302,21 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 30px; border-radius: 
 .parts .p { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; text-align: center; color: var(--muted); }
 .parts .p canvas { width: 36px; height: 36px; }
 .confirm { background: #2d1210; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; box-shadow: inset 0 0 0 2px #7d1d13; }
+.confirm .resumen { background: #1a0b0a; }
+/* Progreso y clave de producto (#guardado): la clave se lee como un display, en el color de los récords zen. */
+.resumen { flex-direction: column; align-items: stretch; gap: 4px; }
+.resumen .v { display: inline-flex; align-items: center; gap: 6px; color: var(--amber); font-size: 14px; }
+.resumen .zenl { border-top: 2px solid var(--edge); margin-top: 2px; padding-top: 6px; }
+.resumen .zenl .v { color: var(--vfd); }
+.clave-box { display: flex; flex-direction: column; gap: 6px; }
+.clave-box .k { font-family: var(--font-ui); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.clave { font-family: var(--font-ui); font-size: 11px; letter-spacing: 0; white-space: nowrap; color: var(--vfd); background: #05090b; border-radius: 4px; padding: 8px 10px; box-shadow: inset 0 0 0 2px var(--edge); display: flex; flex-direction: column; gap: 4px; align-items: center; user-select: all; -webkit-user-select: all; }
+.clave-in { width: 100%; box-sizing: border-box; border: 0; resize: none; text-transform: uppercase; line-height: 1.6; text-align: center; white-space: pre; overflow: hidden; font-size: 11px; }
+.clave-in::placeholder { color: #2f4a52; }
+.clave-in:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.ok-box { background: #0c2a1e; box-shadow: inset 0 0 0 2px #1d6e4c; }
+.ok-box .t b { color: var(--ok); margin: 0; }
+.aviso-avance.err { color: #ff8577; }
 
 /* =====================================================================
    Estilo 16 bits: gabinete de instrumento. Paneles con bisel y tornillos,
@@ -497,6 +512,10 @@ html[data-art="16"] .inst-t b, html[data-art="16"] .verrow b { font-size: 19px; 
 /* Jersey no tiene negrita: en 16 bits lo destacado va en blanco, sin negrita sintética */
 html[data-art="16"] .pasos b, html[data-art="16"] .inst-nota b { font-weight: 400; color: #fff; }
 html[data-art="16"] .aviso-avance { font-size: 15px; line-height: 1.2; }
+html[data-art="16"] .clave { font-size: 18px; border-radius: 6px; box-shadow: inset 0 0 0 2px #0a1014, inset 0 3px 8px #000c, 0 1px 0 #3a4b58; }
+html[data-art="16"] .clave-in { font-size: 16px; }
+html[data-art="16"] .resumen .v { font-size: 18px; }
+html[data-art="16"] .ok-box { background: linear-gradient(180deg, #11402d, #0a2519); }
 html[data-art="16"] .inst-t small, html[data-art="16"] .verrow small, html[data-art="16"] .ver-new, html[data-art="16"] .inst-nota { font-size: 17px; line-height: 1.2; }
 html[data-art="16"] .inst-ic, html[data-art="16"] .inst-tick { border-radius: 12px; box-shadow: 0 0 0 2px #05080a, 0 0 0 3px #4c5f6c; }
 html[data-art="16"] .btn.small { font-size: 19px; min-height: 42px; padding: 6px 14px; }

@@ -13,7 +13,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.4.1', fecha: '5/10/2026' };
+const FOGONAZO_VERSION = { v: '0.5.0', fecha: '6/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -124,6 +124,27 @@ const Save = {
   unlocked(n) { return n === 1 || this.stars(n - 1) > 0; },
   total() { let t = 0; for (let n = 1; n <= LEVELS.length; n++) t += this.stars(n); return t; },
   reset() { this.data = { stars: {}, best: {}, modes: {}, zen: this.zenOf() }; this.fixModes(); this.persist(); Cloud.push(true); },
+  // La clave de producto (codigo/clave.js): lo que guarda es esto, las estrellas de cada modo y los récords zen.
+  estado() {
+    this.fixModes();
+    const modos = {};
+    for (const M of MODES) modos[M.id] = { ...this.data.modes[M.id].stars };
+    const z = this.zen();
+    return { modos, zen: { best: z.best, time: z.time } };
+  },
+  /* Reemplaza el avance por el de una clave. Los récords de puntos de cada nivel no viajan en la clave:
+     arrancan vacíos y se rehacen jugando. Las estrellas de siempre (desbloqueo y total) son lo mejor de cada nivel
+     en cualquier modo. */
+  cargar(e) {
+    const modes = {}, stars = {};
+    for (const M of MODES) {
+      const st = { ...((e.modos || {})[M.id] || {}) };
+      modes[M.id] = { stars: st, best: {} };
+      for (const [n, v] of Object.entries(st)) if (v > (stars[n] || 0)) stars[n] = v;
+    }
+    this.data = { stars, best: {}, modes, zen: this.zenOf(e.zen) };
+    this.persist(); Cloud.push(true);
+  },
 };
 
 // Sincronización opcional con la cuenta (si el visor la ofrece): el avance te sigue entre dispositivos.
@@ -160,6 +181,16 @@ const Cloud = {
    claude.ai no se registra el service worker, no aparece la tarjeta «Instalar» y la fila de versión va sin botón. */
 const publicado = () => /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
 
+// Copia un texto al portapapeles; en Chrome hace falta https o localhost (en el juego publicado, siempre).
+async function copiarTexto(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;opacity:0;top:0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch (e) { return false; }
+}
 function toast(msg) {
   let el = $('#toast');
   if (el) el.remove();
@@ -1275,17 +1306,87 @@ const UI = {
   settings() {
     this.modal(`<span class="eyebrow">AJUSTES</span><h2>Ajustes</h2>${this.modeControl()}${this.styleControl()}${this.soundControls()}
       <button class="btn ghost" id="mHelp">Cómo se juega</button>
-      <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
-      <p class="aviso-avance">El avance se guarda solo en este teléfono. Si borrás los datos de navegación de Chrome, destildá «Cookies y datos de sitios» para no perderlo.</p>
+      <button class="btn ghost" id="mProgreso">Progreso</button>
       ${versionRowHTML()}
       <button class="btn" id="mClose" data-focus>Listo</button>`, c => {
       this.wireSound(c); this.wireStyle(c); this.wireMode(c);
       c.querySelector('#mClose').onclick = () => { Sound.play('click'); this.close(); };
       c.querySelector('#mHelp').onclick = () => { Sound.play('click'); this.help(); };
+      c.querySelector('#mProgreso').onclick = () => { Sound.play('click'); this.progreso(); };
+    });
+  },
+  // Lo que resume una pantalla de progreso: las estrellas de cada modo y los récords zen.
+  resumenHTML(e) {
+    const max = LEVELS.length * 3;
+    const tot = id => Object.values((e.modos || {})[id] || {}).reduce((a, b) => a + b, 0);
+    const z = e.zen || {};
+    return `<div class="spec resumen">${MODES.map(M => `<div class="score-line"><span>${M.name}</span><span class="v">${svgStar(true).replace('<svg', '<svg width="14" height="14"')} ${tot(M.id)}/${max}</span></div>`).join('')}
+      <div class="score-line zenl"><span>Zen</span><span class="v">${z.best ? fmt(z.best) : '—'} · ${z.time ? fmtTime(z.time) : '—'}</span></div></div>`;
+  },
+  /* Progreso (#guardado): el resumen, la clave de producto para resguardar el avance, cargar una clave y borrar.
+     La clave cambia cada vez que se avanza; «Copiar clave» copia los tres renglones juntos, tal como se pegan. */
+  progreso(aviso) {
+    const clave = Clave.codificar(Save.estado());
+    this.modal(`<span class="eyebrow">AJUSTES · PROGRESO</span><h2>Tu progreso</h2>
+      ${aviso ? `<div class="newbox ok-box"><div class="t"><b>${aviso}</b></div></div>` : ''}
+      ${this.resumenHTML(Save.estado())}
+      <div class="clave-box"><span class="k">Clave de producto</span><div class="clave" id="clave">${clave.split('\n').map(l => `<span>${l}</span>`).join('')}</div></div>
+      <button class="btn" id="pCopiar" data-focus>Copiar clave</button>
+      <p class="aviso-avance">Guardala en tus notas o mandátela por mail. Con ella recuperás este avance en cualquier momento. Cambia cada vez que avanzás.</p>
+      <button class="btn ghost" id="pCargar">Cargar una clave</button>
+      <div id="resetZone"><button class="btn ghost" id="mReset" style="width:100%">Borrar progreso</button></div>
+      <p class="aviso-avance">El avance se guarda solo en este teléfono. Si borrás los datos de navegación de Chrome, destildá «Cookies y datos de sitios» para no perderlo.</p>
+      <button class="btn ghost" id="pVolver">Volver</button>`, c => {
+      c.querySelector('#pVolver').onclick = () => { Sound.play('click'); this.settings(); };
+      c.querySelector('#pCargar').onclick = () => { Sound.play('click'); this.cargarClave(); };
+      const bc = c.querySelector('#pCopiar');
+      bc.onclick = async () => {
+        Sound.play('click');
+        const hecho = await copiarTexto(clave);
+        bc.textContent = hecho ? 'Copiada' : 'No se pudo copiar';
+        clearTimeout(bc._t); bc._t = setTimeout(() => { bc.textContent = 'Copiar clave'; }, 1800);
+        if (!hecho) toast('Mantené apretada la clave para seleccionarla y copiarla.');
+      };
       c.querySelector('#mReset').onclick = () => {
         c.querySelector('#resetZone').innerHTML = `<div class="confirm"><p>Se borran todas las estrellas y récords de este juego, en los tres modos. No se puede deshacer.</p><div class="row"><button class="btn danger" id="rYes">Borrar</button><button class="btn ghost" id="rNo">Cancelar</button></div></div>`;
         c.querySelector('#rYes').onclick = () => { Save.reset(); this._scrolled = 0; this.renderMap(); this.close(); };
-        c.querySelector('#rNo').onclick = () => this.settings();
+        c.querySelector('#rNo').onclick = () => this.progreso();
+      };
+    });
+  },
+  /* Cargar una clave: un campo para pegar (o tipear) los tres renglones. Acepta saltos de línea, espacios,
+     guiones y minúsculas. Antes de reemplazar el avance muestra qué trae la clave. */
+  cargarClave(texto) {
+    const MSG = { vacia: '', incompleta: 'La clave está incompleta. Revisá que estén los tres renglones.', sinPrefijo: 'Las claves de Fogonazo empiezan con FCKGW.', invalida: 'Clave inválida. Revisá que esté bien copiada.' };
+    this.modal(`<span class="eyebrow">AJUSTES · PROGRESO</span><h2>Cargar una clave</h2>
+      <textarea class="clave clave-in" id="cIn" rows="3" spellcheck="false" autocapitalize="characters" autocomplete="off" autocorrect="off" aria-label="Clave de producto" placeholder="FCKGW-XXXXX-XXXXX-XXXXX-XXXXX\nXXXXX-XXXXX-XXXXX-XXXXX-XXXXX\nXXXXX-XXXXX-XXXXX-XXXXX-XXXXX"></textarea>
+      <button class="btn ghost" id="cPegar">Pegar</button>
+      <p class="aviso-avance" id="cMsg" role="status">Pegá los tres renglones juntos, tal como los copiaste.</p>
+      <div id="cZona"><div class="row"><button class="btn" id="cOk">Cargar</button><button class="btn ghost" id="cNo">Cancelar</button></div></div>`, c => {
+      const inp = c.querySelector('#cIn'), msg = c.querySelector('#cMsg');
+      if (texto) inp.value = texto;
+      inp.addEventListener('input', () => { msg.classList.remove('err'); msg.textContent = 'Pegá los tres renglones juntos, tal como los copiaste.'; });
+      c.querySelector('#cNo').onclick = () => { Sound.play('click'); this.progreso(); };
+      c.querySelector('#cPegar').onclick = async () => {
+        Sound.play('click');
+        try { inp.value = await navigator.clipboard.readText(); inp.dispatchEvent(new Event('input')); }
+        catch (e) { inp.focus(); toast('Mantené apretado el campo y elegí «Pegar».'); }
+      };
+      c.querySelector('#cOk').onclick = () => {
+        const r = Clave.leer(inp.value);
+        if (!r.ok) {
+          Sound.play('click');
+          msg.classList.add('err');
+          msg.textContent = MSG[r.motivo] || 'Pegá la clave en el campo de arriba.';
+          return;
+        }
+        if (JSON.stringify(r.estado) === JSON.stringify(Save.estado())) { this.progreso('Esa clave ya es tu avance.'); return; }
+        Sound.play('click');
+        c.querySelector('#cZona').innerHTML = `<div class="confirm"><p><b>¿Reemplazar tu avance?</b> El de este teléfono se pierde y queda el de la clave. Los récords de puntos de cada nivel arrancan de cero.</p>
+          ${this.resumenHTML(r.estado)}
+          <div class="row"><button class="btn danger" id="rYes">Reemplazar</button><button class="btn ghost" id="rNo">Cancelar</button></div></div>`;
+        c.querySelector('#rYes').onclick = () => { Save.cargar(r.estado); this._scrolled = 0; this.renderMap(); this.progreso('Listo: cargaste el avance de la clave.'); };
+        c.querySelector('#rNo').onclick = () => this.cargarClave(inp.value);
       };
     });
   },
@@ -1713,7 +1814,7 @@ function boot() {
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
 // Para las pruebas y los bocetos (herramientas/boceto.js)
-window.__fogonazo = { Game, Save, UI, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
+window.__fogonazo = { Game, Save, UI, Clave, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;

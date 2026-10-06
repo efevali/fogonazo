@@ -23,6 +23,7 @@ const js = [
   rd('sprites.js'),
   rd('sprites16.js'),
   rd('audio.js'),
+  rd('clave.js'),
   rd('game.js'),
 ].join('\n');
 
