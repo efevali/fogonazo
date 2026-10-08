@@ -44,7 +44,7 @@ Combinaciones: rayo + rayo (cruz), rayo + sobrecarga (3 filas y 3 columnas), sob
 - **Quemados**: no se mueven ni dejan pasar lo que cae. Se rompen con líneas al lado o con especiales; los de carcasa metálica, con dos golpes.
 - **Cinta kapton**: la pieza encintada no se mueve ni deja pasar lo que cae. Se despega incluyéndola en una línea.
 - **Huecos**: la placa puede tener celdas cortadas; las piezas los atraviesan al caer.
-- **Válvulas**: hay que bajarlas hasta la fila de abajo (el zócalo). Bajan solo cuando desaparecen las piezas que tienen debajo, y caen siempre derecho, nunca en diagonal. Se intercambian como cualquier pieza, solo si el cambio forma una línea. Aparecen en columnas sin obstáculos fijos hasta el zócalo; si no hay ninguna (nivel 29), en cualquiera, y esperan sobre el obstáculo hasta que se rompe.
+- **Válvulas**: hay que bajarlas hasta la fila de abajo (el zócalo). Bajan solo cuando desaparecen las piezas que tienen debajo, y caen siempre derecho, nunca en diagonal. Se intercambian como cualquier pieza, solo si el cambio forma una línea. La partida arranca con una. Las siguientes aparecen con las jugadas, aunque la anterior todavía esté bajando: nunca dos en la misma jugada, con al menos 3 jugadas entre una y otra y como mucho dos a la vez en la placa. Pasadas esas 3 jugadas, cada jugada tiene un 35 % de traer la siguiente; si la placa quedó sin válvulas, aparece seguro. Caen desde arriba, por una de las columnas que se rellenan en esa jugada, de preferencia distinta de la anterior y sin otra válvula. Siempre en columnas sin obstáculos fijos hasta el zócalo; si no hay ninguna (nivel 29), en cualquiera, y esperan sobre el obstáculo hasta que se rompe.
 
 ### Caída
 
