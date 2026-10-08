@@ -64,7 +64,7 @@ const LEVELS = [
     text: 'Jefe del bloque: limpiar lo quemado y volver a soldar.' },
 
   // ---------------- Bloque 5 · Válvulas
-  { name: 'Tríodo', colors: 5, moves: 20, goals: [{ type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.76, tip: 'tubes',
+  { name: 'Tríodo', colors: 5, moves: 20, goals: [{ type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.76, tip: 'tubes',
     text: 'Antes de los transistores estaban las válvulas. Bajalas hasta el zócalo, en la fila de abajo.' },
   { name: 'Radio a válvulas', colors: 5, moves: 26, goals: [{ type: 'tubes', n: 5 }], tubes: { n: 5, max: 2 }, tune: 'moves', target: 0.66,
     layout: ['........', '........', '........', '...xx...', '...xx...', '........', '........', '........'],
@@ -85,10 +85,10 @@ const LEVELS = [
     text: 'Siete segmentos y un 8 entero por soldar.' },
   { name: 'Sintetizador', colors: 7, time: 90, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.45,
     text: 'Osciladores, filtros y envolventes. Contrarreloj con siete componentes en la mesa.' },
-  { name: 'Osciloscopio', colors: 5, moves: 30, goals: [{ type: 'burnt' }, { type: 'locks' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.4,
+  { name: 'Osciloscopio', colors: 5, moves: 30, goals: [{ type: 'burnt' }, { type: 'locks' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.4,
     layout: ['........', '........', '........', 'b.b..b.b', '.k.kk.k.', '........', '........', '........'],
     text: 'El instrumento para ver las señales. Quemados, cinta y válvulas a la vez.' },
-  { name: 'Computadora de 8 bits', colors: 5, moves: 32, goals: [{ type: 'pads' }, { type: 'burnt' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.34,
+  { name: 'Computadora de 8 bits', colors: 5, moves: 32, goals: [{ type: 'pads' }, { type: 'burnt' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.34,
     layout: ['........', '.2.BB.2.', '.2....2.', '...11...', '...11...', '.2....2.', '.2.bb.2.', '........'],
     text: 'El proyecto final: todo lo aprendido en una sola placa.' },
 ];

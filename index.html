@@ -642,6 +642,8 @@ html[data-art="16"] .goal.opt .bon, html[data-art="16"] .goal.opt .lbl { font-si
 const W = 8, H = 10, N = W * H;
 // Tipos de pieza
 const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6, ANT: 7 };
+// Aparición de válvulas (#25): jugadas de separación, probabilidad por jugada y tope en la placa
+const TUBES = { gap: 3, p: 0.35, max: 2 };
 
 function rngFrom(seed) {
   let s = seed >>> 0;
@@ -702,7 +704,13 @@ function createGame(level, seed) {
   }
   g.scoreOnly = g.goals.length === 1 && g.goals[0].type === 'score';
   g.hasCollect = g.goals.some(o => o.type === 'collect');
-  if (level.tubes) g.tubes = { total: level.tubes.n, maxOn: level.tubes.max || 1, spawned: 0, collected: 0 };
+  if (level.tubes) g.tubes = {
+    total: level.tubes.n, maxOn: level.tubes.max || TUBES.max, spawned: 0, collected: 0,
+    last: 0,        // jugada (movesUsed) de la última aparición; la inicial cuenta como la jugada 0
+    lastCol: -1,    // columna por la que entró la última
+    want: false,    // hay una aparición decidida que todavía no encontró columna
+    since: 0,       // jugada en la que se decidió
+  };
   fillInitial(g);
   return g;
 }
@@ -735,18 +743,17 @@ function fillInitial(g) {
       else g.p[i] = mk(g, pickColorNoMatch(g, i), 0);
     }
     if (g.tubes) {
-      // arriba de todo, en columnas con camino libre al zócalo; si no hay ninguna, en cualquiera
-      const n = Math.min(g.tubes.maxOn, g.tubes.total);
+      // una sola, arriba de todo, en una columna con camino libre al zócalo; si no hay ninguna, en cualquiera
       const cols = [];
       for (let x = 0; x < W; x++) { const t = colTop(g, x); if (t >= 0 && !fixed(g.p[t])) cols.push(x); }
-      for (let k = cols.length - 1; k > 0; k--) { const j = (g.rng() * (k + 1)) | 0; [cols[k], cols[j]] = [cols[j], cols[k]]; }
       const free = cols.filter(x => tubeColFree(g, x));
-      let placed = 0;
-      for (const x of (free.length ? free : cols)) {
-        if (placed >= n) break;
-        g.p[colTop(g, x)] = mk(g, -1, K.TUBE); placed++;
+      const pool = free.length ? free : cols;
+      g.tubes.spawned = 0; g.tubes.lastCol = -1;
+      if (pool.length && g.tubes.total > 0) {
+        const x = pool[(g.rng() * pool.length) | 0];
+        g.p[colTop(g, x)] = mk(g, -1, K.TUBE);
+        g.tubes.spawned = 1; g.tubes.lastCol = x;
       }
-      g.tubes.spawned = placed;
     }
     if (findMatches(g).length === 0 && hasValidMove(g)) return;
   }
@@ -1152,6 +1159,37 @@ function tubeColFree(g, x) {
   for (let y = 0; y < H; y++) if (fixed(g.p[I(x, y)])) return false;
   return true;
 }
+function colHasTube(g, x) {
+  for (let y = 0; y < H; y++) { const p = g.p[I(x, y)]; if (p && p.k === K.TUBE) return true; }
+  return false;
+}
+
+// Válvulas (#25): la aparición se decide una vez por jugada, no cuando baja la anterior. Como mucho una por
+// jugada, con `gap` jugadas de separación; pasado eso, probabilidad `p` por jugada, o segura si la placa quedó
+// sin válvulas. Nunca más de `max` a la vez.
+function tubeTurn(g) {
+  const t = g.tubes;
+  if (!t || g.preview || t.want || t.spawned >= t.total) return;
+  if (g.movesUsed - t.last < TUBES.gap) return;
+  const on = countTubes(g);
+  if (on >= t.maxOn) return;
+  if (on === 0 || g.rng() < TUBES.p) { t.want = true; t.since = g.movesUsed; }
+}
+
+// Entre las columnas que se rellenan en esta caída, ¿por cuál entra la válvula pendiente? -1: por ninguna todavía.
+// Prefiere camino libre al zócalo, otra columna que la anterior y sin otra válvula. Si solo hay columnas peores,
+// espera a la jugada siguiente; si ya esperó, se conforma con camino libre y, una jugada después, con cualquiera.
+function tubeEntry(g, tops) {
+  const t = g.tubes;
+  let anyFree = false;
+  for (let x = 0; x < W && !anyFree; x++) if (tubeColFree(g, x)) anyFree = true;
+  const freeOk = tp => !anyFree || tubeColFree(g, X(tp));
+  const waited = g.movesUsed - t.since;
+  let pool = tops.filter(tp => freeOk(tp) && X(tp) !== t.lastCol && !colHasTube(g, X(tp)));
+  if (!pool.length && waited >= 1) pool = tops.filter(freeOk);
+  if (!pool.length && waited >= 2) pool = tops;
+  return pool.length ? pool[(g.rng() * pool.length) | 0] : -1;
+}
 
 const MAX_TICKS = 400;
 function gravity(g) {
@@ -1163,12 +1201,6 @@ function gravity(g) {
     recs.set(p.id, r); step.moves.push(r);
     return r;
   };
-  // ¿aparece una válvula en esta caída? (misma probabilidad que antes)
-  let tubeWant = false;
-  if (g.tubes && !g.preview && g.tubes.spawned < g.tubes.total) {
-    const on = countTubes(g);
-    if (on < g.tubes.maxOn && (on === 0 || g.rng() < 0.18)) tubeWant = true;
-  }
   let k = 0;
   for (; k < MAX_TICKS; k++) {
     let any = false;
@@ -1191,16 +1223,13 @@ function gravity(g) {
       const tops = [];
       for (let x = 0; x < W; x++) { const t = colTop(g, x); if (t >= 0 && g.p[t] === null) tops.push(t); }
       let tubeAt = -1;
-      if (tubeWant && tops.length) {
-        // solo en columnas con camino libre al zócalo; si no hay ninguna en la placa, en cualquiera
-        let anyFree = false;
-        for (let x = 0; x < W && !anyFree; x++) if (tubeColFree(g, x)) anyFree = true;
-        const ok = tops.filter(t => !anyFree || tubeColFree(g, X(t)));
-        if (ok.length) { tubeAt = ok[(g.rng() * ok.length) | 0]; tubeWant = false; }
-      }
+      if (g.tubes && g.tubes.want && !g.over && tops.length) tubeAt = tubeEntry(g, tops);
       for (const t of tops) {
         let p;
-        if (t === tubeAt) { p = mk(g, -1, K.TUBE); g.tubes.spawned++; }
+        if (t === tubeAt) {
+          p = mk(g, -1, K.TUBE);
+          Object.assign(g.tubes, { spawned: g.tubes.spawned + 1, want: false, last: g.movesUsed, lastCol: X(t) });
+        }
         else p = mk(g, spawnColor(g), 0);
         g.p[t] = p; moved.add(p.id); any = true;
         const r = { id: p.id, c: p.c, k: p.k, x: X(t), from: -1, path: [[k, X(t), Y(t)]] };
@@ -1342,6 +1371,7 @@ function trySwap(g, a, b) {
   steps.push({ t: 'swap', a, b, ida: pa.id, idb: pb.id });
   if (g.mode === 'moves') g.moves--;
   g.movesUsed++;
+  tubeTurn(g);
   const first = kind === 2 ? comboWave(g, b, a, steps) : null;
   resolveAll(g, steps, first, [b, a]);
   afterMove(g, steps);
@@ -1355,6 +1385,7 @@ function tryTap(g, i) {
   const p = g.p[i];
   if (g.mode === 'moves') g.moves--;
   g.movesUsed++;
+  tubeTurn(g);
   steps.push({ t: 'tap', i, id: p.id });
   const w = newWave();
   hitCell(g, w, i, 0);
@@ -1612,7 +1643,7 @@ const LEVELS = [
     text: 'Jefe del bloque: limpiar lo quemado y volver a soldar.' },
 
   // ---------------- Bloque 5 · Válvulas
-  { name: 'Tríodo', colors: 5, moves: 20, goals: [{ type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.76, tip: 'tubes',
+  { name: 'Tríodo', colors: 5, moves: 20, goals: [{ type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.76, tip: 'tubes',
     text: 'Antes de los transistores estaban las válvulas. Bajalas hasta el zócalo, en la fila de abajo.' },
   { name: 'Radio a válvulas', colors: 5, moves: 26, goals: [{ type: 'tubes', n: 5 }], tubes: { n: 5, max: 2 }, tune: 'moves', target: 0.66,
     layout: ['........', '........', '........', '...xx...', '...xx...', '........', '........', '........'],
@@ -1633,10 +1664,10 @@ const LEVELS = [
     text: 'Siete segmentos y un 8 entero por soldar.' },
   { name: 'Sintetizador', colors: 7, time: 90, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.45,
     text: 'Osciladores, filtros y envolventes. Contrarreloj con siete componentes en la mesa.' },
-  { name: 'Osciloscopio', colors: 5, moves: 30, goals: [{ type: 'burnt' }, { type: 'locks' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.4,
+  { name: 'Osciloscopio', colors: 5, moves: 30, goals: [{ type: 'burnt' }, { type: 'locks' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.4,
     layout: ['........', '........', '........', 'b.b..b.b', '.k.kk.k.', '........', '........', '........'],
     text: 'El instrumento para ver las señales. Quemados, cinta y válvulas a la vez.' },
-  { name: 'Computadora de 8 bits', colors: 5, moves: 32, goals: [{ type: 'pads' }, { type: 'burnt' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 1 }, tune: 'moves', target: 0.34,
+  { name: 'Computadora de 8 bits', colors: 5, moves: 32, goals: [{ type: 'pads' }, { type: 'burnt' }, { type: 'tubes', n: 3 }], tubes: { n: 3, max: 2 }, tune: 'moves', target: 0.34,
     layout: ['........', '.2.BB.2.', '.2....2.', '...11...', '...11...', '.2....2.', '.2.bb.2.', '........'],
     text: 'El proyecto final: todo lo aprendido en una sola placa.' },
 ];
@@ -1681,7 +1712,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = { LEVELS, 
 else { root.LEVELS = LEVELS; root.BLOCKS = BLOCKS; root.ZEN = ZEN; root.MODES = MODES; root.modeOf = modeOf; root.applyMode = applyMode; }
 })(typeof window !== 'undefined' ? window : this);
 
-const CAL = {"1":{"moves":18,"scoreTarget":14500,"stars":[14500,33500,48000]},"2":{"moves":20,"scoreTarget":18000,"stars":[18000,37000,52500]},"3":{"moves":14,"stars":[0,19000,27000]},"4":{"moves":14,"stars":[0,19300,26900]},"5":{"time":60,"scoreTarget":20000,"stars":[20000,30000,41000]},"6":{"moves":21,"stars":[0,10900,13900]},"7":{"moves":18,"stars":[0,10400,13500]},"8":{"moves":22,"scoreTarget":10700,"stars":[10700,16500,21200]},"9":{"time":65,"stars":[0,9700,13500]},"10":{"moves":18,"stars":[0,10900,14100]},"11":{"moves":14,"stars":[0,17900,26500]},"12":{"moves":20,"stars":[0,11700,15800]},"13":{"moves":23,"stars":[0,16400,20200]},"14":{"time":50,"stars":[0,8300,11700]},"15":{"moves":21,"stars":[0,14000,17600]},"16":{"moves":11,"stars":[0,14600,22800]},"17":{"moves":23,"stars":[0,11500,15700]},"18":{"moves":18,"stars":[0,7900,10900]},"19":{"time":55,"stars":[0,9000,13000]},"20":{"moves":14,"stars":[0,9500,13300]},"21":{"moves":18,"stars":[0,22500,31500]},"22":{"moves":22,"stars":[0,20500,27500]},"23":{"moves":16,"stars":[0,25000,34000]},"24":{"time":75,"scoreTarget":13700,"stars":[13700,17200,21300]},"25":{"moves":17,"stars":[0,28000,37500]},"26":{"moves":24,"stars":[0,8000,10400]},"27":{"moves":24,"stars":[0,16100,21100]},"28":{"time":90,"scoreTarget":9200,"stars":[9200,11100,13700]},"29":{"moves":13,"stars":[0,22500,33000]},"30":{"moves":15,"stars":[0,29500,39000]}};
+const CAL = {"1":{"moves":18,"scoreTarget":14500,"stars":[14500,33500,48000]},"2":{"moves":20,"scoreTarget":18000,"stars":[18000,37000,52500]},"3":{"moves":14,"stars":[0,19000,27000]},"4":{"moves":14,"stars":[0,19300,26900]},"5":{"time":60,"scoreTarget":20000,"stars":[20000,30000,41000]},"6":{"moves":21,"stars":[0,10900,13900]},"7":{"moves":18,"stars":[0,10400,13500]},"8":{"moves":22,"scoreTarget":10700,"stars":[10700,16500,21200]},"9":{"time":65,"stars":[0,9700,13500]},"10":{"moves":18,"stars":[0,10900,14100]},"11":{"moves":14,"stars":[0,17900,26500]},"12":{"moves":20,"stars":[0,11700,15800]},"13":{"moves":23,"stars":[0,16400,20200]},"14":{"time":50,"stars":[0,8300,11700]},"15":{"moves":21,"stars":[0,14000,17600]},"16":{"moves":11,"stars":[0,14600,22800]},"17":{"moves":23,"stars":[0,11500,15700]},"18":{"moves":18,"stars":[0,7900,10900]},"19":{"time":55,"stars":[0,9000,13000]},"20":{"moves":14,"stars":[0,9500,13300]},"21":{"moves":15,"stars":[0,20500,30000]},"22":{"moves":25,"stars":[0,23000,31500]},"23":{"moves":17,"stars":[0,27500,37000]},"24":{"time":75,"scoreTarget":13700,"stars":[13700,17200,21300]},"25":{"moves":19,"stars":[0,32000,43500]},"26":{"moves":24,"stars":[0,8000,10400]},"27":{"moves":24,"stars":[0,16100,21100]},"28":{"time":90,"scoreTarget":9200,"stars":[9200,11100,13700]},"29":{"moves":12,"stars":[0,21500,31500]},"30":{"moves":13,"stars":[0,26000,35500]}};
 /* Chispazo — arte pixelado (16×16). Cada sprite: paleta + filas; el contorno oscuro se agrega solo. */
 const PIECE_NAMES = ['Resistencia', 'Capacitor electrolítico', 'LED', 'Bobina', 'Chip', 'Capacitor cerámico', 'Cristal'];
 const PIECE_SHORT = ['resistencias', 'electrolíticos', 'LEDs', 'bobinas', 'chips', 'cerámicos', 'cristales'];

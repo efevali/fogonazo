@@ -307,12 +307,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   22500,
-   31500
+   20500,
+   30000
   ],
-  "winRate": 0.8125,
-  "moves": 18,
-  "medianDone": 13
+  "winRate": 0.82375,
+  "moves": 15,
+  "medianDone": 12
  },
  "22": {
   "id": 22,
@@ -322,12 +322,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   20500,
-   27500
+   23000,
+   31500
   ],
-  "winRate": 0.605,
-  "moves": 22,
-  "medianDone": 20
+  "winRate": 0.695,
+  "moves": 25,
+  "medianDone": 23
  },
  "23": {
   "id": 23,
@@ -337,12 +337,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   25000,
-   34000
+   27500,
+   37000
   ],
-  "winRate": 0.59,
-  "moves": 16,
-  "medianDone": 15
+  "winRate": 0.55625,
+  "moves": 17,
+  "medianDone": 17
  },
  "24": {
   "id": 24,
@@ -367,12 +367,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   28000,
-   37500
+   32000,
+   43500
   ],
-  "winRate": 0.535,
-  "moves": 17,
-  "medianDone": 18
+  "winRate": 0.4125,
+  "moves": 19,
+  "medianDone": 20
  },
  "26": {
   "id": 26,
@@ -427,12 +427,12 @@
   "neverRate": 0,
   "stars": [
    0,
-   22500,
-   33000
+   21500,
+   31500
   ],
-  "winRate": 0.3925,
-  "moves": 13,
-  "medianDone": 16
+  "winRate": 0.4125,
+  "moves": 12,
+  "medianDone": 13
  },
  "30": {
   "id": 30,
@@ -442,11 +442,11 @@
   "neverRate": 0,
   "stars": [
    0,
-   29500,
-   39000
+   26000,
+   35500
   ],
-  "winRate": 0.2775,
-  "moves": 15,
-  "medianDone": 18
+  "winRate": 0.34,
+  "moves": 13,
+  "medianDone": 15
  }
 }

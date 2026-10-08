@@ -5,6 +5,8 @@
 const W = 8, H = 10, N = W * H;
 // Tipos de pieza
 const K = { N: 0, LH: 1, LV: 2, BOMB: 3, BAT: 4, TUBE: 5, BURNT: 6, ANT: 7 };
+// Aparición de válvulas (#25): jugadas de separación, probabilidad por jugada y tope en la placa
+const TUBES = { gap: 3, p: 0.35, max: 2 };
 
 function rngFrom(seed) {
   let s = seed >>> 0;
@@ -65,7 +67,13 @@ function createGame(level, seed) {
   }
   g.scoreOnly = g.goals.length === 1 && g.goals[0].type === 'score';
   g.hasCollect = g.goals.some(o => o.type === 'collect');
-  if (level.tubes) g.tubes = { total: level.tubes.n, maxOn: level.tubes.max || 1, spawned: 0, collected: 0 };
+  if (level.tubes) g.tubes = {
+    total: level.tubes.n, maxOn: level.tubes.max || TUBES.max, spawned: 0, collected: 0,
+    last: 0,        // jugada (movesUsed) de la última aparición; la inicial cuenta como la jugada 0
+    lastCol: -1,    // columna por la que entró la última
+    want: false,    // hay una aparición decidida que todavía no encontró columna
+    since: 0,       // jugada en la que se decidió
+  };
   fillInitial(g);
   return g;
 }
@@ -98,18 +106,17 @@ function fillInitial(g) {
       else g.p[i] = mk(g, pickColorNoMatch(g, i), 0);
     }
     if (g.tubes) {
-      // arriba de todo, en columnas con camino libre al zócalo; si no hay ninguna, en cualquiera
-      const n = Math.min(g.tubes.maxOn, g.tubes.total);
+      // una sola, arriba de todo, en una columna con camino libre al zócalo; si no hay ninguna, en cualquiera
       const cols = [];
       for (let x = 0; x < W; x++) { const t = colTop(g, x); if (t >= 0 && !fixed(g.p[t])) cols.push(x); }
-      for (let k = cols.length - 1; k > 0; k--) { const j = (g.rng() * (k + 1)) | 0; [cols[k], cols[j]] = [cols[j], cols[k]]; }
       const free = cols.filter(x => tubeColFree(g, x));
-      let placed = 0;
-      for (const x of (free.length ? free : cols)) {
-        if (placed >= n) break;
-        g.p[colTop(g, x)] = mk(g, -1, K.TUBE); placed++;
+      const pool = free.length ? free : cols;
+      g.tubes.spawned = 0; g.tubes.lastCol = -1;
+      if (pool.length && g.tubes.total > 0) {
+        const x = pool[(g.rng() * pool.length) | 0];
+        g.p[colTop(g, x)] = mk(g, -1, K.TUBE);
+        g.tubes.spawned = 1; g.tubes.lastCol = x;
       }
-      g.tubes.spawned = placed;
     }
     if (findMatches(g).length === 0 && hasValidMove(g)) return;
   }
@@ -515,6 +522,37 @@ function tubeColFree(g, x) {
   for (let y = 0; y < H; y++) if (fixed(g.p[I(x, y)])) return false;
   return true;
 }
+function colHasTube(g, x) {
+  for (let y = 0; y < H; y++) { const p = g.p[I(x, y)]; if (p && p.k === K.TUBE) return true; }
+  return false;
+}
+
+// Válvulas (#25): la aparición se decide una vez por jugada, no cuando baja la anterior. Como mucho una por
+// jugada, con `gap` jugadas de separación; pasado eso, probabilidad `p` por jugada, o segura si la placa quedó
+// sin válvulas. Nunca más de `max` a la vez.
+function tubeTurn(g) {
+  const t = g.tubes;
+  if (!t || g.preview || t.want || t.spawned >= t.total) return;
+  if (g.movesUsed - t.last < TUBES.gap) return;
+  const on = countTubes(g);
+  if (on >= t.maxOn) return;
+  if (on === 0 || g.rng() < TUBES.p) { t.want = true; t.since = g.movesUsed; }
+}
+
+// Entre las columnas que se rellenan en esta caída, ¿por cuál entra la válvula pendiente? -1: por ninguna todavía.
+// Prefiere camino libre al zócalo, otra columna que la anterior y sin otra válvula. Si solo hay columnas peores,
+// espera a la jugada siguiente; si ya esperó, se conforma con camino libre y, una jugada después, con cualquiera.
+function tubeEntry(g, tops) {
+  const t = g.tubes;
+  let anyFree = false;
+  for (let x = 0; x < W && !anyFree; x++) if (tubeColFree(g, x)) anyFree = true;
+  const freeOk = tp => !anyFree || tubeColFree(g, X(tp));
+  const waited = g.movesUsed - t.since;
+  let pool = tops.filter(tp => freeOk(tp) && X(tp) !== t.lastCol && !colHasTube(g, X(tp)));
+  if (!pool.length && waited >= 1) pool = tops.filter(freeOk);
+  if (!pool.length && waited >= 2) pool = tops;
+  return pool.length ? pool[(g.rng() * pool.length) | 0] : -1;
+}
 
 const MAX_TICKS = 400;
 function gravity(g) {
@@ -526,12 +564,6 @@ function gravity(g) {
     recs.set(p.id, r); step.moves.push(r);
     return r;
   };
-  // ¿aparece una válvula en esta caída? (misma probabilidad que antes)
-  let tubeWant = false;
-  if (g.tubes && !g.preview && g.tubes.spawned < g.tubes.total) {
-    const on = countTubes(g);
-    if (on < g.tubes.maxOn && (on === 0 || g.rng() < 0.18)) tubeWant = true;
-  }
   let k = 0;
   for (; k < MAX_TICKS; k++) {
     let any = false;
@@ -554,16 +586,13 @@ function gravity(g) {
       const tops = [];
       for (let x = 0; x < W; x++) { const t = colTop(g, x); if (t >= 0 && g.p[t] === null) tops.push(t); }
       let tubeAt = -1;
-      if (tubeWant && tops.length) {
-        // solo en columnas con camino libre al zócalo; si no hay ninguna en la placa, en cualquiera
-        let anyFree = false;
-        for (let x = 0; x < W && !anyFree; x++) if (tubeColFree(g, x)) anyFree = true;
-        const ok = tops.filter(t => !anyFree || tubeColFree(g, X(t)));
-        if (ok.length) { tubeAt = ok[(g.rng() * ok.length) | 0]; tubeWant = false; }
-      }
+      if (g.tubes && g.tubes.want && !g.over && tops.length) tubeAt = tubeEntry(g, tops);
       for (const t of tops) {
         let p;
-        if (t === tubeAt) { p = mk(g, -1, K.TUBE); g.tubes.spawned++; }
+        if (t === tubeAt) {
+          p = mk(g, -1, K.TUBE);
+          Object.assign(g.tubes, { spawned: g.tubes.spawned + 1, want: false, last: g.movesUsed, lastCol: X(t) });
+        }
         else p = mk(g, spawnColor(g), 0);
         g.p[t] = p; moved.add(p.id); any = true;
         const r = { id: p.id, c: p.c, k: p.k, x: X(t), from: -1, path: [[k, X(t), Y(t)]] };
@@ -705,6 +734,7 @@ function trySwap(g, a, b) {
   steps.push({ t: 'swap', a, b, ida: pa.id, idb: pb.id });
   if (g.mode === 'moves') g.moves--;
   g.movesUsed++;
+  tubeTurn(g);
   const first = kind === 2 ? comboWave(g, b, a, steps) : null;
   resolveAll(g, steps, first, [b, a]);
   afterMove(g, steps);
@@ -718,6 +748,7 @@ function tryTap(g, i) {
   const p = g.p[i];
   if (g.mode === 'moves') g.moves--;
   g.movesUsed++;
+  tubeTurn(g);
   steps.push({ t: 'tap', i, id: p.id });
   const w = newWave();
   hitCell(g, w, i, 0);
