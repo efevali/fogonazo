@@ -2,13 +2,17 @@
 
 Todas las versiones publicadas de Fogonazo, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico que explica el [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.6.1 — 8/10/2026
+
+- «Atrás» en un nivel: el segundo «atrás» cerraba la app. Ahora la partida va a la pausa y la pausa, al mapa; en zen, la pausa va a «Partida terminada» y de ahí al mapa. Desde el mapa sale de la app ([#27](https://github.com/efevali/fogonazo/issues/27)).
+
 ## 0.6.0 — 8/10/2026
 
 Válvulas y «atrás» ([milestone](https://github.com/efevali/fogonazo/milestone/6)).
 
 - Válvulas: ya no salen de a una ni siempre por la misma columna. La partida arranca con una, y las siguientes aparecen con las jugadas, aunque la anterior todavía esté bajando: nunca dos en la misma jugada, con al menos 3 jugadas entre una y otra y como mucho dos a la vez en la placa. Caen desde arriba por una de las columnas que se rellenan, de preferencia otra que la de la anterior ([#25](https://github.com/efevali/fogonazo/issues/25)).
 - Dificultad: con la regla nueva se recalibraron los movimientos de los seis niveles con válvulas. En Difícil: Tríodo 15 (antes 18), Radio a válvulas 25 (22), Amplificador valvular 17 (16), Transmisor AM 19 (17), Osciloscopio 12 (13) y Computadora de 8 bits 13 (15). Normal y Fácil salen de esos valores con los factores de siempre.
-- El «atrás» del teléfono navega por el juego: en partida abre la pausa, en la pausa se sigue jugando, en la presentación y los resultados vuelve al mapa, Progreso vuelve a Ajustes y las demás ventanas se cierran. Solo desde el mapa sale de la app ([#24](https://github.com/efevali/fogonazo/issues/24)).
+- El «atrás» del teléfono navega por el juego: en partida abre la pausa, en la presentación y los resultados vuelve al mapa, Progreso vuelve a Ajustes y las demás ventanas se cierran. Solo desde el mapa sale de la app ([#24](https://github.com/efevali/fogonazo/issues/24)).
 
 ## 0.5.0 — 6/10/2026
 

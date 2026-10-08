@@ -3031,7 +3031,7 @@ const fmt = n => Math.round(n).toLocaleString('es-AR');
 
 // Versión de este código, con versionado semántico MAYOR.MENOR.PARCHE (ver README). Tiene que coincidir con
 // VERSION de sw.js: herramientas/version.js sube las dos juntas.
-const FOGONAZO_VERSION = { v: '0.6.0', fecha: '8/10/2026' };
+const FOGONAZO_VERSION = { v: '0.6.1', fecha: '8/10/2026' };
 
 // ------------------------------------------------------------ iconos pixel (SVG)
 function pixSvg(rows, fill, extra) {
@@ -4801,32 +4801,50 @@ const Game = {
   new ResizeObserver(() => { if (UI.screen === 'game') View.resize(); }).observe($('#boardWrap'));
 })();
 
-// ------------------------------------------------------------ el «atrás» del teléfono (#24)
+// ------------------------------------------------------------ el «atrás» del teléfono (#24, #27)
 /* El «atrás» de Android (botón o gesto) y la flecha del navegador siguen el camino del juego; solo desde el mapa,
-   sin ventanas abiertas, salen de la app. Es la lógica de Kasa adaptada a un juego sin direcciones: mientras no se
-   está en el mapa limpio hay una sola entrada de más en el historial (la «guardia»). El «atrás» la consume y el
-   juego hace lo que haría su propio botón de volver; si después sigue fuera del mapa limpio, se repone. Volver al
-   mapa con los botones del juego la consume también (history.back), para que desde ahí un solo «atrás» salga.
-   Si el navegador no deja tocar el historial, todo sigue como antes. */
+   sin ventanas abiertas, salen de la app. Es la lógica de Kasa adaptada a un juego sin direcciones.
+
+   Cada lugar tiene una profundidad: cuántos «atrás» faltan para llegar al mapa limpio (partida 2: pausa y mapa;
+   pausa 1; Progreso 2: Ajustes y mapa…). El historial tiene siempre una entrada por cada paso (k = 1, 2…) sobre la
+   del mapa (k = 0). El «atrás» retrocede una entrada y el juego hace lo que haría su propio botón de volver, que
+   lleva justo al lugar de un paso menos: así nunca hace falta sumar entradas al recibir el «atrás».
+
+   Por qué importa (#27): Chrome saltea con el «atrás» las entradas que una página suma sin que la persona la haya
+   tocado. La 0.6.0 reponía la entrada al recibir el «atrás», y el segundo «atrás» salía de la app. Ahora las
+   entradas se suman solo al tocar algo (abrir un nivel, «Empezar», «Seguir», abrir una ventana); al cerrar o
+   volver con los botones propios se retrocede (history.go). Si el navegador no deja tocar el historial, todo
+   sigue como antes. */
 const Atras = {
-  ok: false, on: false, skip: 0, pend: false, _t: 0,
-  // Qué botón de la ventana abierta hace de «volver», en este orden: Seguir (pausa), Cancelar de una confirmación,
-  // Volver (Progreso → Ajustes), Cancelar (Cargar una clave → Progreso), Mapa (presentación y resultados) y
-  // Listo / Entendido / Ahora no (cerrar; desde la pausa, «Cómo se juega» vuelve a la pausa).
-  BOTONES: ['#mRes', '#rNo', '#pVolver', '#cNo', '#mMap', '#mClose'],
+  ok: false, pos: 0, skip: 0, pend: false, _t: 0,
+  q(sel) { return $('#card ' + sel); },
+  // Cuántos «atrás» faltan para el mapa limpio desde donde se está
+  prof() {
+    const q = s => this.q(s), zen = !!(Game.def && Game.def.zen);
+    if (UI.screen === 'game') {
+      if (!UI.open) return Game.playing && !Game.ended ? (zen ? 3 : 2) : 1;   // partida (o la animación del final)
+      if (q('#mRes')) return zen ? 2 : 1;                                    // pausa (zen: pausa → fin → mapa)
+      if (Game.paused && q('#mClose')) return zen ? 3 : 2;                   // «Cómo se juega» desde la pausa
+      return 1;                                                              // presentación o resultado
+    }
+    if (!UI.open) return 0;
+    if (q('#cIn')) return q('#rNo') ? 4 : 3;                                // Cargar una clave (y su confirmación)
+    if (q('#pVolver')) return q('#rNo') ? 3 : 2;                            // Progreso (y «Borrar progreso»)
+    return 1;                                                                // Ajustes, Récords, Cómo se juega, Instalar
+  },
   init() {
     try {
       const st = history.state;
-      this.on = !!(st && st.fz === 'guardia');   // se recargó con la guardia puesta (por ejemplo, al actualizar)
-      if (!this.on) history.replaceState({ fz: 'base' }, '');
+      this.pos = this.k(st);   // si se recargó con entradas puestas (por ejemplo, al actualizar), se descuentan
+      if (!this.pos) history.replaceState({ fz: 'g', k: 0 }, '');
       window.addEventListener('popstate', e => this.pop(e));
       this.ok = true;
       this.sync();
     } catch (e) { this.ok = false; }
   },
-  limpio() { return UI.screen === 'map' && !UI.open; },
-  // Después de cada cambio de pantalla o de ventana. Se junta en una microtarea: cerrar una ventana y abrir otra
-  // en el mismo toque no toca el historial.
+  k(st) { return st && st.fz === 'g' && st.k > 0 ? st.k : st && st.fz === 'guardia' ? 1 : 0; },   // 'guardia': la 0.6.0
+  // Después de cada cambio de pantalla o de ventana. Se junta en una microtarea: cerrar una ventana y abrir otra en
+  // el mismo toque no toca el historial.
   sync() {
     if (!this.ok || this.pend) return;
     this.pend = true;
@@ -4834,33 +4852,40 @@ const Atras = {
   },
   ajustar() {
     if (!this.ok || this.skip) return;   // hay un retroceso propio en camino: se ajusta cuando llega
+    const want = this.prof();
     try {
-      if (this.limpio()) {
-        if (this.on) {
-          this.on = false; this.skip++;
-          clearTimeout(this._t);
-          this._t = setTimeout(() => { if (this.skip) { this.skip = 0; this.ajustar(); } }, 1200);   // por si no llega
-          history.back();
-        }
-      } else if (!this.on) { history.pushState({ fz: 'guardia' }, ''); this.on = true; }
+      if (want < this.pos) {
+        const n = this.pos - want;
+        this.skip++;
+        clearTimeout(this._t);
+        this._t = setTimeout(() => { if (this.skip) { this.skip = 0; this.pos = this.k(history.state); this.ajustar(); } }, 1200);   // por si no llega
+        history.go(-n);
+      } else if (want > this.pos) {
+        for (let k = this.pos + 1; k <= want; k++) history.pushState({ fz: 'g', k }, '');
+        this.pos = want;
+      }
     } catch (e) {}
   },
   pop(e) {
-    if (this.skip) { this.skip--; clearTimeout(this._t); this.ajustar(); return; }   // el retroceso propio
-    const st = e.state;
-    if (st && st.fz === 'guardia') { this.on = true; this.ajustar(); return; }        // la flecha de adelante
-    this.on = false;                                                                  // el «atrás» de quien juega
-    this.volver();
+    const k = this.k(e.state);
+    if (this.skip) { this.skip--; clearTimeout(this._t); this.pos = k; this.ajustar(); return; }   // el retroceso propio
+    if (k >= this.pos) { this.pos = k; this.ajustar(); return; }                                // la flecha de adelante
+    let pasos = this.pos - k;                                                                     // el «atrás» de quien juega
+    this.pos = k;
+    while (pasos-- > 0) this.volver();
     this.ajustar();
   },
+  // Un paso hacia el mapa: lo que hace el botón de volver del lugar donde se está
   volver() {
+    const q = s => this.q(s);
     if (UI.open) {
-      const b = this.BOTONES.map(q => $('#card ' + q)).find(Boolean);
+      if (q('#mRes')) { const b = Game.def && Game.def.zen ? q('#mEnd') : q('#mMap'); if (b) b.click(); return; }   // pausa: mapa (zen: terminar)
+      const b = ['#rNo', '#pVolver', '#cNo', '#mMap', '#mClose'].map(q).find(Boolean);
       if (b) b.click(); else UI.close();
       return;
     }
     if (UI.screen === 'game' && Game.playing && !Game.ended) Game.pause();
-    // en el mapa limpio no hay guardia; en la partida sin ventana y sin jugar (la animación del final), se espera
+    // en la partida sin ventana y sin jugar (la animación del final), se espera el resultado
   },
 };
 
