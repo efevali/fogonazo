@@ -4205,6 +4205,7 @@ const UI = {
     $('#scr-game').hidden = name !== 'game';
     if (name === 'map') { Sound.duck(false); Sound.music('map'); }
     if (name === 'game') requestAnimationFrame(() => View.resize());
+    Atras.sync();
   },
   renderMap() {
     this.renderZen();
@@ -4261,8 +4262,9 @@ const UI = {
     if (onMount) onMount(c);
     const f = c.querySelector('[data-focus]') || c.querySelector('button');
     if (f) f.focus({ preventScroll: true });
+    Atras.sync();
   },
-  close() { $('#modal').hidden = true; $('#card').innerHTML = ''; },
+  close() { $('#modal').hidden = true; $('#card').innerHTML = ''; Atras.sync(); },
   get open() { return !$('#modal').hidden; },
   styleControl() {
     const st = ART.style;
@@ -4799,6 +4801,69 @@ const Game = {
   new ResizeObserver(() => { if (UI.screen === 'game') View.resize(); }).observe($('#boardWrap'));
 })();
 
+// ------------------------------------------------------------ el «atrás» del teléfono (#24)
+/* El «atrás» de Android (botón o gesto) y la flecha del navegador siguen el camino del juego; solo desde el mapa,
+   sin ventanas abiertas, salen de la app. Es la lógica de Kasa adaptada a un juego sin direcciones: mientras no se
+   está en el mapa limpio hay una sola entrada de más en el historial (la «guardia»). El «atrás» la consume y el
+   juego hace lo que haría su propio botón de volver; si después sigue fuera del mapa limpio, se repone. Volver al
+   mapa con los botones del juego la consume también (history.back), para que desde ahí un solo «atrás» salga.
+   Si el navegador no deja tocar el historial, todo sigue como antes. */
+const Atras = {
+  ok: false, on: false, skip: 0, pend: false, _t: 0,
+  // Qué botón de la ventana abierta hace de «volver», en este orden: Seguir (pausa), Cancelar de una confirmación,
+  // Volver (Progreso → Ajustes), Cancelar (Cargar una clave → Progreso), Mapa (presentación y resultados) y
+  // Listo / Entendido / Ahora no (cerrar; desde la pausa, «Cómo se juega» vuelve a la pausa).
+  BOTONES: ['#mRes', '#rNo', '#pVolver', '#cNo', '#mMap', '#mClose'],
+  init() {
+    try {
+      const st = history.state;
+      this.on = !!(st && st.fz === 'guardia');   // se recargó con la guardia puesta (por ejemplo, al actualizar)
+      if (!this.on) history.replaceState({ fz: 'base' }, '');
+      window.addEventListener('popstate', e => this.pop(e));
+      this.ok = true;
+      this.sync();
+    } catch (e) { this.ok = false; }
+  },
+  limpio() { return UI.screen === 'map' && !UI.open; },
+  // Después de cada cambio de pantalla o de ventana. Se junta en una microtarea: cerrar una ventana y abrir otra
+  // en el mismo toque no toca el historial.
+  sync() {
+    if (!this.ok || this.pend) return;
+    this.pend = true;
+    queueMicrotask(() => { this.pend = false; this.ajustar(); });
+  },
+  ajustar() {
+    if (!this.ok || this.skip) return;   // hay un retroceso propio en camino: se ajusta cuando llega
+    try {
+      if (this.limpio()) {
+        if (this.on) {
+          this.on = false; this.skip++;
+          clearTimeout(this._t);
+          this._t = setTimeout(() => { if (this.skip) { this.skip = 0; this.ajustar(); } }, 1200);   // por si no llega
+          history.back();
+        }
+      } else if (!this.on) { history.pushState({ fz: 'guardia' }, ''); this.on = true; }
+    } catch (e) {}
+  },
+  pop(e) {
+    if (this.skip) { this.skip--; clearTimeout(this._t); this.ajustar(); return; }   // el retroceso propio
+    const st = e.state;
+    if (st && st.fz === 'guardia') { this.on = true; this.ajustar(); return; }        // la flecha de adelante
+    this.on = false;                                                                  // el «atrás» de quien juega
+    this.volver();
+    this.ajustar();
+  },
+  volver() {
+    if (UI.open) {
+      const b = this.BOTONES.map(q => $('#card ' + q)).find(Boolean);
+      if (b) b.click(); else UI.close();
+      return;
+    }
+    if (UI.screen === 'game' && Game.playing && !Game.ended) Game.pause();
+    // en el mapa limpio no hay guardia; en la partida sin ventana y sin jugar (la animación del final), se espera
+  },
+};
+
 // ------------------------------------------------------------ arranque
 function boot() {
   $('#btnSettings').innerHTML = pixSvg(IC.gear);
@@ -4815,6 +4880,7 @@ function boot() {
   Sound.configure(Save.settings);
   UI.show('map');
   UI.renderMap();
+  Atras.init();
   Cloud.init();
   iniciarApp();
   avisoActualizado();
@@ -4832,7 +4898,7 @@ function boot() {
   if (document.fonts && document.fonts.load) document.fonts.load('700 16px Silkscreen').catch(() => {});
 }
 // Para las pruebas y los bocetos (herramientas/boceto.js)
-window.__fogonazo = { Game, Save, UI, Clave, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
+window.__fogonazo = { Game, Save, UI, Atras, Clave, View, HUD, Seg, levelDef, APPV, INST, pintarVersion, marcarInstalado, abrirPasos, abrirSamsung };
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ screen: UI.screen })); } catch (e) {}
 let booted = false;
