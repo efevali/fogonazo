@@ -28,6 +28,12 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 - **Se revisa antes de aprobar:** que respete la composición, el orden y los colores pedidos; la lógica de los objetos; que lo importante quede en la franja central; y, en las piezas, que el fondo sea parejo y el recorte salga limpio.
 - **Lo aprobado se guarda en la carpeta `arte/` de su parte**, y se cuenta en su README. Lo que reemplaza a otra imagen la reemplaza en el repositorio: la anterior queda en el historial de Git.
 
+## Pedidos abiertos
+
+| Pedido | Qué | Dónde |
+|---|---|---|
+| P-008 | El fondo de Buen ojo: la mesa del pintor desde arriba | [El pedido](buenojo/README.md#el-pedido-p-008) |
+
 ## Pedidos cerrados
 
 | Pedido | Qué | Con qué IA | Vigente |

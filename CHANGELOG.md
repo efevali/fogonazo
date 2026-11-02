@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.14.0 — 2/11/2026
+
+- **Buen ojo, el tercer juego** (S-29): se ve un color unos segundos y se lo arma de memoria con tres pomos de pintura (tono, saturación y brillo), sobre la mesa de un pintor. Cinco colores por partida, con un puntaje de 0 a 10 por color que mide la diferencia como la ve el ojo, una frase según el puntaje y, si la diferencia se nota, qué le faltó al tuyo. Tres dificultades (el color se ve 5, 3 o 1,5 segundos), cada una con su récord, y una práctica con el color a la vista y los números.
+- **La sala tiene un cuarto objeto activo:** el cuadro del arcoíris, sobre el equipo de audio, lleva a Buen ojo. Los brillos dan la vuelta entre los cuatro.
+
 ## 0.13.0 — 1/11/2026
 
 - Fogonazo: **cada dificultad sigue su propia curva.** Normal y Fácil ya no multiplican los movimientos de Difícil: cada nivel se calibró en cada modo para que conserve las oleadas, sea de piezas, de puntos, de obstáculos o de válvulas. En Fácil, los niveles de piezas y de puntos que estaban regalados piden un poco más, y los de obstáculos y válvulas, menos. Un modo más fácil nunca da menos movimientos que uno más difícil.
