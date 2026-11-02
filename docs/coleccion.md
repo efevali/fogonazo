@@ -1,10 +1,10 @@
 # La colección
 
-Qué es la colección de minijuegos y lo que vale para todos sus juegos. Lo propio de cada uno está en su carpeta ([sala](sala/README.md), [Fogonazo](fogonazo/README.md), [mahjong](mahjong/README.md)); cómo se ve y cómo suena, en la [guía de estilo](estilo.md); por qué se decidió cada cosa, en el [registro de decisiones](decisiones.md).
+Qué es la colección de minijuegos y lo que vale para todos sus juegos. Lo propio de cada uno está en su carpeta ([sala](sala/README.md), [Fogonazo](fogonazo/README.md), [mahjong](mahjong/README.md), [Buen ojo](buenojo/README.md)); cómo se ve y cómo suena, en la [guía de estilo](estilo.md); por qué se decidió cada cosa, en el [registro de decisiones](decisiones.md).
 
 ## Qué es
 
-Una colección de juegos simples, divertidos y visualmente atractivos para el celular. Es una sola app, que se instala desde Chrome, y se entra por **la sala**: un living de los 70 ilustrado, al atardecer con lluvia, donde algunos objetos, los **objetos activos**, llevan a los juegos. Hoy son dos, Fogonazo y el mahjong, y se van a sumar más.
+Una colección de juegos simples, divertidos y visualmente atractivos para el celular. Es una sola app, que se instala desde Chrome, y se entra por **la sala**: un living de los 70 ilustrado, al atardecer con lluvia, donde algunos objetos, los **objetos activos**, llevan a los juegos. Hoy son tres, Fogonazo, el mahjong y Buen ojo, y se van a sumar más.
 
 La colección y Fogonazo todavía no tienen nombre definitivo, y el repositorio conserva el de `fogonazo` hasta entonces.
 
@@ -22,6 +22,7 @@ Lo que vale para todos los juegos:
 Sala ── banco de electrónica ──► Fogonazo
      ── mesa ratona con el mahjong ──► Mahjong
      ── equipo de audio ──► Sonido
+     ── cuadro del arcoíris ──► Buen ojo
 ```
 
 - **Los objetos activos** no llevan carteles, círculos ni marcas: brillan apenas, de a uno por turno.

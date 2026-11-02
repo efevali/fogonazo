@@ -1,0 +1,40 @@
+/* Buen ojo: lo común a sus dos pantallas. La mesa de trabajo de un pintor vista desde arriba, con la luz cálida de
+   la lámpara desde arriba a la izquierda (S-29). Mientras no esté pintada (P-008), la madera, las manchas, el frasco
+   y el pincel se dibujan con código. Espacio de diseño: 915 × 412, como el mahjong. */
+@font-face { font-family: Barlow; font-weight: 600; src: url(../comun/fuentes/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: Barlow; font-weight: 700; src: url(../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: Caveat; font-weight: 600; src: url(../comun/fuentes/caveat-latin-600-normal.woff2) format('woff2'); }
+:root { --birome: #23398a; --birome-suave: #55628f; --rojo: #b5402e; --cinta: rgba(232, 220, 184, .94); --rotulo: #6b5a48; --ladrillo: #7a3324; }
+html, body { margin: 0; height: 100%; background: #5a3d28; overflow: hidden; }
+body { font-family: Barlow, "Arial Narrow", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; margin: 0; cursor: pointer; }
+button:focus { outline: none; }
+#stage { position: fixed; left: 0; top: 0; font-size: 1px; width: 915em; height: 412em; overflow: clip; }
+#stage > * { position: absolute; }
+
+/* the table: pine boards, the lamp's light, a vignette */
+#mesa { left: -60rem; top: -40rem; width: 1035rem; height: 492rem; pointer-events: none;
+  background: radial-gradient(ellipse at 20% 10%, rgba(255, 214, 150, .34), rgba(0, 0, 0, 0) 58%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, .38)),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .07) 0 1rem, transparent 1rem 9rem),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .035) 0 3rem, transparent 3rem 23rem),
+    repeating-linear-gradient(0deg, transparent 0 121rem, rgba(0, 0, 0, .22) 121rem 123rem),
+    linear-gradient(#80603f, #674630); }
+#mesa i { position: absolute; display: block; opacity: .5; }
+
+.birome { font-family: Caveat, cursive; font-weight: 600; color: var(--birome); }
+.rotulo { font-weight: 600; font-size: 15rem; letter-spacing: .14em; color: var(--rotulo); }
+/* masking tape as a button; the main one, brick red */
+.cinta { display: flex; align-items: center; justify-content: center; font: 700 21rem Barlow; letter-spacing: .03em; color: #2a2a28; background: var(--cinta);
+  clip-path: polygon(0 8%, 3% 0, 6% 10%, 9% 2%, 91% 0, 94% 9%, 97% 1%, 100% 6%, 100% 94%, 97% 100%, 94% 91%, 91% 99%, 9% 100%, 6% 92%, 3% 100%, 0 93%);
+  filter: drop-shadow(0 1rem 1.5rem rgba(0, 0, 0, .35)); }
+.cinta.principal { background: #b5482f; color: #fff6ec; }
+.cinta:active { transform: translateY(1.5rem) rotate(var(--r, 0deg)); }
+.tira { position: absolute; width: 62rem; height: 22rem; background: var(--cinta); box-shadow: 0 1rem 2rem rgba(0, 0, 0, .25); }
+
+#volver { left: 773rem; top: 366rem; width: 124rem; height: 30rem; z-index: 3; }
+#volver svg { width: 100%; height: 100%; display: block; transform: rotate(-1.5deg); }
+#rotate { position: fixed; inset: 0; display: none; place-items: center; background: rgba(20, 10, 4, .82); color: #f3e6d0;
+  font: 600 18px/1.4 Barlow, sans-serif; text-align: center; padding: 24px; z-index: 5; }
+@media (orientation: portrait) { #rotate { display: grid; } }

@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5a3d28">
+<title>Buen ojo · la partida</title>
+<link rel="stylesheet" href="mesa.css">
+<style>
+/* A game of Buen ojo (S-29c to h). On the left, a neutral grey card taped to the table: the color appears on it for
+   a few seconds and then it is rebuilt in the same place. On the right, a sheet with three brush strokes (hue,
+   saturation, brightness) whose tracks are painted with the current color; a paint tube rides on each one and is
+   dragged along it. Then both colors side by side, the score in red pen and, if the difference shows, what was off.
+   Five colors per game; the practice keeps the color in view, with the numbers, and has no score. */
+.cartulina { left: 32rem; top: 28rem; width: 455rem; height: 318rem; background-color: #7f7f7f;
+  background-image: repeating-linear-gradient(35deg, rgba(255, 255, 255, .025) 0 1rem, transparent 1rem 4rem); box-shadow: 0 5rem 12rem rgba(0, 0, 0, .45); }
+.cartulina > * { position: absolute; }
+#muestra { left: 32rem; top: 32rem; width: 391rem; height: 254rem; transition: opacity .25s; }
+#muestra.vacia { opacity: 0; }
+.mitad { top: 32rem; width: 195.5rem; height: 254rem; }
+#orig { left: 32rem; } #tuyo { left: 227.5rem; }
+.etq { top: 292rem; width: 195.5rem; text-align: center; font-weight: 600; font-size: 15rem; letter-spacing: .14em; color: #ececea; }
+#tiza { left: 32rem; top: 299rem; width: 391rem; height: 3rem; border-radius: 2rem; background: rgba(245, 245, 240, .85); transform-origin: left; }
+#ronda { left: 226rem; top: 15rem; width: 74rem; height: 27rem; font-size: 24rem; line-height: 27rem; text-align: center; transform: rotate(-2deg); }
+
+.hoja { left: 512rem; top: 28rem; width: 368rem; height: 318rem; background: #f6f3ea;
+  background-image: radial-gradient(rgba(0, 0, 0, .025) 1rem, transparent 1rem); background-size: 5rem 5rem; box-shadow: 0 5rem 12rem rgba(0, 0, 0, .4); }
+.hoja > * { position: absolute; }
+.fila { left: 0; width: 368rem; height: 84rem; touch-action: none; }
+.fila > * { position: absolute; }
+.fila .rotulo { left: 22rem; top: 2rem; }
+.cifra { right: 22rem; top: -2rem; font-size: 24rem; line-height: 24rem; }
+.trazo { left: 22rem; top: 28rem; width: 324rem; height: 32rem;
+  clip-path: polygon(1% 22%, 0 52%, 2% 84%, 8% 100%, 40% 94%, 70% 100%, 93% 96%, 99% 78%, 100% 44%, 97% 10%, 86% 0, 55% 6%, 22% 0, 6% 4%); }
+.trazo::after { content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .1) 0 1rem, transparent 1rem 4rem), repeating-linear-gradient(0deg, rgba(0, 0, 0, .08) 0 1rem, transparent 1rem 7rem); }
+.vacio { left: 22rem; top: 29rem; width: 320rem; height: 27rem; border: 2rem dashed rgba(90, 90, 90, .28); border-radius: 14rem 18rem 12rem 20rem; }
+.pomo { top: 12rem; width: 32rem; height: 64rem; margin-left: -16rem; filter: drop-shadow(0 3rem 2rem rgba(0, 0, 0, .45)); pointer-events: none; }
+.pomo svg { width: 100%; height: 100%; display: block; }
+#accion { left: 196rem; top: 266rem; width: 150rem; height: 42rem; --r: -1.5deg; transform: rotate(-1.5deg); }
+#mirar { left: 24rem; top: 262rem; font-size: 27rem; }
+
+#nota { left: 0; top: 0; width: 368rem; height: 260rem; }
+#nota > * { position: absolute; }
+#nota .nro { left: 22rem; top: 14rem; width: 112rem; height: 80rem; box-sizing: border-box; border: 3rem solid var(--rojo);
+  border-radius: 52% 48% 55% 45% / 50% 55% 45% 50%; transform: rotate(-4deg); display: flex; align-items: center; justify-content: center;
+  font-size: 52rem; color: var(--rojo); }
+#nota .de { left: 144rem; top: 40rem; font-size: 27rem; color: var(--rojo); }
+#nota .textos { left: 22rem; top: 102rem; width: 324rem; height: 158rem; display: flex; flex-direction: column; gap: 6rem; }
+#frase { font-size: 27rem; line-height: 27rem; }
+#ayuda { font-size: 22rem; line-height: 23rem; }
+#desglose { font-size: 18rem; line-height: 20rem; color: var(--birome-suave); }
+
+/* which parts each moment shows */
+#stage:not([data-fase=ver]):not([data-fase=practica]) .mitad, #stage:not([data-fase=ver]):not([data-fase=practica]) .etq { display: none; }
+#stage[data-fase=ver] #muestra, #stage[data-fase=practica] #muestra { display: none; }
+#stage:not([data-fase=mirar]) #tiza { visibility: hidden; }
+#stage:not([data-fase=espera]):not([data-fase=mirar]) .vacio, #stage:not([data-fase=espera]):not([data-fase=mirar]) #mirar { display: none; }
+#stage[data-fase=espera] .trazo, #stage[data-fase=mirar] .trazo, #stage[data-fase=espera] .pomo, #stage[data-fase=mirar] .pomo { display: none; }
+#stage:not([data-fase=ver]) #nota { display: none; }
+#stage[data-fase=ver] .fila { display: none; }
+#stage[data-fase=espera] #accion, #stage[data-fase=mirar] #accion { display: none; }
+#stage:not([data-fase=practica]) .cifra { display: none; }
+#stage[data-fase=espera] .rotulo, #stage[data-fase=mirar] .rotulo { color: #a59684; }
+#stage[data-fase=fin] .cartulina, #stage[data-fase=fin] .hoja, #stage[data-fase=fin] .tira { display: none; }
+
+/* the end of a game (S-29g): a page of the sketchbook with the five chips, the total and the record */
+#fin { left: 60rem; top: 24rem; width: 680rem; height: 360rem; background: #f4f1e8; border-radius: 2rem; box-shadow: 0 8rem 16rem rgba(0, 0, 0, .45); z-index: 2; }
+#fin > * { position: absolute; }
+#fin .espiral { left: -11rem; top: 14rem; bottom: 14rem; width: 24rem; background: repeating-linear-gradient(180deg, transparent 0 6rem, #8f9297 6rem 12rem, #c9ccd0 12rem 15rem, transparent 15rem 22rem); }
+#finDif { left: 48rem; top: 22rem; color: var(--ladrillo); }
+#total { left: 46rem; top: 36rem; font-size: 80rem; line-height: 86rem; white-space: nowrap; }
+#total small { font-size: 38rem; }
+#sello { left: 410rem; top: 34rem; transform: rotate(8deg); border: 3rem solid var(--rojo); border-radius: 6rem; padding: 3rem 14rem;
+  font-weight: 700; font-size: 25rem; letter-spacing: .1em; color: var(--rojo); opacity: .9; }
+#antes { left: 430rem; top: 88rem; font-size: 23rem; color: var(--birome-suave); }
+#fichas { left: 48rem; top: 140rem; display: flex; gap: 16rem; }
+.ficha { width: 88rem; box-sizing: border-box; padding: 5rem 5rem 0; background: #fbfaf6; box-shadow: 0 2rem 4rem rgba(0, 0, 0, .3); transform: rotate(var(--r)); }
+.ficha div { height: 80rem; display: flex; } .ficha div i { flex: 1; }
+.ficha b { display: block; font: 600 31rem/38rem Caveat, cursive; text-align: center; color: var(--birome); }
+#leyenda { left: 50rem; top: 270rem; font-size: 22rem; color: var(--birome-suave); }
+#otra { left: 448rem; top: 298rem; width: 180rem; height: 48rem; --r: -1.5deg; transform: rotate(-1.5deg); }
+</style>
+</head>
+<body>
+<div id="stage" data-fase="espera">
+  <div id="mesa" aria-hidden="true">
+    <i style="left:40rem;top:400rem;width:24rem;height:18rem;border-radius:40% 60% 50% 50%;background:#c8553d"></i>
+    <i style="left:600rem;top:398rem;width:30rem;height:20rem;border-radius:55% 45% 60% 40%;background:#4f6db3"></i>
+    <i style="left:952rem;top:70rem;width:14rem;height:12rem;border-radius:50%;background:#e0b84c"></i>
+  </div>
+  <!-- a brush resting below the card -->
+  <div aria-hidden="true" style="left:150rem;top:362rem;width:240rem;height:16rem;transform:rotate(-2deg)">
+    <div style="position:absolute;left:74rem;top:3rem;width:166rem;height:10rem;border-radius:5rem;background:linear-gradient(#c79a5c,#8b6033)"></div>
+    <div style="position:absolute;left:42rem;top:3rem;width:34rem;height:10rem;background:linear-gradient(#e2e4e7,#9a9ea4)"></div>
+    <div style="position:absolute;left:10rem;top:2rem;width:34rem;height:12rem;border-radius:50% 10% 10% 50%;background:#3a2a1e"></div>
+  </div>
+
+  <div class="cartulina">
+    <div id="muestra" class="vacia"></div>
+    <div id="orig" class="mitad"></div><div id="tuyo" class="mitad"></div>
+    <div class="etq" style="left:32rem">ORIGINAL</div><div class="etq" style="left:227.5rem">EL TUYO</div>
+    <div id="tiza"></div>
+  </div>
+  <div class="tira" aria-hidden="true" style="left:20rem;top:18rem;transform:rotate(-38deg)"></div>
+  <div class="tira" aria-hidden="true" style="left:438rem;top:18rem;transform:rotate(38deg)"></div>
+  <div id="ronda" class="tira birome"></div>
+
+  <div class="hoja">
+    <div class="fila" id="filaH" style="top:10rem" role="slider" aria-label="Tono" aria-valuemin="0" aria-valuemax="360" tabindex="0">
+      <div class="rotulo">TONO</div><div class="cifra birome"></div><div class="vacio"></div><div class="trazo"></div><div class="pomo"></div>
+    </div>
+    <div class="fila" id="filaS" style="top:98rem" role="slider" aria-label="Saturación" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+      <div class="rotulo">SATURACIÓN</div><div class="cifra birome"></div><div class="vacio"></div><div class="trazo"></div><div class="pomo"></div>
+    </div>
+    <div class="fila" id="filaV" style="top:186rem" role="slider" aria-label="Brillo" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+      <div class="rotulo">BRILLO</div><div class="cifra birome"></div><div class="vacio"></div><div class="trazo"></div><div class="pomo"></div>
+    </div>
+    <div id="mirar" class="birome">mirá bien…</div>
+    <div id="nota" aria-live="polite">
+      <div class="nro birome" id="nro"></div><div class="de birome">de 10</div>
+      <div class="textos"><div id="frase" class="birome"></div><div id="ayuda" class="birome"></div><div id="desglose" class="birome"></div></div>
+    </div>
+    <button id="accion" class="cinta principal" type="button">Listo</button>
+  </div>
+
+  <div id="fin" hidden>
+    <div class="espiral" aria-hidden="true"></div>
+    <div id="finDif" class="rotulo"></div>
+    <div id="total" class="birome"></div>
+    <div id="sello" hidden>NUEVO RÉCORD</div>
+    <div id="antes" class="birome"></div>
+    <div id="fichas"></div>
+    <div id="leyenda" class="birome">en cada muestra: el original a la izquierda, el tuyo a la derecha</div>
+    <button id="otra" class="cinta principal" type="button">Otra partida</button>
+  </div>
+
+  <button id="volver" type="button" aria-label="Volver al block"><svg viewBox="0 0 132 34" aria-hidden="true"><path d="M2,4 h126 l-4,13 l4,13 h-126 l4,-13 z" fill="#1c1c1c"/><text x="66" y="23" text-anchor="middle" font-family="Barlow" font-weight="700" font-size="14" letter-spacing="2.2" fill="#f4f1ea">◀ VOLVER</text></svg></button>
+</div>
+<div id="rotate">Girá el teléfono para verlo en horizontal</div>
+
+<script src="../comun/pantalla.js"></script>
+<script src="color.js"></script>
+<script src="estado.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const Est = window.Estado, C = window.Color;
+  const fx = n => App.sonido.fx(n);
+  const stage = $('stage');
+
+  function fit() {
+    const vv = window.visualViewport;
+    const w = document.documentElement.clientWidth || innerWidth, h = (vv && vv.height) || innerHeight;
+    const s = Math.min(w / 915, h / 412);
+    stage.style.fontSize = s + 'px'; document.documentElement.style.fontSize = s + 'px';
+    stage.style.left = ((w - 915 * s) / 2) + 'px'; stage.style.top = ((h - 412 * s) / 2) + 'px';
+  }
+  addEventListener('resize', fit); if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+  fit();
+
+  const q = new URLSearchParams(location.search);
+  const PRACTICA = q.has('practica');
+  const DIF = Est.DIFICULTADES[q.get('d')] ? q.get('d') : Est.dificultad;
+  const SEGUNDOS = Est.DIFICULTADES[DIF].segundos;
+  const RONDAS = 5;
+  const INICIO = () => ({ h: 180, s: 50, v: 50 });   // every round starts from the same place
+
+  // the state of the game
+  const G = { ronda: 0, objetivo: null, tuyo: INICIO(), resultados: [], usadas: new Set(), timers: [] };
+  const fase = f => { stage.dataset.fase = f; };
+  const despues = (ms, f) => G.timers.push(setTimeout(f, ms));
+
+  // ------------------------------------------------------------ the strokes and the tubes
+  const TUBO = color => `<svg viewBox="0 0 30 60" aria-hidden="true"><defs><linearGradient id="al" x1="0" x2="1"><stop offset="0" stop-color="#8f9399"/><stop offset=".35" stop-color="#eef0f2"/><stop offset=".6" stop-color="#c4c8cd"/><stop offset="1" stop-color="#7d8188"/></linearGradient></defs><rect x="10" y="0" width="10" height="8" rx="1.5" fill="#1e1e1e"/><path d="M12 0V8M14 0V8M16 0V8M18 0V8" stroke="#555" stroke-width=".6"/><rect x="11.5" y="8" width="7" height="3" fill="url(#al)"/><path d="M11.5 11 L6 16 H24 L18.5 11 Z" fill="url(#al)"/><path d="M6 16 H24 L25 48 H5 Z" fill="url(#al)"/><path d="M6.1 19 H23.9 V22 H6.1Z" fill="#f6f4ee"/><path class="etiqueta" d="M6.2 22 H23.8 L24.4 40 H5.6 Z" fill="${color}"/><rect x="3" y="48" width="24" height="11" rx="1" fill="url(#al)"/><path d="M3 51H27M3 54H27M3 57H27" stroke="#7d8188" stroke-width=".6"/></svg>`;
+  const FILAS = [
+    { el: $('filaH'), k: 'h', max: 360 },
+    { el: $('filaS'), k: 's', max: 100 },
+    { el: $('filaV'), k: 'v', max: 100 },
+  ];
+  FILAS.forEach(f => { f.trazo = f.el.querySelector('.trazo'); f.pomo = f.el.querySelector('.pomo'); f.cifra = f.el.querySelector('.cifra'); f.pomo.innerHTML = TUBO('#888'); f.etq = f.pomo.querySelector('.etiqueta'); });
+  const ANCHO = 324, IZQ = 22;
+
+  function pintarTuyo() {
+    const t = G.tuyo, actual = C.css(t.h, t.s, t.v);
+    const tonos = []; for (let h = 0; h <= 360; h += 30) tonos.push(C.css(h, t.s, t.v));
+    FILAS[0].trazo.style.background = `linear-gradient(90deg, ${tonos.join(', ')})`;
+    FILAS[1].trazo.style.background = `linear-gradient(90deg, ${C.css(t.h, 0, t.v)}, ${C.css(t.h, 100, t.v)})`;
+    FILAS[2].trazo.style.background = `linear-gradient(90deg, ${C.css(t.h, t.s, 0)}, ${C.css(t.h, t.s, 100)})`;
+    FILAS.forEach(f => {
+      f.pomo.style.left = (IZQ + t[f.k] / f.max * ANCHO) + 'rem';
+      f.etq.setAttribute('fill', actual);
+      f.el.setAttribute('aria-valuenow', Math.round(t[f.k]));
+    });
+    if (stage.dataset.fase === 'armar') $('muestra').style.background = actual;
+    $('tuyo').style.background = actual;
+    if (PRACTICA) {
+      const o = G.objetivo;
+      FILAS[0].cifra.textContent = `${Math.round(t.h)}° · el original, ${Math.round(o.h)}°`;
+      FILAS[1].cifra.textContent = `${Math.round(t.s)} · el original, ${Math.round(o.s)}`;
+      FILAS[2].cifra.textContent = `${Math.round(t.v)} · el original, ${Math.round(o.v)}`;
+    }
+  }
+
+  // dragging: grabbing the tube moves it from where it is; touching elsewhere on the stroke takes it there
+  const activo = () => stage.dataset.fase === 'armar' || stage.dataset.fase === 'practica';
+  FILAS.forEach(f => {
+    let arrastre = null;
+    const valorEn = x => { const r = f.trazo.getBoundingClientRect(); return Math.max(0, Math.min(1, (x - r.left) / r.width)) * f.max; };
+    f.el.addEventListener('pointerdown', e => {
+      if (!activo()) return;
+      e.preventDefault();
+      f.el.setPointerCapture(e.pointerId);
+      const rp = f.pomo.getBoundingClientRect(), sobrePomo = e.clientX >= rp.left - 10 && e.clientX <= rp.right + 10;
+      if (!sobrePomo) { G.tuyo[f.k] = valorEn(e.clientX); pintarTuyo(); }
+      arrastre = { x: e.clientX, v: G.tuyo[f.k], ancho: f.trazo.getBoundingClientRect().width };
+      fx('toc');
+    });
+    f.el.addEventListener('pointermove', e => {
+      if (!arrastre) return;
+      G.tuyo[f.k] = Math.max(0, Math.min(f.max, arrastre.v + (e.clientX - arrastre.x) / arrastre.ancho * f.max));
+      pintarTuyo();
+    });
+    const soltar = () => { if (arrastre) { arrastre = null; fx('suelta'); } };
+    f.el.addEventListener('pointerup', soltar); f.el.addEventListener('pointercancel', soltar);
+    // with a keyboard, the arrows move it a little
+    f.el.addEventListener('keydown', e => {
+      if (!activo()) return;
+      const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault(); G.tuyo[f.k] = Math.max(0, Math.min(f.max, G.tuyo[f.k] + d * (e.shiftKey ? 10 : 1))); pintarTuyo();
+    });
+  });
+
+  // ------------------------------------------------------------ a round
+  function ronda() {
+    G.ronda++;
+    G.objetivo = C.sortear(G.resultados.map(r => r.objetivo));
+    G.tuyo = INICIO();
+    $('ronda').textContent = G.ronda + ' / ' + RONDAS;
+    $('muestra').classList.add('vacia');
+    fase('espera');
+    pintarTuyo();
+    despues(800, mirar);
+  }
+  function mirar() {
+    const m = $('muestra'), o = G.objetivo, tiza = $('tiza');
+    m.style.background = C.css(o.h, o.s, o.v);
+    m.classList.remove('vacia');
+    tiza.style.transition = 'none'; tiza.style.transform = 'scaleX(1)';
+    fase('mirar');
+    void tiza.getBoundingClientRect();
+    tiza.style.transition = `transform ${SEGUNDOS}s linear`; tiza.style.transform = 'scaleX(0)';
+    despues(SEGUNDOS * 1000, () => {
+      m.classList.add('vacia');
+      despues(280, armar);
+    });
+  }
+  function armar() {
+    fase('armar');
+    $('accion').textContent = 'Listo';
+    pintarTuyo();
+    $('muestra').classList.remove('vacia');
+  }
+  // the reveal: both colors side by side, the score, a phrase of its band and, if the difference shows, the help
+  function ver() {
+    const o = G.objetivo, t = Object.assign({}, G.tuyo);
+    const dE = C.diferencia(o, t), p = C.puntaje(dE);
+    G.resultados.push({ objetivo: o, tuyo: t, dE, p });
+    $('orig').style.background = C.css(o.h, o.s, o.v);
+    $('tuyo').style.background = C.css(t.h, t.s, t.v);
+    $('nro').textContent = C.coma(p);
+    $('frase').textContent = C.frase(p, G.usadas);
+    const a = C.ayuda(o, t, dE);
+    $('ayuda').textContent = a ? a.texto : '';
+    $('desglose').textContent = a ? a.desglose : '';
+    $('accion').textContent = G.ronda < RONDAS ? 'Siguiente' : 'Ver el total';
+    fase('ver');
+    ajustarNota();
+    fx('pista');
+  }
+  // a long phrase plus the help can overflow the sheet: the pen gets a little smaller until it fits
+  function ajustarNota() {
+    const caja = document.querySelector('#nota .textos'), els = [$('frase'), $('ayuda'), $('desglose')], base = [27, 22, 18];
+    for (let k = 0; k <= 6; k++) {
+      const f = 1 - k * 0.06;
+      els.forEach((el, i) => { el.style.fontSize = base[i] * f + 'rem'; el.style.lineHeight = (base[i] + 1) * f + 'rem'; });
+      if (caja.scrollHeight <= caja.clientHeight + 1) break;
+    }
+  }
+  function fin() {
+    const total = Math.round(G.resultados.reduce((s, r) => s + r.p, 0) * 10) / 10;
+    const r = Est.terminada(DIF, total);
+    $('finDif').textContent = 'PARTIDA · ' + Est.DIFICULTADES[DIF].nombre.toUpperCase();
+    $('total').innerHTML = `${C.coma(total)}<small> de 50</small>`;
+    $('sello').hidden = !r.record;
+    $('antes').textContent = r.record && r.antes ? 'antes: ' + C.coma(r.antes) : r.record ? '' : 'récord: ' + C.coma(r.antes);
+    const ROT = [-2, 1.5, -1, 2, -1.5];
+    $('fichas').innerHTML = G.resultados.map((x, i) =>
+      `<div class="ficha" style="--r:${ROT[i]}deg"><div><i style="background:${C.css(x.objetivo.h, x.objetivo.s, x.objetivo.v)}"></i><i style="background:${C.css(x.tuyo.h, x.tuyo.s, x.tuyo.v)}"></i></div><b>${C.coma(x.p)}</b></div>`).join('');
+    $('fin').hidden = false;
+    fase('fin');
+    fx(r.record ? 'record' : 'limpio');
+  }
+  function nuevaPartida() {
+    G.timers.forEach(clearTimeout); G.timers = [];
+    G.ronda = 0; G.resultados = []; G.usadas = new Set();
+    $('fin').hidden = true;
+    ronda();
+  }
+
+  // ------------------------------------------------------------ the practice: the color stays in view, with numbers
+  function practica() {
+    G.objetivo = C.sortear(G.objetivo ? [G.objetivo] : []);
+    G.tuyo = INICIO();
+    $('ronda').textContent = 'práctica';
+    $('ronda').style.width = '100rem'; $('ronda').style.left = '213rem';
+    $('orig').style.background = C.css(G.objetivo.h, G.objetivo.s, G.objetivo.v);
+    $('accion').textContent = 'Otro color';
+    fase('practica');
+    pintarTuyo();
+  }
+
+  $('accion').addEventListener('click', () => {
+    const f = stage.dataset.fase;
+    fx('boton');
+    if (f === 'armar') ver();
+    else if (f === 'ver') { if (G.ronda < RONDAS) ronda(); else fin(); }
+    else if (f === 'practica') practica();
+  });
+  $('otra').addEventListener('click', () => { fx('boton'); nuevaPartida(); });
+  $('volver').addEventListener('click', () => { fx('boton'); App.volver(1 + App.extra); });
+
+  // for the tools (herramientas/capturas.js): see the state and jump to a moment
+  window.__buenojo = { G, fase: () => stage.dataset.fase, ver, fin, armar, ronda, poner: t => { Object.assign(G.tuyo, t); pintarTuyo(); }, objetivo: o => { G.objetivo = o; } };
+
+  if (PRACTICA) practica(); else ronda();
+})();
+</script>
+</body>
+</html>

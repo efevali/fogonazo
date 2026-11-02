@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5a3d28">
+<title>Buen ojo · el block</title>
+<link rel="stylesheet" href="mesa.css">
+<style>
+/* The way into Buen ojo (S-29b): a sketchbook open on the painter's table. Three paint-chip cards pick the
+   difficulty (how long the color is shown), each with its record in pen; two strips of tape start a game or the
+   practice. The chosen card is lifted, with an amber edge, like the chosen tile of the mahjong. */
+.block { left: 60rem; top: 24rem; width: 680rem; height: 360rem; background: #f4f1e8; border-radius: 2rem; box-shadow: 0 8rem 16rem rgba(0, 0, 0, .45); }
+.block > * { position: absolute; }
+.espiral { left: -11rem; top: 14rem; bottom: 14rem; width: 24rem; background: repeating-linear-gradient(180deg, transparent 0 6rem, #8f9297 6rem 12rem, #c9ccd0 12rem 15rem, transparent 15rem 22rem); }
+h1 { margin: 0; left: 48rem; top: 20rem; font: 700 36rem Barlow; color: #2a2a28; letter-spacing: .02em; }
+.lema { left: 204rem; top: 28rem; font-size: 26rem; }
+.dif { left: 48rem; top: 84rem; color: var(--ladrillo); }
+.chip { position: absolute; top: 108rem; width: 126rem; height: 180rem; box-sizing: border-box; padding: 7rem; background: #fbfaf6; text-align: left;
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, .3); transform: rotate(var(--r)); transition: transform .15s, box-shadow .15s; }
+.chip span { display: block; height: 32rem; }
+.chip b { display: block; margin-top: 7rem; font: 700 21rem/22rem Barlow; color: #2a2a28; }
+.chip small { display: block; font: 600 15rem Barlow; color: #5a5a55; }
+.chip.elegida { transform: rotate(var(--r)) translateY(-6rem); box-shadow: 0 0 0 3rem #e0a43a, 0 10rem 14rem rgba(0, 0, 0, .35); }
+#chips { left: 0; top: 0; }
+.rec { position: absolute; top: 296rem; width: 126rem; font-size: 24rem; line-height: 24rem; }
+.rec.nada { color: #8a8aa6; }
+#partida { left: 470rem; top: 128rem; width: 166rem; height: 60rem; --r: -2deg; transform: rotate(-2deg); }
+#practica { left: 470rem; top: 232rem; width: 166rem; height: 60rem; --r: 1.5deg; transform: rotate(1.5deg); }
+.pie { left: 476rem; font-size: 23rem; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="mesa" aria-hidden="true">
+    <i style="left:860rem;top:86rem;width:36rem;height:28rem;border-radius:55% 45% 60% 40%;background:#4f6db3"></i>
+    <i style="left:884rem;top:120rem;width:12rem;height:10rem;border-radius:50%;background:#4f6db3"></i>
+    <i style="left:96rem;top:386rem;width:24rem;height:18rem;border-radius:40% 60% 50% 50%;background:#c8553d"></i>
+    <i style="left:830rem;top:380rem;width:18rem;height:14rem;border-radius:50%;background:#e0b84c"></i>
+  </div>
+  <!-- the water jar, from above, and a brush resting beside it -->
+  <div aria-hidden="true" style="left:778rem;top:120rem;width:104rem;height:104rem;border-radius:50%;background:radial-gradient(circle at 40% 38%,rgba(160,200,190,.5),rgba(120,150,150,.35) 60%,rgba(255,255,255,.4) 62%,rgba(255,255,255,.12) 70%);box-shadow:0 4rem 10rem rgba(0,0,0,.4)"></div>
+  <div aria-hidden="true" style="left:756rem;top:262rem;width:150rem;height:62rem;transform:rotate(-24deg)">
+    <div style="position:absolute;left:44rem;top:26rem;width:106rem;height:10rem;border-radius:5rem;background:linear-gradient(#c79a5c,#8b6033)"></div>
+    <div style="position:absolute;left:20rem;top:26rem;width:26rem;height:10rem;background:linear-gradient(#e2e4e7,#9a9ea4)"></div>
+    <div style="position:absolute;left:0;top:25rem;width:22rem;height:12rem;border-radius:50% 10% 10% 50%;background:#3a2a1e"></div>
+  </div>
+
+  <div class="block">
+    <div class="espiral" aria-hidden="true"></div>
+    <h1>Buen ojo</h1>
+    <div class="lema birome">mirá, acordate, armalo</div>
+    <div class="dif rotulo">DIFICULTAD</div>
+    <div id="chips" role="radiogroup" aria-label="Dificultad"></div>
+    <button id="partida" class="cinta principal" type="button">Partida</button>
+    <div class="pie birome" style="top:192rem">5 colores</div>
+    <button id="practica" class="cinta" type="button">Práctica</button>
+    <div class="pie birome" style="top:296rem">con el color a la vista</div>
+  </div>
+  <button id="volver" type="button" aria-label="Volver a la sala"><svg viewBox="0 0 132 34" aria-hidden="true"><path d="M2,4 h126 l-4,13 l4,13 h-126 l4,-13 z" fill="#1c1c1c"/><text x="66" y="23" text-anchor="middle" font-family="Barlow" font-weight="700" font-size="14" letter-spacing="2.2" fill="#f4f1ea">◀ VOLVER</text></svg></button>
+</div>
+<div id="rotate">Girá el teléfono para verlo en horizontal</div>
+
+<script src="../comun/pantalla.js"></script>
+<script src="color.js"></script>
+<script src="estado.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const Est = window.Estado, C = window.Color;
+  const fx = n => App.sonido.fx(n);
+
+  const stage = $('stage');
+  function fit() {
+    const vv = window.visualViewport;
+    const w = document.documentElement.clientWidth || innerWidth, h = (vv && vv.height) || innerHeight;
+    const s = Math.min(w / 915, h / 412);
+    stage.style.fontSize = s + 'px'; document.documentElement.style.fontSize = s + 'px';
+    stage.style.left = ((w - 915 * s) / 2) + 'px'; stage.style.top = ((h - 412 * s) / 2) + 'px';
+  }
+  addEventListener('resize', fit); if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+  fit();
+
+  // the three paint chips: three shades of one color each, the name and the seconds
+  const CHIPS = {
+    facil: { x: 48, r: -2, tonos: ['#a9d3c8', '#5fae9b', '#2f7a68'] },
+    normal: { x: 192, r: 1, tonos: ['#f0d68e', '#e0b84c', '#a8822a'] },
+    dificil: { x: 336, r: -1, tonos: ['#eaa79a', '#c8553d', '#8a2f20'] },
+  };
+  const seg = s => String(s).replace('.', ',') + ' segundos';
+  function pintar() {
+    const elegida = Est.dificultad;
+    $('chips').innerHTML = Object.entries(CHIPS).map(([id, c]) => {
+      const D = Est.DIFICULTADES[id], r = Est.record(id);
+      return `<button class="chip${id === elegida ? ' elegida' : ''}" type="button" role="radio" aria-checked="${id === elegida}" data-id="${id}"
+        style="left:${c.x}rem;--r:${c.r}deg" aria-label="${D.nombre}, ${seg(D.segundos)}${r ? ', récord ' + C.coma(r) : ''}">${c.tonos.map(t => `<span style="background:${t}"></span>`).join('')}<b>${D.nombre}</b><small>${seg(D.segundos)}</small></button>` +
+        `<div class="rec birome${r ? '' : ' nada'}" style="left:${c.x + 8}rem">${r ? 'récord<br>' + C.coma(r) : 'todavía<br>nada'}</div>`;
+    }).join('');
+  }
+  pintar();
+  $('chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b || b.dataset.id === Est.dificultad) return;
+    fx('boton'); Est.dificultad = b.dataset.id; pintar();
+  });
+
+  $('partida').addEventListener('click', () => { fx('boton'); App.ir('buenojo/partida.html?d=' + Est.dificultad); });
+  $('practica').addEventListener('click', () => { fx('boton'); App.ir('buenojo/partida.html?practica'); });
+  $('volver').addEventListener('click', () => { fx('boton'); App.volver(1 + App.extra); });
+})();
+</script>
+</body>
+</html>

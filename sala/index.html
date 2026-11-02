@@ -12,7 +12,7 @@
 @font-face { font-family: "Barlow Semi Condensed"; font-weight: 600; src: url(../comun/fuentes/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); }
 @font-face { font-family: "IBM Plex Mono"; font-weight: 600; src: url(../comun/fuentes/ibm-plex-mono-latin-600-normal.woff2) format('woff2'); }
 @font-face { font-family: "Barlow Semi Condensed"; font-weight: 700; src: url(../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
-/* Layout: one full-bleed illustrated room (Gemini) with an SVG layer in image coordinates; three active objects: bench, coffee table, hi-fi. */
+/* Layout: one full-bleed illustrated room (Gemini) with an SVG layer in image coordinates; four active objects: bench, coffee table, hi-fi, painting. */
 :root {
   --night: #120c0a;
   --walnut: #5a3520;
@@ -69,8 +69,9 @@ body { margin: 0; background: var(--night); color: var(--chip-fg); overflow: hid
 }
 
 /* access highlights: a brightened copy of the room, masked to each object, pulsing in turn */
-.hl { opacity: 0; animation: hint 5.1s ease-in-out infinite; pointer-events: none; }
-@keyframes hint { 0%, 100% { opacity: 0; } 22% { opacity: .5; } 44% { opacity: 0; } }
+.hl { opacity: 0; animation: hint 6.8s ease-in-out infinite; pointer-events: none; }
+/* four objects, one every 1.7 s: each one glows for the same 2.2 s as when there were three */
+@keyframes hint { 0%, 100% { opacity: 0; } 16.5% { opacity: .5; } 33% { opacity: 0; } }
 /* touch feedback on its own layer, so the hint cycle above is never restarted and keeps its turn */
 .fl { opacity: 0; pointer-events: none; }
 .fl.flash { animation: flash .45s ease-out 1; }
@@ -193,11 +194,12 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
 </head>
 <body>
 <div id="stage">
-  <svg id="scene" viewBox="0 120 2576 1200" preserveAspectRatio="xMidYMid slice" aria-label="Living de los 70 de noche, con lluvia: banco de electrónica, sillón con mesa ratona y mahjong, equipo de audio">
+  <svg id="scene" viewBox="0 120 2576 1200" preserveAspectRatio="xMidYMid slice" aria-label="Living de los 70 de noche, con lluvia: banco de electrónica, sillón con mesa ratona y mahjong, equipo de audio y el cuadro del arcoíris">
     <defs>
       <mask id="mBench" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-bench.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <mask id="mTable" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-table.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <mask id="mAudio" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-audio.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
+      <mask id="mCuadro" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-cuadro.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <mask id="mRain" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-rain.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <clipPath id="lavaGlass"><path d="M2181,583 C2178,593 2176.5,605 2176.5,618 C2176.5,633 2177.5,645 2179.5,655 L2195,655 C2197,645 2198,633 2198,618 C2198,605 2196.5,593 2193.5,583 Z"/></clipPath>
       <clipPath id="scopeScreen"><rect x="243" y="740" width="52" height="58" rx="7"/></clipPath>
@@ -233,6 +235,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     <image class="hl" id="hlBench" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mBench)" style="animation-delay:0s"/>
     <image class="hl" id="hlTable" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mTable)" style="animation-delay:1.7s"/>
     <image class="hl" id="hlAudio" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mAudio)" style="animation-delay:3.4s"/>
+    <image class="hl" id="hlCuadro" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mCuadro)" style="animation-delay:5.1s"/>
     <image class="fl" id="flash" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mBench)"/>
 
     <!-- rain on the window (masked around the arc lamp) -->
@@ -309,10 +312,13 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     <path class="hit" id="hitTable" data-href="mahjong/estuche.html" data-hl="hlTable" role="button" tabindex="0" aria-label="Abrir Mahjong"
       d="M834,960H1102V878H1262V988H1358V1234H834Z"/>
     <path class="hit" id="hitAudio" data-open="sheetAudio" data-hl="hlAudio" role="button" tabindex="0" aria-label="Abrir ajustes"
-      d="M1495,652H2250V1052H1495Z"/>
+      d="M1495,670H2250V1052H1495Z"/>
+    <path class="hit" id="hitCuadro" data-href="buenojo/index.html" data-hl="hlCuadro" role="button" tabindex="0" aria-label="Abrir Buen ojo"
+      d="M1675,428H2040V668H1675Z"/>
     <text class="zone-label" x="383" y="470" text-anchor="middle">FOGONAZO</text>
     <text class="zone-label" x="1096" y="860" text-anchor="middle">MAHJONG</text>
     <text class="zone-label" x="1872" y="630" text-anchor="middle">AJUSTES</text>
+    <text class="zone-label" x="1858" y="416" text-anchor="middle">BUEN OJO</text>
   </svg>
 
   <div class="rotate">Girá el teléfono para verlo en horizontal</div>
