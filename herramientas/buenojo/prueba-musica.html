@@ -2,12 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<!-- S-33 (segunda vuelta: B descartado, A con más flauta y la variante A2), página de prueba de la música de Buen ojo: el estilo general, sobre un solo tema.
-     «Taller» (el del mapa de Fogonazo, que en Buen ojo sería el del block y la práctica) en tres versiones:
-     el original de Fogonazo, A (Renacimiento: laúd, flauta dulce, viola da gamba y tamboril) y B (Barroco: clave,
-     violín y violonchelo, con trinos). Como las primas orientales del mahjong: mismo tempo, ritmo, acordes y bajo; el
-     color lo dan los instrumentos y los adornos. Todo sintetizado, sin archivos de audio.
-     En el juego, la primera vuelta del tema va sin melodía; acá arranca con la melodía para escucharla enseguida. -->
+<!-- S-33, página de prueba de la música de Buen ojo. Estilo elegido (3/11): A, Renacimiento — laúd en los arpegios,
+     flauta dulce en la melodía con un adorno corto en las notas largas, viola da gamba en el bajo y tamboril suave.
+     Descartados: B (barroco, con trinos), A2 (consort, laúd rasgueado y dos flautas) y A3 (todo ligado, de fondo).
+     Los cuatro temas de Fogonazo en ese estilo, como las primas orientales del mahjong (mismo tempo, ritmo, acordes y
+     bajo; el color lo dan los instrumentos), cada uno junto a su original para comparar:
+       Taller → el block y la práctica · Siesta → Fácil · Placa → Normal · Urgente → Difícil (a 144 como en Fogonazo, o
+       a 120 y sin el tamboril de caja, porque en Buen ojo el armado no corre contra reloj).
+     Todo sintetizado, sin archivos de audio. En el juego, Taller, Siesta y Placa arrancan con una vuelta sin melodía;
+     acá arrancan con la melodía para escucharla enseguida. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#5a3d28">
 <title>Buen ojo · prueba de música</title>
@@ -19,48 +22,78 @@ body { font-family: Barlow, "Arial Narrow", sans-serif; color: #3a332c; display:
   -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
 .hoja { background: #f6f3ea; max-width: 640px; width: 100%; padding: 20px 20px 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, .4); box-sizing: border-box; }
 h1 { font-size: 22px; margin: 0 0 4px; } p { font-weight: 500; color: #7a6c5c; font-size: 15px; line-height: 1.4; margin: 0 0 14px; }
-.op { display: block; width: 100%; text-align: left; border: 0; margin: 0 0 12px; padding: 12px 14px; font: inherit; color: inherit; cursor: pointer;
+h2 { font-size: 17px; margin: 18px 0 2px; } h2 + p { font-size: 14px; margin-bottom: 8px; }
+.par { display: flex; gap: 10px; }
+.op { flex: 1; text-align: left; border: 0; margin: 0; padding: 10px 12px; font: inherit; color: inherit; cursor: pointer;
   background: #fbfaf6; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); border-left: 6px solid #d9cfbd; }
-.op b { display: block; font-size: 19px; } .op span { display: block; font-weight: 500; font-size: 14px; color: #7a6c5c; margin-top: 2px; line-height: 1.35; }
+.op b { display: block; font-size: 17px; } .op span { display: block; font-weight: 500; font-size: 13px; color: #7a6c5c; margin-top: 2px; }
 .op.on { border-left-color: #b5402e; background: #fff; }
-.op.on b::after { content: "  ♪ sonando"; color: #b5402e; font-size: 15px; }
-#parar { background: linear-gradient(#c95a3d, #a63f27); color: #fff6ec; font: 700 18px Barlow; border: 0; padding: 10px 26px; cursor: pointer; margin-top: 4px; }
+.op.on b::after { content: "  ♪"; color: #b5402e; }
+#parar { background: linear-gradient(#c95a3d, #a63f27); color: #fff6ec; font: 700 18px Barlow; border: 0; padding: 10px 26px; cursor: pointer; margin-top: 20px; }
 small { display: block; margin-top: 16px; color: #9a8b78; font-weight: 500; font-size: 13px; line-height: 1.4; }
 </style>
 </head>
 <body>
 <div class="hoja">
   <h1>Buen ojo · la música (S-33)</h1>
-  <p>Un solo tema, «Taller», para elegir el estilo general. El B (barroco) quedó descartado; ahora, el A con la flauta más presente y una variante, A2, más lejos del mahjong. Tocá una para escucharla; tocá otra para cambiar. Con el volumen del teléfono como cuando jugás.</p>
-  <button class="op" data-v="original"><b>Original</b><span>Taller, como suena en el mapa de Fogonazo.</span></button>
-  <button class="op" data-v="A"><b>A · Renacimiento</b><span>Laúd en arpegios, flauta dulce en la melodía (ahora más presente), viola da gamba en el bajo y un tamboril suave. Un adorno corto en las notas largas.</span></button>
-  <button class="op" data-v="A3"><b>A3 · Renacimiento, de fondo</b><span>Como el A, pero todo ligado: la flauta y la viola da gamba unen cada nota con la siguiente, sin adornos. La flauta más baja, el laúd más cálido, el tamboril apenas y más sala: más acompañamiento que protagonista.</span></button>
-  <button class="op" data-v="A2"><b>A2 · Renacimiento, en consort</b><span>El laúd rasguea los acordes en ritmo de pavana (largo, corto, corto) en lugar de arpegiar; la viola da gamba sostiene el bajo; dos flautas dulces tocan la melodía a dos voces, en terceras; tamboril y pandereta. Sin adornos.</span></button>
+  <p>Los cuatro temas en el estilo A (laúd, flauta dulce, viola da gamba y tamboril), cada uno junto a su original de Fogonazo. Tocá uno para escucharlo; tocá otro para cambiar.</p>
+  <div id="temas"></div>
   <button id="parar" type="button">Parar</button>
-  <small>Mismo tempo (92), mismos acordes, bajo y ritmo en las tres; cambian los instrumentos y los adornos. En el juego, la primera vuelta va sin melodía; acá arranca con ella.</small>
+  <small>Mismo tempo, acordes, bajo y ritmo que en Fogonazo; cambian los instrumentos. En el juego, Taller, Siesta y Placa arrancan con una vuelta sin melodía; acá arrancan con ella.</small>
 </div>
 <script>
 'use strict';
-// ------------------------------------------------------------------ the theme (Taller, from comun/sonido.js)
+// ------------------------------------------------------------------ the four themes (from comun/sonido.js)
 const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const N = s => { const m = /^([A-G])([#b]?)(-?\d)$/.exec(s); return 12 * (+m[3] + 1) + NOTE[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); };
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
-const SONG = {
-  bpm: 92,
-  chords: [['C4', 'E4', 'G4'], ['G3', 'B3', 'D4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4']].map(c => c.map(N)),
-  roots: ['C3', 'G2', 'A2', 'F2'].map(N),
-  bass: [0, 6, 8, 14], bassLen: 1.8, arpEvery: 2, hats: [2, 6, 10, 14],
-  lead: [[0, 'E5', 4], [4, 'G5', 2], [6, 'E5', 2], [8, 'D5', 4], [12, 'C5', 4],
-    [16, 'D5', 2], [18, 'B4', 2], [20, 'D5', 4], [24, 'G5', 6],
-    [32, 'C5', 2], [34, 'E5', 2], [36, 'A5', 4], [40, 'G5', 2], [42, 'E5', 2], [44, 'C5', 4],
-    [48, 'A4', 2], [50, 'C5', 2], [52, 'F5', 4], [56, 'E5', 3], [60, 'D5', 4]],
+const SONGS = {
+  taller: { name: 'Taller', bpm: 92,
+    chords: [['C4', 'E4', 'G4'], ['G3', 'B3', 'D4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4']], roots: ['C3', 'G2', 'A2', 'F2'],
+    bass: [0, 6, 8, 14], bassLen: 1.8, octave: [], arpEvery: 2, hats: [2, 6, 10, 14], hatAccent: [], kick: [], snare: [], leadPasses: 'odd',
+    lead: [[0, 'E5', 4], [4, 'G5', 2], [6, 'E5', 2], [8, 'D5', 4], [12, 'C5', 4], [16, 'D5', 2], [18, 'B4', 2], [20, 'D5', 4], [24, 'G5', 6],
+      [32, 'C5', 2], [34, 'E5', 2], [36, 'A5', 4], [40, 'G5', 2], [42, 'E5', 2], [44, 'C5', 4], [48, 'A4', 2], [50, 'C5', 2], [52, 'F5', 4], [56, 'E5', 3], [60, 'D5', 4]] },
+  siesta: { name: 'Siesta', bpm: 104, soft: true,
+    chords: [['F3', 'A3', 'C4', 'E4'], ['E3', 'G3', 'B3', 'D4'], ['D3', 'F3', 'A3', 'C4'], ['C3', 'E3', 'G3', 'D4']], roots: ['F2', 'E2', 'D2', 'C2'],
+    bass: [0, 10], bassLen: 5, octave: [], arpEvery: 2, hats: [4, 12], hatAccent: [], kick: [], snare: [], leadPasses: 'odd',
+    lead: [[0, 'A5', 6], [8, 'G5', 2], [10, 'E5', 4], [16, 'D5', 6], [24, 'E5', 2], [26, 'G5', 4], [32, 'F5', 6], [40, 'E5', 2], [42, 'C5', 4],
+      [48, 'D5', 4], [52, 'E5', 2], [54, 'G5', 2], [56, 'E5', 6]] },
+  placa: { name: 'Placa', bpm: 104,
+    chords: [['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['C4', 'E4', 'G4'], ['G3', 'B3', 'D4']], roots: ['A2', 'F2', 'C3', 'G2'],
+    bass: [0, 6, 8, 14], bassLen: 1.8, octave: [], arpEvery: 1, hats: [0, 2, 4, 6, 8, 10, 12, 14], hatAccent: [2, 6, 10, 14], kick: [], snare: [], leadPasses: 'odd',
+    lead: [[0, 'E5', 2], [4, 'G5', 2], [8, 'A5', 3], [14, 'G5', 2], [16, 'F5', 2], [20, 'E5', 2], [24, 'C5', 4],
+      [32, 'E5', 2], [36, 'G5', 2], [40, 'C6', 3], [46, 'B5', 2], [48, 'A5', 2], [52, 'G5', 2], [56, 'D5', 4]] },
+  urgente: { name: 'Urgente', bpm: 144,
+    chords: [['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['D4', 'F4', 'A4'], ['E3', 'G#3', 'B3']], roots: ['A2', 'F2', 'D3', 'E2'],
+    bass: [0, 2, 4, 6, 8, 10, 12, 14], bassLen: 1.3, octave: [2, 6, 10, 14], arpEvery: 1, hats: [0, 2, 4, 6, 8, 10, 12, 14], hatAccent: [2, 6, 10, 14], kick: [0, 8], snare: [4, 12], leadPasses: 'all',
+    lead: [[0, 'A5', 2], [2, 'G5', 2], [4, 'A5', 2], [6, 'E5', 2], [8, 'A5', 2], [10, 'C6', 2], [12, 'B5', 2], [14, 'A5', 2],
+      [16, 'A5', 2], [18, 'G5', 2], [20, 'F5', 2], [22, 'C5', 2], [24, 'F5', 2], [26, 'A5', 2], [28, 'G5', 2], [30, 'F5', 2],
+      [32, 'F5', 2], [34, 'E5', 2], [36, 'D5', 2], [38, 'A4', 2], [40, 'D5', 2], [42, 'F5', 2], [44, 'E5', 2], [46, 'D5', 2],
+      [48, 'E5', 2], [50, 'F5', 2], [52, 'G#5', 4], [56, 'B5', 2], [58, 'G#5', 2], [60, 'E5', 4]] },
 };
-SONG.leadByStep = new Map(SONG.lead.map(([st, n, len]) => [st, [N(n), len]]));
-// the next note up in C major (for the ornaments)
-const ESCALA = [0, 2, 4, 5, 7, 9, 11];
-// a third below in C major (two degrees of the scale down), for the second recorder
-const abajo3 = m => { let x = m, n = 0; while (n < 2) { x--; if (ESCALA.includes(((x % 12) + 12) % 12)) n++; } return x; };
-const arriba = m => { for (let k = 1; k <= 2; k++) if (ESCALA.includes((m + k) % 12)) return m + k; return m + 2; };
+for (const s of Object.values(SONGS)) {
+  s.chordsM = s.chords.map(c => c.map(N)); s.rootsM = s.roots.map(N);
+  s.leadByStep = new Map(s.lead.map(([st, n, len]) => [st, [N(n), len]]));
+}
+// the versions on the page: the original and A for each theme; Urgente also at 120, without the snare tabor
+const VERSIONES = [
+  { tema: 'taller', para: 'el block y la práctica', ops: [['original', 'Original'], ['A', 'A']] },
+  { tema: 'siesta', para: 'Fácil', ops: [['original', 'Original'], ['A', 'A']] },
+  { tema: 'placa', para: 'Normal', ops: [['original', 'Original'], ['A', 'A']] },
+  { tema: 'urgente', para: 'Difícil', ops: [['original', 'Original'], ['A', 'A · a 144'], ['A120', 'A · a 120']] },
+];
+// in A, per theme: the recorder level, the lute level and where the tabor plays (0 and 8 are the bar and the half)
+const ESTILO = {
+  taller: { fl: 0.085, laud: 0.09, tambor: { 0: 0.09, 8: 0.06 } },
+  siesta: { fl: 0.1, laud: 0.08, tambor: { 0: 0.06 } },
+  placa: { fl: 0.1, laud: 0.05, tambor: { 0: 0.09, 8: 0.06, 4: 0.03, 12: 0.03 } },
+  urgente: { fl: 0.085, laud: 0.055, tambor: { 0: 0.1, 8: 0.08 }, caja: { 4: 0.05, 12: 0.05 } },
+};
+// the next note up in the scale (for the grace notes); in Urgente the G# is part of it
+const arriba = (m, tema) => { const esc = tema === 'urgente' ? [0, 2, 4, 5, 7, 8, 9, 11] : [0, 2, 4, 5, 7, 9, 11]; for (let k = 1; k <= 2; k++) if (esc.includes((m + k) % 12)) return m + k; return m + 2; };
+
+// how much each version is turned up or down to sound as loud as its original (measured offline, see __render)
+const TRIM = { 'taller:A': 0.363, 'siesta:A': 0.221, 'placa:A': 0.38, 'urgente:A': 0.501, 'urgente:A120': 0.49 };
 
 // ------------------------------------------------------------------ the engine (works on a live or an offline context)
 function Motor(ctx) {
@@ -71,7 +104,7 @@ function Motor(ctx) {
   const bus = ctx.createGain(); bus.gain.value = 0.35 * 0.6;
   bus.connect(master); master.connect(comp); comp.connect(ctx.destination);
   const noise = ctx.createBuffer(1, sr, sr); { const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
-  // a room: a short one for the lute and recorder, a bit longer (a church) for the harpsichord and strings
+  // a small room for the lute and the recorder
   function sala(seg, curva) {
     const len = Math.floor(sr * seg), ir = ctx.createBuffer(2, len, sr);
     for (let ch = 0; ch < 2; ch++) { const c = ir.getChannelData(ch); for (let i = 0; i < len; i++) c[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, curva); }
@@ -85,9 +118,9 @@ function Motor(ctx) {
   }
   function salida(dest, pan) { if (!pan) return dest; const p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(dest); return p; }
 
-  // -------- the original (8 bits, ARR['8'] of the game)
-  function pluck(f, t, dur, vol, type, dest) {
-    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f;
+  // -------- the originals (ARR['8'] and, for Siesta, ARR['8s'] of the game)
+  function pluck(f, t, dur, vol, type, dest, duty) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); if (duty) o.setPeriodicWave(pulse[duty]); else o.type = type; o.frequency.value = f;
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.02);
   }
@@ -96,200 +129,172 @@ function Motor(ctx) {
     const g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.04));
     s.connect(f); f.connect(g); g.connect(dest); s.start(t, Math.random() * 0.5); s.stop(t + (dur || 0.04) + 0.02);
   }
+  const ARR = {
+    '8': {
+      bass(f, t, d, dest) { pluck(f, t, d, 0.12, 'square', dest); },
+      arp(f, t, d, dest) { pluck(f, t, d, 0.035, 'triangle', dest); },
+      hat(t, acc, dest) { hiss(t, acc ? 0.05 : 0.025, dest); },
+      kick(t, dest) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.08); g.gain.setValueAtTime(0.22, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.11); o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.13); },
+      snare(t, dest) { hiss(t, 0.08, dest, 0.11, 1500, 'bandpass'); },
+      lead(f, t, d, dest) { pluck(f, t, d, 0.045, 'square', dest); },
+    },
+    '8s': {
+      bass(f, t, d, dest) { pluck(f, t, Math.min(d, 1.2), 0.13, 'triangle', dest); },
+      arp(f, t, d, dest) { pluck(f, t, d * 1.6, 0.022, null, dest, 0.125); },
+      hat(t, acc, dest) { hiss(t, 0.014, dest, 0.03, 9000); },
+      kick() {}, snare() {},
+      lead(f, t, d, dest) { pluck(f, t, d, 0.04, null, dest, 0.25); },
+    },
+  };
 
-  // -------- plucked strings: Karplus-Strong computed once per note (a lute, soft and short; a harpsichord, bright)
+  // -------- the lute: Karplus-Strong computed once per note, plucked with the finger (soft and short)
   const cuerdas = new Map();
-  function cuerda(tipo, m) {
-    const k = tipo + m; if (cuerdas.has(k)) return cuerdas.get(k);
-    const f = mtof(m), P = Math.max(2, Math.round(sr / f - 0.5));
-    const laud = tipo === 'laud', seg = laud ? 1.6 : 2.4, len = Math.floor(sr * seg);
+  function cuerda(m) {
+    if (cuerdas.has(m)) return cuerdas.get(m);
+    const f = mtof(m), P = Math.max(2, Math.round(sr / f - 0.5)), len = Math.floor(sr * 1.6);
     const buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0), ring = new Float32Array(P);
-    // the excitation: the lute is plucked with the finger (soft noise), the harpsichord with a quill (bright noise)
-    let prev = 0; for (let i = 0; i < P; i++) { const x = Math.random() * 2 - 1; prev = laud ? prev * 0.55 + x * 0.45 : x; ring[i] = prev; }
-    const damp = laud ? 0.9955 - Math.min(0.006, f / 200000) : 0.9985 - Math.min(0.004, f / 400000);
+    let prev = 0; for (let i = 0; i < P; i++) { prev = prev * 0.55 + (Math.random() * 2 - 1) * 0.45; ring[i] = prev; }
+    const damp = 0.9955 - Math.min(0.006, f / 200000);
     let p = 0; for (let i = 0; i < len; i++) { const a = ring[p], b = ring[(p + 1) % P]; d[i] = a; ring[p] = damp * 0.5 * (a + b); p = (p + 1) % P; }
     let pk = 0; for (let i = 0; i < len; i++) pk = Math.max(pk, Math.abs(d[i])); for (let i = 0; i < len; i++) d[i] /= pk || 1;
-    cuerdas.set(k, buf); return buf;
+    cuerdas.set(m, buf); return buf;
   }
-  function tocarCuerda(tipo, m, t, vol, dest, pan, suelta, rate, tibio) {
-    const s = ctx.createBufferSource(); s.buffer = cuerda(tipo, m); if (rate) s.playbackRate.value = rate;
-    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = tibio ? 1700 : tipo === 'laud' ? 2600 : 7000;
-    g.gain.setValueAtTime(vol, t);
-    // when the note is let go, the damper stops it (in the harpsichord, the key; in the lute, the hand)
-    if (suelta) { g.gain.setValueAtTime(vol, t + suelta); g.gain.exponentialRampToValueAtTime(0.0001, t + suelta + 0.12); }
-    s.connect(lp); lp.connect(g); g.connect(salida(dest, pan)); s.start(t); s.stop(t + (suelta ? suelta + 0.15 : 2.4));
+  function laud(m, t, vol, dest, pan) {
+    const s = ctx.createBufferSource(); s.buffer = cuerda(m);
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; g.gain.value = vol;
+    s.connect(lp); lp.connect(g); g.connect(salida(dest, pan)); s.start(t); s.stop(t + 1.6);
   }
-
-  // -------- blown and bowed voices
   function vibrato(param, f, t, prof, vel, desde) {
     const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = vel;
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0, t + desde); g.gain.linearRampToValueAtTime(f * prof, t + desde + 0.25);
     l.connect(g); g.connect(param); l.start(t); return l;
   }
-  // recorder: almost a sine, a little breath at the start (the «chiff») and a light, late vibrato
-  function flautaDulce(m, t, d, vol, dest, pan, ligado) {
-    const f = mtof(m), o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f; g2.gain.value = 0.55;
-    const o3 = ctx.createOscillator(), g3 = ctx.createGain(); o3.type = 'sine'; o3.frequency.value = f * 2; g3.gain.value = 0.12; o3.connect(g3); g3.connect(g);
-    const lv = vibrato(o.frequency, f, t, 0.004, 5, 0.18); const lv2 = vibrato(o2.frequency, f, t, 0.004, 5, 0.18);
-    const at = ligado ? 0.07 : 0.035, sl = ligado ? 0.12 : 0.05;
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + at); g.gain.setValueAtTime(vol * 0.92, t + Math.max(at + 0.02, d - 0.06)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + sl);
-    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(salida(dest, pan));
+  // the recorder: almost a sine with a little of the triangle and the octave (so the phone speaker carries it), a
+  // breath at the start (the «chiff») and a light, late vibrato
+  function flautaDulce(m, t, d, vol, dest, pan) {
+    const f = mtof(m), o = ctx.createOscillator(), o2 = ctx.createOscillator(), o3 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(), g3 = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f; g2.gain.value = 0.55; o3.type = 'sine'; o3.frequency.value = f * 2; g3.gain.value = 0.12;
+    const lv = vibrato(o.frequency, f, t, 0.004, 5, 0.18), lv2 = vibrato(o2.frequency, f, t, 0.004, 5, 0.18);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.035); g.gain.setValueAtTime(vol * 0.92, t + Math.max(0.055, d - 0.06)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.05);
+    o.connect(g); o2.connect(g2); g2.connect(g); o3.connect(g3); g3.connect(g); g.connect(salida(dest, pan));
     const s = ctx.createBufferSource(); s.buffer = noise; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f * 2; bp.Q.value = 3;
-    const gn = ctx.createGain(); gn.gain.setValueAtTime(ligado ? 0.0001 : vol * 0.5, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    const gn = ctx.createGain(); gn.gain.setValueAtTime(vol * 0.5, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
     s.connect(bp); bp.connect(gn); gn.connect(salida(dest, pan)); s.start(t, Math.random() * 0.5); s.stop(t + 0.07);
-    o.start(t); o2.start(t); o3.start(t); for (const x of [o, o2, o3, lv, lv2]) x.stop(t + d + (ligado ? 0.15 : 0.08));
+    o.start(t); o2.start(t); o3.start(t); for (const x of [o, o2, o3, lv, lv2]) x.stop(t + d + 0.08);
   }
-  // bowed string: two slightly detuned saws, a body filter, a soft bow attack and vibrato (here, the viola da gamba)
-  function arco(m, t, d, vol, dest, pan, o) {
+  // the viola da gamba: two slightly detuned saws through a dark body, bowed (soft attack), no vibrato
+  function gamba(m, t, d, vol, dest, pan) {
     const f = mtof(m), g = ctx.createGain(), lp = ctx.createBiquadFilter(), cuerpo = ctx.createBiquadFilter();
-    lp.type = 'lowpass'; lp.frequency.value = o.brillo; lp.Q.value = 0.6;
-    cuerpo.type = 'peaking'; cuerpo.frequency.value = o.cuerpo; cuerpo.Q.value = 1.2; cuerpo.gain.value = 5;
-    const osc = [-o.desafine, o.desafine].map(c => { const x = ctx.createOscillator(); x.type = 'sawtooth'; x.frequency.value = f; x.detune.value = c; x.connect(lp); return x; });
-    const lv = osc.map(x => vibrato(x.frequency, f, t, o.vib, 5.4, o.vibDesde));
+    lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 0.6; cuerpo.type = 'peaking'; cuerpo.frequency.value = 900; cuerpo.Q.value = 1.2; cuerpo.gain.value = 5;
+    const osc = [-3, 3].map(c => { const x = ctx.createOscillator(); x.type = 'sawtooth'; x.frequency.value = f; x.detune.value = c; x.connect(lp); return x; });
     lp.connect(cuerpo); cuerpo.connect(g); g.connect(salida(dest, pan));
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + o.ataque); g.gain.setValueAtTime(vol, t + Math.max(o.ataque, d - 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + o.suelta);
-    osc.forEach(x => x.start(t));
-    for (const x of [...osc, ...lv]) x.stop(t + d + o.suelta + 0.05);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.035); g.gain.setValueAtTime(vol, t + Math.max(0.035, d - 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.07);
+    osc.forEach(x => { x.start(t); x.stop(t + d + 0.12); });
   }
-  const GAMBA = { brillo: 1100, cuerpo: 900, desafine: 3, vib: 0, vibDesde: 0.1, ataque: 0.035, suelta: 0.07 };
-  // tabor: a low frame drum, felt more than heard
-  function tamboril(t, vol, dest) {
-    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(85, t + 0.12);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.22);
-    hiss(t, vol * 0.35, dest, 0.05, 900, 'lowpass');
-  }
-  // tambourine: a few small jingles, very soft
-  function pandereta(t, vol, dest) { for (let j = 0; j < 3; j++) hiss(t + j * 0.012, vol * (1 - j * 0.25), dest, 0.07, 7500, 'bandpass'); }
-  // a lute strum: the notes of the chord one after the other, downwards (or upwards, softer)
-  function rasguido(notas, t, vol, dest, arribaAbajo) {
-    const ns = arribaAbajo ? notas.slice().reverse() : notas;
-    ns.forEach((m, j) => tocarCuerda('laud', m, t + j * 0.022, vol * (arribaAbajo ? 0.7 : 1), dest, -0.3 + j * 0.2, null));
+  // the tabor: a low frame drum, felt more than heard; struck at the rim (higher and drier) it plays the snare's part
+  function tamboril(t, vol, dest, aro) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(aro ? 260 : 150, t); o.frequency.exponentialRampToValueAtTime(aro ? 180 : 85, t + (aro ? 0.06 : 0.12));
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + (aro ? 0.09 : 0.2)); o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.22);
+    hiss(t, vol * (aro ? 0.6 : 0.35), dest, aro ? 0.04 : 0.05, aro ? 2200 : 900, aro ? 'bandpass' : 'lowpass');
   }
 
-  // -------- the three versions
-  function crear(v) {
-    const b = ctx.createGain(); b.gain.value = 1; b.connect(bus);
-    // each version is trimmed so the three sound equally loud (measured offline)
-    b.gain.value = TRIM[v] || 1;
-    let rev = null;
-    if (v !== 'original') {
-      rev = ctx.createGain(); rev.gain.value = v === 'A3' ? 0.34 : 0.22;
-      const conv = sala(1.4, 3.4); rev.connect(conv); conv.connect(b);
-    }
-    // the dry and the reverb send, together
-    const seco = ctx.createGain(); seco.connect(b); if (rev) seco.connect(rev);
-    return { v, b, dest: seco };
+  // -------- one version of one theme
+  function crear(tema, v) {
+    const song = Object.assign({}, SONGS[tema]);
+    if (v === 'A120') song.bpm = 120;
+    const b = ctx.createGain(); b.gain.value = TRIM[tema + ':' + v] || 1; b.connect(bus);
+    const seco = ctx.createGain(); seco.connect(b);
+    if (v !== 'original') { const rev = ctx.createGain(); rev.gain.value = 0.22; const conv = sala(1.4, 3.4); seco.connect(rev); rev.connect(conv); conv.connect(b); }
+    return { tema, v, song, b, dest: seco };
   }
   function paso(c, step, t, S) {
-    const v = c.v; let dest = c.dest; const k = step % 64, bar = (k / 16) | 0, i = k % 16;
-    const chord = SONG.chords[bar], root = SONG.roots[bar];
-    const conMelodia = ((step / 64) | 0) % 2 === 1;
-    let L = conMelodia ? SONG.leadByStep.get(k) : null;
-    if (SOLO === 'resto') L = null;
-    const AC = SOLO !== 'melodia';
-    if (v === 'original') {
-      if (AC && SONG.bass.includes(i)) pluck(mtof(root), t, S * SONG.bassLen, 0.12, 'square', dest);
-      if (AC && i % SONG.arpEvery === 0) pluck(mtof(chord[(i / SONG.arpEvery) % chord.length] + 12), t, S * SONG.arpEvery * 0.9, 0.035, 'triangle', dest);
-      if (AC && SONG.hats.includes(i)) hiss(t, 0.025, dest);
-      if (L) pluck(mtof(L[0]), t, S * L[1] * 0.95, 0.045, 'square', dest);
+    const song = c.song, dest = c.dest, k = step % 64, bar = (k / 16) | 0, i = k % 16;
+    const chord = song.chordsM[bar], root = song.rootsM[bar];
+    const L = (song.leadPasses === 'all' || ((step / 64) | 0) % 2 === 1) ? song.leadByStep.get(k) : null;
+    const AC = SOLO !== 'melodia', ME = SOLO !== 'resto';
+    if (c.v === 'original') {
+      const A = ARR[song.soft ? '8s' : '8'];
+      if (AC && song.bass.includes(i)) A.bass(mtof(root + (song.octave.includes(i) ? 12 : 0)), t, S * song.bassLen, dest);
+      if (AC && i % song.arpEvery === 0) A.arp(mtof(chord[(i / song.arpEvery) % chord.length] + 12), t, S * song.arpEvery * 0.9, dest);
+      if (AC && song.hats.includes(i)) A.hat(t, song.hatAccent.includes(i), dest);
+      if (AC && song.kick.includes(i)) A.kick(t, dest);
+      if (AC && song.snare.includes(i)) A.snare(t, dest);
+      if (ME && L) A.lead(mtof(L[0]), t, S * L[1] * 0.95, dest);
       return;
     }
-    if (v === 'A') {
-      // viola da gamba in the bass, the lute arpeggiates the chord in its own register, the tabor marks the bar
-      if (AC && SONG.bass.includes(i)) arco(root, t, S * SONG.bassLen, 0.06, dest, -0.15, GAMBA);
-      if (AC && i % SONG.arpEvery === 0) tocarCuerda('laud', chord[(i / SONG.arpEvery) % chord.length], t, 0.09, dest, (i % 4 < 2 ? -0.25 : 0.25), null);
-      if (AC && (i === 0 || i === 8)) tamboril(t, i === 0 ? 0.09 : 0.06, dest);
-      if (L) {
-        const [m, len] = L, d = S * len * 0.95;
-        // a short grace note from above on the long notes, as a recorder player would do
-        if (len >= 4) { flautaDulce(arriba(m), t, S * 0.45, FL * 0.9, dest, 0.1); flautaDulce(m, t + S * 0.5, d - S * 0.5, FL, dest, 0.1); }
-        else flautaDulce(m, t, d, FL, dest, 0.1);
-      }
-      return;
-    }
-    // A3, in the background: like A, but everything tied — the recorder and the viola da gamba join each note to the
-    // next, no grace notes — with a softer recorder, a warmer lute, a barely-there tabor and more room
-    if (v === 'A3') {
-      const sigBajo = { 0: 6, 6: 2, 8: 6, 14: 2 };
-      if (AC && SONG.bass.includes(i)) arco(root, t, S * sigBajo[i] + 0.03, 0.045, dest, -0.15, Object.assign({}, GAMBA, { ataque: 0.07, suelta: 0.1 }));
-      if (AC && i % SONG.arpEvery === 0) tocarCuerda('laud', chord[(i / SONG.arpEvery) % chord.length], t, 0.075, dest, (i % 4 < 2 ? -0.25 : 0.25), null, 0, true);
-      if (AC && i === 0) tamboril(t, 0.045, dest);
-      if (L) {
-        const sig = SONG.lead.map(x => x[0]).find(x => x > k), d = S * ((sig == null ? 64 : sig) - k) + 0.04;
-        flautaDulce(L[0], t, d, FL * 0.62, dest, 0.1, true);
-      }
-      return;
-    }
-    // A2, a consort: the lute strums the chord in a pavane rhythm (long, short, short), the viola da gamba holds the
-    // root, two recorders play the melody in thirds, and a tabor and a tambourine keep it moving. No grace notes.
-    if (AC && (i === 0 || i === 8 || i === 12)) rasguido([root + 12, ...chord], t, i === 0 ? 0.075 : 0.055, dest, i === 12);
-    if (AC && (i === 0 || i === 8)) arco(root, t, S * 7.6, 0.045, dest, -0.15, GAMBA);
-    if (AC && i === 0) tamboril(t, 0.08, dest);
-    if (AC && (i === 4 || i === 12)) pandereta(t, 0.02, dest);
-    if (L) {
+    // A: the viola da gamba plays the bass line, the lute arpeggiates the chord in its own register, the tabor marks
+    // the bar (and in Urgente at 144, struck at the rim, the snare's part)
+    const E = ESTILO[c.tema];
+    if (AC && song.bass.includes(i)) gamba(root + (song.octave.includes(i) ? 12 : 0), t, S * song.bassLen, song.bass.length > 4 ? 0.045 : 0.06, dest, -0.15);
+    if (AC && i % song.arpEvery === 0) laud(chord[(i / song.arpEvery) % chord.length], t, E.laud, dest, (i % 4 < 2 ? -0.25 : 0.25));
+    if (AC && E.tambor[i]) tamboril(t, E.tambor[i], dest);
+    if (AC && c.v === 'A' && E.caja && E.caja[i]) tamboril(t, E.caja[i], dest, true);
+    if (ME && L) {
       const [m, len] = L, d = S * len * 0.95;
-      flautaDulce(m, t, d, FL * 0.8, dest, 0.2);
-      flautaDulce(abajo3(m), t, d, FL * 0.5, dest, -0.2);
+      // a short grace note from above on the long notes, as a recorder player would do
+      if (len >= 4) { flautaDulce(arriba(m, c.tema), t, S * 0.45, E.fl * 0.9, dest, 0.1); flautaDulce(m, t + S * 0.5, d - S * 0.5, E.fl, dest, 0.1); }
+      else flautaDulce(m, t, d, E.fl, dest, 0.1);
     }
   }
-  return { crear, paso, bus };
+  return { crear, paso };
 }
-
-// how much louder or softer each version goes to sound like the original (measured with herramientas, offline)
-const TRIM = { original: 1, A: 0.363, A2: 0.38, A3: 0.479 };
-let FL = 0.085;   // the recorder's level
 let SOLO = null;   // for the tools: 'melodia' or 'resto', to measure the balance
 
-// ------------------------------------------------------------------ live playback
+// ------------------------------------------------------------------ the page and live playback
+const temas = document.getElementById('temas');
+for (const V of VERSIONES) {
+  temas.insertAdjacentHTML('beforeend', `<h2>${SONGS[V.tema].name}</h2><p>En Buen ojo: ${V.para}. ${SONGS[V.tema].bpm} bpm en Fogonazo.</p><div class="par">` +
+    V.ops.map(([v, t]) => `<button class="op" data-t="${V.tema}" data-v="${v}"><b>${t}</b><span>${v === 'original' ? 'como en Fogonazo' : v === 'A120' ? 'más lento, sin la caja' : 'Renacimiento'}</span></button>`).join('') + '</div>');
+}
 let ctx = null, motor = null, cur = null, step = 0, nextT = 0, timer = null;
-function sonar(v) {
+function sonar(tema, v) {
   if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); motor = Motor(ctx); }
   if (ctx.state === 'suspended') ctx.resume();
   parar(0.25);
-  cur = motor.crear(v); step = 64; nextT = ctx.currentTime + 0.1;   // from the pass with the melody
-  timer = setInterval(() => { const S = 60 / SONG.bpm / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
-  marcar(v);
+  cur = motor.crear(tema, v); step = cur.song.leadPasses === 'all' ? 0 : 64; nextT = ctx.currentTime + 0.1;
+  timer = setInterval(() => { const S = 60 / cur.song.bpm / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
+  marcar(tema, v);
 }
 function parar(fade) {
   if (timer) { clearInterval(timer); timer = null; }
   if (cur) { const b = cur.b, t = ctx.currentTime; b.gain.setValueAtTime(b.gain.value, t); b.gain.linearRampToValueAtTime(0, t + (fade || 0.3)); setTimeout(() => { try { b.disconnect(); } catch (e) {} }, 3000); }
-  cur = null; marcar(null);
+  cur = null; marcar();
 }
-function marcar(v) { document.querySelectorAll('.op').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
-document.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => sonar(b.dataset.v)));
+function marcar(tema, v) { document.querySelectorAll('.op').forEach(b => b.classList.toggle('on', b.dataset.t === tema && b.dataset.v === v)); }
+document.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => sonar(b.dataset.t, b.dataset.v)));
 document.getElementById('parar').addEventListener('click', () => parar(0.3));
 document.addEventListener('visibilitychange', () => { if (document.hidden) parar(0.1); });
 
-// for the tools: render a version offline (both passes) and give back its RMS and peak
-// for the tools: the version as a WAV (base64), from the pass with the melody, normalized to a listening level
-window.__renderBuf = async v => {
-  const sr = 44100, S = 60 / SONG.bpm / 4, dur = 128 * S + 2.5, off = new OfflineAudioContext(2, Math.ceil(sr * dur), sr);
-  SOLO = null; const m = Motor(off), c = m.crear(v);
-  for (let s = 0; s < 128; s++) m.paso(c, s + 64, 0.05 + s * S, S);
-  const buf = await off.startRendering(), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, g = 8;
+// ------------------------------------------------------------------ for the tools (offline)
+async function renderizar(tema, v, desde) {
+  const sr = 44100, base = SONGS[tema], bpm = v === 'A120' ? 120 : base.bpm, S = 60 / bpm / 4, dur = 128 * S + 2.5;
+  const off = new OfflineAudioContext(2, Math.ceil(sr * dur), sr), m = Motor(off), c = m.crear(tema, v);
+  for (let s = 0; s < 128; s++) m.paso(c, s + desde, 0.05 + s * S, S);
+  return { buf: await off.startRendering(), S, sr };
+}
+// loudness as the ear hears it (K-weighting, ITU BS.1770), over the first 64 steps rendered (the pass with the melody)
+window.__render = async (tema, v) => {
+  const { buf, S, sr } = await renderizar(tema, v, SONGS[tema].leadPasses === 'all' ? 0 : 64), d = buf.getChannelData(0), d1 = buf.getChannelData(1);
+  const a = Math.floor(0.05 * sr), z = Math.floor((0.05 + 64 * S) * sr);
+  const kw = x => { const o = new Float32Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0, w1 = 0, w2 = 0;
+    for (let i = 0; i < x.length; i++) { const y = 1.53512485958697 * x[i] - 2.69169618940638 * x1 + 1.19839281085285 * x2 + 1.69065929318241 * y1 - 0.73248077421585 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = y;
+      const w = y - 2 * u1 + u2 + 1.99004745483398 * w1 - 0.99007225036621 * w2; u2 = u1; u1 = y; w2 = w1; w1 = w; o[i] = w; } return o; };
+  const k0 = kw(d.subarray(a, z)), k1 = kw(d1.subarray(a, z)); let ks = 0, pk = 0, nan = 0;
+  for (let i = 0; i < k0.length; i++) ks += k0[i] * k0[i] + k1[i] * k1[i];
+  for (let i = 0; i < d.length; i++) { if (!Number.isFinite(d[i])) nan++; pk = Math.max(pk, Math.abs(d[i]), Math.abs(d1[i])); }
+  return { lufs: -0.691 + 10 * Math.log10(ks / k0.length), pico: pk, nan };
+};
+// the version as a WAV (base64): the pass with the melody and then the next one, at a listening level
+window.__renderBuf = async (tema, v) => {
+  const { buf, sr } = await renderizar(tema, v, SONGS[tema].leadPasses === 'all' ? 0 : 64), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, g = 8;
   const dv = new DataView(new ArrayBuffer(44 + n * 4)), w = (o, t) => [...t].forEach((ch, i) => dv.setUint8(o + i, ch.charCodeAt(0)));
   w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true);
   dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);
   for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i] * g)) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i] * g)) * 32767, true); }
   let bin = ''; const u = new Uint8Array(dv.buffer); for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin);
 };
-window.__render = async (v, trim) => {
-  const sr = 44100, S = 60 / SONG.bpm / 4, dur = 128 * S + 2.5, off = new OfflineAudioContext(2, Math.ceil(sr * dur), sr);
-  const m = Motor(off); if (trim != null) TRIM[v] = trim; SOLO = window.__solo || null; const c = m.crear(v);
-  for (let s = 0; s < 128; s++) m.paso(c, s, 0.05 + s * S, S);
-  const buf = await off.startRendering(), d = buf.getChannelData(0), d1 = buf.getChannelData(1);
-  let sum = 0, pk = 0, nan = 0; for (let i = 0; i < d.length; i++) { const x = (d[i] + d1[i]) / 2; if (!Number.isFinite(x)) nan++; sum += x * x; pk = Math.max(pk, Math.abs(d[i]), Math.abs(d1[i])); }
-  // RMS over the pass with the melody only, and over the whole
-  let s2 = 0; const a = Math.floor((0.05 + 64 * S) * sr), z = Math.floor((0.05 + 128 * S) * sr); for (let i = a; i < z; i++) { const x = (d[i] + d1[i]) / 2; s2 += x * x; }
-  // loudness as the ear hears it (K-weighting, ITU BS.1770), over the pass with the melody
-  const kw = x => { const o = new Float32Array(x.length); let [x1, x2, y1, y2] = [0, 0, 0, 0], [u1, u2, w1, w2] = [0, 0, 0, 0];
-    for (let i = 0; i < x.length; i++) { const y = 1.53512485958697 * x[i] - 2.69169618940638 * x1 + 1.19839281085285 * x2 + 1.69065929318241 * y1 - 0.73248077421585 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = y;
-      const w = y - 2 * u1 + u2 + 1.99004745483398 * w1 - 0.99007225036621 * w2; u2 = u1; u1 = y; w2 = w1; w1 = w; o[i] = w; } return o; };
-  const k0 = kw(d.subarray(a, z)), k1 = kw(d1.subarray(a, z)); let ks = 0; for (let i = 0; i < k0.length; i++) ks += k0[i] * k0[i] + k1[i] * k1[i];
-  const lufs = -0.691 + 10 * Math.log10(ks / k0.length);
-  return { rms: Math.sqrt(sum / d.length), rmsMelodia: Math.sqrt(s2 / (z - a)), pico: pk, nan, lufs };
-};
+window.__trim = TRIM; window.__solo = s => { SOLO = s; };
 </script>
 </body>
 </html>
