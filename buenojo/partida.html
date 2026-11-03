@@ -49,10 +49,16 @@
   border-radius: 52% 48% 55% 45% / 50% 55% 45% 50%; transform: rotate(-4deg); display: flex; align-items: center; justify-content: center;
   font-size: 52rem; color: var(--rojo); }
 #nota .de { left: 144rem; top: 40rem; font-size: 27rem; color: var(--rojo); }
-#nota .textos { left: 22rem; top: 102rem; width: 324rem; height: 158rem; display: flex; flex-direction: column; gap: 10rem; }
+#nota .textos { left: 22rem; top: 98rem; width: 324rem; height: 172rem; display: flex; flex-direction: column; gap: 7rem; }
 #frase { font-size: 27rem; line-height: 33rem; }
 #ayuda { font-size: 17rem; line-height: 24rem; font-weight: 500; }
-#desglose { font-size: 13rem; line-height: 19rem; letter-spacing: .04em; }
+/* the values of both, always, as an informal table (S-32): the digits centered under each heading, the ° hanging */
+#desglose { font-size: 13rem; line-height: 17rem; letter-spacing: .04em; }
+#desglose .tabla { display: grid; grid-template-columns: max-content 80rem 80rem; column-gap: 14rem; row-gap: 3rem; font-variant-numeric: tabular-nums; }
+#desglose .tabla .tit { font-weight: 600; color: #9a8b78; text-align: center; padding-bottom: 3rem; border-bottom: 1rem solid rgba(122, 108, 92, .3); }
+#desglose .tabla .n { text-align: center; color: #4a4036; font-weight: 600; }
+#desglose .tabla .n b { position: relative; font-weight: inherit; }
+#desglose .tabla .n i { position: absolute; left: 100%; font-style: normal; }
 
 /* which parts each moment shows */
 #stage:not([data-fase=ver]):not([data-fase=practica]) .mitad, #stage:not([data-fase=ver]):not([data-fase=practica]) .etq { display: none; }
@@ -64,7 +70,9 @@
 #stage:not([data-fase=ver]) #nota { display: none; }
 #stage[data-fase=ver] .fila { display: none; }
 #stage[data-fase=espera] #accion, #stage[data-fase=mirar] #accion { display: none; }
-#stage:not([data-fase=practica]) .cifra { display: none; }
+#stage:not([data-fase=practica]):not([data-fase=armar]) .cifra { display: none; }
+/* while building, only the own value, small and light (S-32) */
+#stage[data-fase=armar] .cifra { font-size: 11rem; top: 3rem; color: #a09280; }
 #stage[data-fase=espera] .rotulo, #stage[data-fase=mirar] .rotulo { color: #a59684; }
 #stage[data-fase=fin] .cartulina, #stage[data-fase=fin] .hoja, #stage[data-fase=fin] .tira { display: none; }
 
@@ -98,7 +106,7 @@
   <div class="cartulina">
     <div id="muestra" class="vacia"></div>
     <div id="orig" class="mitad"></div><div id="tuyo" class="mitad"></div>
-    <div class="etq" style="left:32rem">ORIGINAL</div><div class="etq" style="left:227.5rem">EL TUYO</div>
+    <div class="etq" style="left:32rem">REFERENCIA</div><div class="etq" style="left:227.5rem">TU INTENTO</div>
     <div id="tiza"></div>
     <div id="cuenta" aria-live="polite"></div>
   </div>
@@ -207,9 +215,13 @@
     $('tuyo').style.background = actual;
     if (PRACTICA) {
       const o = G.objetivo;
-      FILAS[0].cifra.textContent = `${Math.round(t.h)}° · original ${Math.round(o.h)}°`;
-      FILAS[1].cifra.textContent = `${Math.round(t.s)} · original ${Math.round(o.s)}`;
-      FILAS[2].cifra.textContent = `${Math.round(t.v)} · original ${Math.round(o.v)}`;
+      FILAS[0].cifra.textContent = `${Math.round(t.h)}° · referencia ${Math.round(o.h)}°`;
+      FILAS[1].cifra.textContent = `${Math.round(t.s)} · referencia ${Math.round(o.s)}`;
+      FILAS[2].cifra.textContent = `${Math.round(t.v)} · referencia ${Math.round(o.v)}`;
+    } else {
+      FILAS[0].cifra.textContent = `${Math.round(t.h)}°`;
+      FILAS[1].cifra.textContent = `${Math.round(t.s)}`;
+      FILAS[2].cifra.textContent = `${Math.round(t.v)}`;
     }
   }
 
@@ -292,15 +304,17 @@
     $('frase').textContent = C.frase(p, G.usadas);
     const a = C.ayuda(o, t, dE);
     $('ayuda').textContent = a ? a.texto : '';
-    $('desglose').textContent = a ? a.desglose : '';
+    const R = Math.round, num = (v, g) => `<span class="n"><b>${R(v)}${g ? '<i>°</i>' : ''}</b></span>`;
+    $('desglose').innerHTML = '<div class="tabla"><span class="tit"></span><span class="tit">Referencia</span><span class="tit">Tu intento</span>' +
+      [['tono', 'h', 1], ['saturación', 's', 0], ['brillo', 'v', 0]].map(([n, k, g]) => `<span>${n}</span>${num(o[k], g)}${num(t[k], g)}`).join('') + '</div>';
     $('accion').textContent = G.ronda < RONDAS ? 'Siguiente' : 'Ver el total';
     fase('ver');
     ajustarNota();
     fx('pista');
   }
-  // a long phrase plus the help can overflow the sheet: the pen gets a little smaller until it fits
+  // a long phrase plus the help and the table can overflow the sheet: the phrase and the help get a little smaller until it fits
   function ajustarNota() {
-    const caja = document.querySelector('#nota .textos'), els = [$('frase'), $('ayuda'), $('desglose')], base = [27, 17, 13];
+    const caja = document.querySelector('#nota .textos'), els = [$('frase'), $('ayuda')], base = [27, 17];   // the table keeps its size
     for (let k = 0; k <= 6; k++) {
       const f = 1 - k * 0.06;
       els.forEach((el, i) => { el.style.fontSize = base[i] * f + 'rem'; el.style.lineHeight = base[i] * 1.32 * f + 'rem'; });

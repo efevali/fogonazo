@@ -95,7 +95,8 @@
     });
     return mejor;
   }
-  // original y tuyo: {h, s, v}. Devuelve { texto, desglose } o null si no hace falta ayuda.
+  // original y tuyo: {h, s, v}. Devuelve { texto } o null si no hace falta ayuda. Los valores de cada uno van aparte,
+  // en la tabla de la revelación (S-32).
   function ayuda(orig, tuyo, dE) {
     if (dE <= UMBRAL_AYUDA) return null;
     const dh = difTono(orig.h, tuyo.h), ds = tuyo.s - orig.s, dv = tuyo.v - orig.v;
@@ -114,11 +115,7 @@
     // «un poco más celeste, un poco más apagado» → «un poco más celeste, más apagado»: no se repite el «un poco»
     const lim = partes.map((p, i) => i > 0 && p.slice(0, 12) === partes[i - 1].slice(0, 12) ? p.replace(/^(un poco |mucho )/, '') : p);
     const lista = lim.length === 1 ? lim[0] : lim.slice(0, -1).join(', ') + ' y ' + lim[lim.length - 1];
-    const signo = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(Math.round(n));
-    return {
-      texto: 'El tuyo quedó ' + lista + '.',
-      desglose: `tono ${signo(dh)}° · saturación ${signo(ds)} · brillo ${signo(dv)}`,
-    };
+    return { texto: 'Te quedó ' + lista + '.' };
   }
 
   // ------------------------------------------------------------ los colores de una partida
