@@ -78,19 +78,23 @@ Imágenes, en este orden: [la referencia](../mahjong/arte/P-006_fondo-mesa.jpg) 
 
 ### El pedido P-009
 
-Imágenes, en este orden: [la mesa aprobada](arte/P-008_fondo-mesa.jpg) (el P-008, que tiene que quedar igual) y [la composición](bocetos/P-009-composicion.png) (la misma mesa con el block dibujado plano encima). Texto:
+Imágenes, en este orden: [la mesa aprobada](arte/P-008_fondo-mesa.jpg) (el P-008, que tiene que quedar igual) y [la composición](bocetos/P-009-composicion.png) (la misma mesa con el block dibujado plano encima). El block va en x 352 a 2182 e y 201 a 1164 de la imagen: más arriba que el centro y sin tapar el trapo. Si llega corrido, el código acomoda lo que va escrito encima. Texto:
 
-> Necesito agregarle un objeto a una ilustración que ya está aprobada, sin cambiar nada más. Es el fondo de un juego para celular: la mesa de trabajo de un pintor de los años 70 vista exactamente desde arriba. Encima de la mesa va un block de dibujo anillado, abierto en una hoja en blanco; lo que se escribe en la hoja lo pone el juego.
+> Necesito agregarle un objeto a una ilustración que ya está aprobada, sin cambiar nada más. Es el fondo de un juego para celular: la mesa de trabajo de un pintor de los años 70 vista exactamente desde arriba. Encima de la mesa va un block de dibujo anillado, abierto en una hoja en blanco; lo que se escribe en la hoja lo pone el juego, por eso el lugar del block tiene que ser exacto.
 >
 > Te mando dos imágenes:
 > 1. La ilustración aprobada: la mesa de pino con sus tablas, las manchas de pintura, el pincel y el trapo. Tiene que quedar idéntica: el mismo encuadre, las mismas tablas, la misma luz y los mismos colores. No la redibujes ni la reencuadres.
 > 2. Boceto de composición: la misma mesa con el block dibujado plano encima, en el lugar y del tamaño exactos que tiene que tener. El boceto es esquemático; la terminación tiene que ser la de la ilustración aprobada.
 >
-> Lo que tiene que tener el block:
-> - Un block de dibujo de los 70, horizontal, apoyado derecho sobre la mesa, con el anillado de espiral de alambre metálico del lado izquierdo, como en el boceto. Ocupa exactamente el rectángulo del boceto: el borde de la hoja coincide con el del dibujo.
+> Dónde va el block (es lo más importante):
+> - NO va centrado en la imagen. Copiá la posición del boceto: la hoja empieza a unos 350 píxeles del borde izquierdo y termina a unos 395 del derecho; empieza a unos 200 píxeles del borde de arriba y termina a unos 275 del de abajo. Es decir, queda más cerca del borde de arriba que del de abajo.
+> - En píxeles de la imagen de 2576 × 1438: la esquina de arriba a la izquierda de la hoja en (352, 201) y la de abajo a la derecha en (2182, 1164).
+> - El trapo de la esquina de abajo a la izquierda queda entero a la vista, sin que el block lo toque. El pincel queda en parte debajo del block y asoma por su borde de abajo, como en el boceto.
+>
+> Cómo es el block:
+> - Un block de dibujo de los 70, horizontal, apoyado derecho sobre la mesa (sin girar), con el anillado de espiral de alambre metálico del lado izquierdo, como en el boceto.
 > - La hoja, en blanco: papel de dibujo grueso color marfil, con una textura de papel muy suave, sin renglones, sin cuadrícula, sin margen, sin manchas ni dibujos. Pareja en toda la superficie, porque el juego escribe encima.
 > - Debajo de la hoja, apenas a la vista por los bordes de abajo y de la derecha, el canto de las otras hojas, y una sombra suave sobre la madera, con la misma luz de la ilustración, que viene de arriba a la izquierda.
-> - El block tapa el pincel; el trapo de la esquina de abajo a la izquierda asoma por debajo, como en el boceto.
 > - Sin texto ni letras, sin tapa visible con marcas, sin lápices ni otros objetos nuevos, sin personas ni manos.
 > - El mismo tamaño que la ilustración aprobada: 2576 × 1438.
 
