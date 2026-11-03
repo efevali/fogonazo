@@ -2,6 +2,14 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.15.0 — 3/11/2026
+
+- Buen ojo **tiene música** (S-33): los cuatro temas de Fogonazo como primos renacentistas, con laúd, flauta dulce, viola da gamba y tamboril. Taller en el block y la práctica, Siesta en Fácil, Placa en Normal y Urgente, más tranquilo, en Difícil.
+- **Efectos propios** (S-34), del oficio del pintor y de la misma música: la cinta de papel, el aluminio del pomo, la mesa, tres notas de laúd en la cuenta, una pincelada en la revelación y una cadencia al terminar.
+- **Los pomos arrancan en un lugar al azar**, lejos del color en uno o dos selectores (#61): ningún color queda armado de entrada.
+- **Colores más apagados** en el sorteo: la saturación arranca en 20 (#62).
+- Se corrigió un caso raro en que el sorteo podía dar tono 360.
+
 ## 0.14.5 — 3/11/2026
 
 - Buen ojo (S-32): **los valores, a la vista.** Mientras se arma, cada pomo muestra su valor, chico, arriba a la derecha. En la revelación, siempre, una tabla con el tono, la saturación y el brillo de la referencia y de tu intento, en lugar de las diferencias sueltas.

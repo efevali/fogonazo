@@ -119,19 +119,39 @@
   }
 
   // ------------------------------------------------------------ los colores de una partida
-  // Tono libre; saturación desde 25 y brillo desde 30, para que el tono siempre se vea. Cada color de una partida
+  // Tono libre; saturación desde 20 y brillo desde 30, para que el tono siempre se vea. Cada color de una partida
   // queda bien lejos de los anteriores (ΔE 20 o más), para que no se parezcan entre sí.
   function sortear(previos = [], azar = Math.random) {
     let c;
     for (let i = 0; i < 60; i++) {
-      c = { h: Math.round(azar() * 3600) / 10, s: Math.round(25 + azar() * 75), v: Math.round(30 + azar() * 70) };
+      c = { h: (Math.round(azar() * 3600) % 3600) / 10, s: Math.round(20 + azar() * 80), v: Math.round(30 + azar() * 70) };
       if (previos.every(p => diferencia(p, c) >= 20)) break;
     }
     return c;
   }
 
+  // ------------------------------------------------------------ dónde arrancan los pomos (#61)
+  // Al azar en cada ronda, y adrede lejos del color en uno o dos de los tres selectores (se sortea cuáles), para que un
+  // color cerca del centro no quede armado sin hacer nada. Lejos: al menos un 30 % del recorrido (108° de tono, por el
+  // camino corto del círculo; 30 de saturación o de brillo). Los demás, al azar.
+  const LEJOS = { h: 108, s: 30, v: 30 };
+  function inicio(obj, azar = Math.random) {
+    const ks = ['h', 's', 'v'], n = azar() < 0.5 ? 1 : 2, lejos = [];
+    while (lejos.length < n) { const k = ks[Math.floor(azar() * 3)]; if (!lejos.includes(k)) lejos.push(k); }
+    const t = {};
+    for (const k of ks) {
+      const max = k === 'h' ? 360 : 100;
+      if (!lejos.includes(k)) { t[k] = Math.round(azar() * max); continue; }
+      if (k === 'h') { t.h = Math.round((obj.h + LEJOS.h + azar() * (360 - 2 * LEJOS.h)) % 360); continue; }
+      // los valores que quedan lejos: debajo de obj − 30 y arriba de obj + 30; se elige uno al azar en ese largo
+      const abajo = Math.max(0, obj[k] - LEJOS[k]), arriba = Math.max(0, max - obj[k] - LEJOS[k]), x = azar() * (abajo + arriba);
+      t[k] = Math.round(x < abajo ? x : obj[k] + LEJOS[k] + (x - abajo));
+    }
+    return t;
+  }
+
   const coma = n => n.toFixed(1).replace('.', ',');
 
-  const API = { hsvARgb, css, rgbALab, deltaE, diferencia, puntaje, UMBRAL_AYUDA, BANDAS, frase, ayuda, sortear, difTono, coma };
+  const API = { hsvARgb, css, rgbALab, deltaE, diferencia, puntaje, UMBRAL_AYUDA, BANDAS, frase, ayuda, sortear, inicio, LEJOS, difTono, coma };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else raiz.Color = API;
 })(typeof window !== 'undefined' ? window : this);

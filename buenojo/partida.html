@@ -154,7 +154,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const Est = window.Estado, C = window.Color;
-  const fx = n => App.sonido.fx(n);
+  const fx = (n, a) => App.sonido.fx(n, a);
   const stage = $('stage');
 
   function fit() {
@@ -172,10 +172,10 @@
   const DIF = Est.DIFICULTADES[q.get('d')] ? q.get('d') : Est.dificultad;
   const SEGUNDOS = Est.DIFICULTADES[DIF].segundos;
   const RONDAS = 5;
-  const INICIO = () => ({ h: 180, s: 50, v: 50 });   // every round starts from the same place
+  const INICIO = () => C.inicio(G.objetivo);   // each round, from a random place, far from the color in one or two of the three (#61)
 
   // the state of the game
-  const G = { ronda: 0, objetivo: null, tuyo: INICIO(), resultados: [], usadas: new Set(), timers: [] };
+  const G = { ronda: 0, objetivo: null, tuyo: { h: 180, s: 50, v: 50 }, resultados: [], usadas: new Set(), timers: [] };
   const fase = f => { stage.dataset.fase = f; };
   const despues = (ms, f) => G.timers.push(setTimeout(f, ms));
 
@@ -237,14 +237,14 @@
       const rp = f.pomo.getBoundingClientRect(), sobrePomo = e.clientX >= rp.left - 10 && e.clientX <= rp.right + 10;
       if (!sobrePomo) { G.tuyo[f.k] = valorEn(e.clientX); pintarTuyo(); }
       arrastre = { x: e.clientX, v: G.tuyo[f.k], ancho: f.trazo.getBoundingClientRect().width };
-      fx('toc');
+      fx('bo_agarra');
     });
     f.el.addEventListener('pointermove', e => {
       if (!arrastre) return;
       G.tuyo[f.k] = Math.max(0, Math.min(f.max, arrastre.v + (e.clientX - arrastre.x) / arrastre.ancho * f.max));
       pintarTuyo();
     });
-    const soltar = () => { if (arrastre) { arrastre = null; fx('suelta'); } };
+    const soltar = () => { if (arrastre) { arrastre = null; fx('bo_suelta'); } };
     f.el.addEventListener('pointerup', soltar); f.el.addEventListener('pointercancel', soltar);
     // with a keyboard, the arrows move it a little
     f.el.addEventListener('keydown', e => {
@@ -271,7 +271,7 @@
     const c = $('cuenta');
     if (!n) { c.textContent = ''; mirar(); return; }
     c.textContent = n; c.classList.remove('toca'); void c.offsetWidth; c.classList.add('toca');
-    fx('toc');
+    fx('bo_cuenta', n);
     despues(1000, () => cuenta(n - 1));
   }
   function mirar() {
@@ -310,7 +310,7 @@
     $('accion').textContent = G.ronda < RONDAS ? 'Siguiente' : 'Ver el total';
     fase('ver');
     ajustarNota();
-    fx('pista');
+    fx('bo_pincel');
   }
   // a long phrase plus the help and the table can overflow the sheet: the phrase and the help get a little smaller until it fits
   function ajustarNota() {
@@ -333,7 +333,7 @@
       `<div class="ficha" style="--r:${ROT[i]}deg"><div><i style="background:${C.css(x.objetivo.h, x.objetivo.s, x.objetivo.v)}"></i><i style="background:${C.css(x.tuyo.h, x.tuyo.s, x.tuyo.v)}"></i></div><b>${C.coma(x.p)}</b></div>`).join('');
     $('fin').hidden = false;
     fase('fin');
-    fx(r.record ? 'record' : 'limpio');
+    fx(r.record ? 'bo_record' : 'bo_fin');
   }
   function nuevaPartida() {
     G.timers.forEach(clearTimeout); G.timers = [];
@@ -356,17 +356,19 @@
 
   $('accion').addEventListener('click', () => {
     const f = stage.dataset.fase;
-    fx('boton');
+    fx('bo_cinta');
     if (f === 'armar') ver();
     else if (f === 'ver') { if (G.ronda < RONDAS) ronda(); else fin(); }
     else if (f === 'practica') practica();
   });
-  $('otra').addEventListener('click', () => { fx('boton'); nuevaPartida(); });
-  $('volver').addEventListener('click', () => { fx('boton'); App.volver(1 + App.extra); });
+  $('otra').addEventListener('click', () => { fx('bo_cinta'); nuevaPartida(); });
+  $('volver').addEventListener('click', () => { fx('bo_cinta'); App.volver(1 + App.extra); });
 
   // for the tools (herramientas/capturas.js): see the state and jump to a moment
   window.__buenojo = { G, fase: () => stage.dataset.fase, ver, fin, armar, ronda, poner: t => { Object.assign(G.tuyo, t); pintarTuyo(); }, objetivo: o => { G.objetivo = o; } };
 
+  // the music: Taller in the practice (as in the sketchbook), and by difficulty in a game (S-33)
+  App.sonido.musica(PRACTICA ? 'tallerR' : { facil: 'siestaR', normal: 'placaR', dificil: 'urgenteR' }[DIF]);
   if (PRACTICA) practica(); else ronda();
 })();
 </script>

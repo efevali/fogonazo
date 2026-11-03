@@ -3,6 +3,8 @@
    - Los efectos y los cuatro temas de Fogonazo (Placa, Taller, Urgente y Siesta), su sonido de siempre.
    - Los del mahjong: voces orientales (koto, flauta, bloque de madera, tamborcito y campana), sus efectos y Siesta y
      Taller como primas orientales: mismo tempo, ritmo, acordes y bajo, la melodía en do pentatónica mayor.
+   - Los de Buen ojo (S-33, S-34): voces renacentistas (laúd, flauta dulce, viola da gamba y tamboril), los cuatro
+     temas de Fogonazo como primos renacentistas y efectos con esos instrumentos y sonidos del oficio del pintor.
    - La lluvia de la sala: un colchón de ruido rosa apagado y gotitas en el vidrio.
    - Un solo juego de volúmenes para toda la colección (música, efectos y lluvia, de 0 a 10), guardado en Chrome.
    Vive en la página contenedora (index.html), así que no se corta al pasar de una pantalla a otra. */
@@ -179,6 +181,56 @@ const Sound = (() => {
     fm({ at: t, f: f * 2.02, ratio: 1, index: 0.2, indexEnd: 0.01, dur: 1.2, vol: vol * 0.35, attack: 0.003, dec: 1.2, sus: 0.01, rel: 0.2, dest });
   }
 
+  // ------------------------------------------------------------ voces renacentistas (Buen ojo, S-33)
+  // laúd: cuerda pulsada con el dedo, por Karplus-Strong, calculada una vez por nota
+  const cuerdasLaud = new Map();
+  function cuerdaLaud(m) {
+    if (cuerdasLaud.has(m)) return cuerdasLaud.get(m);
+    const sr = ctx.sampleRate, f = mtof(m), P = Math.max(2, Math.round(sr / f - 0.5)), len = Math.floor(sr * 1.6);
+    const buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0), ring = new Float32Array(P);
+    let prev = 0; for (let i = 0; i < P; i++) { prev = prev * 0.55 + (Math.random() * 2 - 1) * 0.45; ring[i] = prev; }
+    const damp = 0.9955 - Math.min(0.006, f / 200000);
+    let q = 0; for (let i = 0; i < len; i++) { const a = ring[q], b = ring[(q + 1) % P]; d[i] = a; ring[q] = damp * 0.5 * (a + b); q = (q + 1) % P; }
+    let pk = 0; for (let i = 0; i < len; i++) pk = Math.max(pk, Math.abs(d[i])); for (let i = 0; i < len; i++) d[i] /= pk || 1;
+    cuerdasLaud.set(m, buf); return buf;
+  }
+  function laud(m, t, vol, dest, pan) {
+    const s = ctx.createBufferSource(); s.buffer = cuerdaLaud(m);
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; g.gain.value = vol;
+    s.connect(lp); lp.connect(g); g.connect(out(dest, pan)); s.start(t); s.stop(t + 1.6);
+  }
+  function vibratoR(param, f, t, prof) {
+    const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = 5;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0, t + 0.18); g.gain.linearRampToValueAtTime(f * prof, t + 0.43);
+    l.connect(g); g.connect(param); l.start(t); return l;
+  }
+  // flauta dulce: casi un seno, con algo de triangular y de la octava (para que el parlante del teléfono la lleve), un
+  // soplo al atacar y un vibrato liviano y tardío
+  function flautaDulce(m, t, d, vol, dest, pan) {
+    const f = mtof(m), o = ctx.createOscillator(), o2 = ctx.createOscillator(), o3 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(), g3 = ctx.createGain();
+    o.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f; g2.gain.value = 0.55; o3.frequency.value = f * 2; g3.gain.value = 0.12;
+    const lv = vibratoR(o.frequency, f, t, 0.004), lv2 = vibratoR(o2.frequency, f, t, 0.004);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.035); g.gain.setValueAtTime(vol * 0.92, t + Math.max(0.055, d - 0.06)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.05);
+    o.connect(g); o2.connect(g2); g2.connect(g); o3.connect(g3); g3.connect(g); g.connect(out(dest, pan));
+    noise({ at: t, dur: 0.05, vol: vol * 0.5, filter: 'bandpass', freq: f * 2, q: 3, dest, pan });
+    o.start(t); o2.start(t); o3.start(t); for (const x of [o, o2, o3, lv, lv2]) x.stop(t + d + 0.08);
+  }
+  // viola da gamba: dos sierras apenas desafinadas por un cuerpo oscuro, con arco (ataque suave), sin vibrato
+  function gamba(m, t, d, vol, dest, pan) {
+    const f = mtof(m), g = ctx.createGain(), lp = ctx.createBiquadFilter(), cuerpo = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 0.6; cuerpo.type = 'peaking'; cuerpo.frequency.value = 900; cuerpo.Q.value = 1.2; cuerpo.gain.value = 5;
+    const osc = [-3, 3].map(c => { const x = ctx.createOscillator(); x.type = 'sawtooth'; x.frequency.value = f; x.detune.value = c; x.connect(lp); return x; });
+    lp.connect(cuerpo); cuerpo.connect(g); g.connect(out(dest, pan));
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.035); g.gain.setValueAtTime(vol, t + Math.max(0.035, d - 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.07);
+    osc.forEach(x => { x.start(t); x.stop(t + d + 0.12); });
+  }
+  // tamboril: un tambor de marco grave, que se siente más de lo que se oye
+  function tamboril(t, vol, dest) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(85, t + 0.12);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.22);
+    noise({ at: t, dur: 0.05, vol: vol * 0.35, filter: 'lowpass', freq: 900, dest });
+  }
+
   // ------------------------------------------------------------ efectos
   const PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.7, 1318.5, 1568];
   const MJ_SEMI = [0, 2, 4, 7, 9, 12, 14, 16, 19], MJ_PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
@@ -239,7 +291,44 @@ const Sound = (() => {
       fm({ at: t + 0.42, f: 98, ratio: 1.4, index: 2, indexEnd: 0.2, indexTime: 0.6, dur: 1.4, vol: 0.06, dec: 1.4, sus: 0.05, rel: 0.2 });
     },
     record() { const t = ctx.currentTime; [1046.5, 1318.5, 1568].forEach((f, i) => koto(f, t + i * 0.09, 0.065, null, 0, null, 0.9)); rin(t + 0.3, 2093, 0.035); },
+
+    // Buen ojo (S-34): sonidos del oficio del pintor y los instrumentos de su música
+    // tocar una cinta: la cinta de papel, un golpecito sordo con algo de papel
+    bo_cinta() { const t = ctx.currentTime, d = nivel(0.96); noise({ at: t, dur: 0.035, vol: 0.22, filter: 'lowpass', freq: 1400, dest: d }); senoR(t, 210, 150, 0.06, 0.16, d); noise({ at: t + 0.004, dur: 0.05, vol: 0.05, filter: 'bandpass', freq: 3800, q: 1.5, dest: d }); },
+    // agarrar el pomo: un clic de aluminio, apagado
+    bo_agarra() { const t = ctx.currentTime, d = nivel(2.56); [[2500, 0.045, 0.045], [3900, 0.03, 0.03], [5800, 0.02, 0.015]].forEach(([f, l, v]) => senoR(t, f, 0, l, v, d)); noise({ at: t, dur: 0.012, vol: 0.1, filter: 'bandpass', freq: 3000, q: 1.2, dest: d }); },
+    // soltar el pomo: un toque liviano sobre la mesa
+    bo_suelta() { const t = ctx.currentTime, d = nivel(2); noise({ at: t, dur: 0.016, vol: 0.12, filter: 'bandpass', freq: 1500, q: 1.8, dest: d }); senoR(t, 330, 250, 0.03, 0.06, d); },
+    // la cuenta: tres notas de laúd que suben (3, 2, 1)
+    bo_cuenta(n) { laud([0, 67, 65, 64][n] || 64, ctx.currentTime, 0.26 * 0.3, sfxBus); },
+    // la revelación: una pincelada sobre el papel, igual para cualquier puntaje
+    bo_pincel() {
+      const t = ctx.currentTime, d = nivel(2.5);
+      const src = ctx.createBufferSource(); src.buffer = noiseBuf; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
+      f.frequency.setValueAtTime(1800, t); f.frequency.exponentialRampToValueAtTime(4200, t + 0.32);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.11, t + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+      src.connect(f); f.connect(g); g.connect(d); src.start(t, Math.random() * 0.5); src.stop(t + 0.34);
+      for (let j = 0; j < 7; j++) noise({ at: t + 0.04 + j * 0.035, dur: 0.02, vol: 0.025, filter: 'bandpass', freq: 2500 + j * 300, q: 3, dest: d });
+    },
+    // fin de partida: una cadencia de laúd y flauta; el récord, más larga y con el tamboril al cierre
+    bo_fin() { cadencia(ctx.currentTime, nivel(0.57), false); },
+    bo_record() { cadencia(ctx.currentTime, nivel(0.62), true); },
   };
+  // cada efecto de Buen ojo pasa por su nivel: el que tenía en la prueba (S-34), medido acá (los golpes muy cortos
+  // salen más bajos con el ataque de noise(), por eso algunos niveles pasan de 1)
+  function nivel(v) { const g = ctx.createGain(); g.gain.value = v; g.connect(sfxBus); setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 4000); return g; }
+  function senoR(t, f, f2, dur, vol, dest) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.02);
+  }
+  function cadencia(t, d, record) {
+    [55, 59, 62].forEach((m, j) => laud(m, t + j * 0.12, 0.22, d, -0.2 + j * 0.2));
+    [60, 64, 67, 72].forEach((m, j) => laud(m, t + 0.42 + j * 0.03, 0.24 * (1 - j * 0.08), d, -0.3 + j * 0.2));
+    if (!record) { flautaDulce(84, t + 0.42, 0.9, 0.1, d, 0.1); return; }
+    [[76, 0.42, 0.14], [79, 0.57, 0.14], [84, 0.72, 1.0]].forEach(([m, s, l]) => flautaDulce(m, t + s, l, 0.1, d, 0.1));
+    tamboril(t + 1.75, 0.2, d); tamboril(t + 1.95, 0.24, d);
+  }
 
   function play(name, arg, gap) {
     if (!ctx || set.mute || set.sfx <= 0) return;
@@ -313,6 +402,19 @@ const Sound = (() => {
       lead: [[0, 'E5', 4], [4, 'G5', 2], [6, 'E5', 2], [8, 'D5', 4], [12, 'C5', 4], [16, 'D5', 2], [18, 'A4', 2], [20, 'D5', 4], [24, 'G5', 6],
         [32, 'C5', 2], [34, 'E5', 2], [36, 'A5', 4], [40, 'G5', 2], [42, 'E5', 2], [44, 'C5', 4], [48, 'A4', 2], [50, 'C5', 2], [52, 'G5', 4], [56, 'E5', 3], [60, 'D5', 4]] },
   });
+  // Primos renacentistas para Buen ojo (S-33): mismo tempo, ritmo, acordes y bajo que los de Fogonazo (Urgente, a 120 y
+  // sin la caja, porque el armado no corre contra reloj). Laúd en los arpegios, flauta dulce en la melodía con un
+  // adorno corto en las notas largas, viola da gamba en el bajo y tamboril. Cada uno suena tan fuerte como su original
+  // (trim, medido en herramientas/buenojo/prueba-musica.html). Taller en el block y la práctica, Siesta en Fácil,
+  // Placa en Normal y Urgente en Difícil.
+  const RENACENTISTAS = {
+    tallerR: ['map', { fl: 0.085, laud: 0.09, tambor: { 0: 0.09, 8: 0.06 }, trim: 0.363 }],
+    siestaR: ['zen', { fl: 0.1, laud: 0.08, tambor: { 0: 0.06 }, trim: 0.221 }],
+    placaR: ['game', { fl: 0.1, laud: 0.05, tambor: { 0: 0.09, 8: 0.06, 4: 0.03, 12: 0.03 }, trim: 0.38 }],
+    urgenteR: ['timed', { bpm: 120, fl: 0.085, laud: 0.055, tambor: { 0: 0.1, 8: 0.08 }, trim: 0.49, escala: [0, 2, 4, 5, 7, 8, 9, 11] }],
+  };
+  for (const [id, [base, o]] of Object.entries(RENACENTISTAS))
+    SONGS[id] = Object.assign({}, SONGS[base], { name: SONGS[base].name + ' renacentista', ren: true, soft: false, escala: [0, 2, 4, 5, 7, 9, 11] }, o);
   function defineSong(id, s) {
     s.chordsM = s.chords.map(c => c.map(N));
     s.rootsM = s.roots.map(N);
@@ -374,6 +476,8 @@ const Sound = (() => {
       d.connect(lp); lp.connect(fb); fb.connect(d); lp.connect(wet); wet.connect(b);
       // las orientales: eco a tres semicorcheas y un poco de sala
       if (song && song.jp) { d.delayTime.value = (60 / song.bpm / 4) * 3; const s = ctx.createGain(); s.gain.value = 0.14; b.connect(s); s.connect(revIn); }
+      // las renacentistas: su nivel y la misma sala chica
+      if (song && song.ren) { b.gain.value = song.trim; const s = ctx.createGain(); s.gain.value = 0.275; b.connect(s); s.connect(revIn); }
       return { b, echoIn: d, delay: d };
     }
     function schedJp(c, t, S) {
@@ -388,8 +492,26 @@ const Sound = (() => {
       if (k === 56 && ((step / 64) | 0) % 2 === 0) MJ_PENTA.forEach((f, i) => koto(f, t + i * S * 0.5, 0.03, dest, (i - 2.5) * 0.12, null, 0.7));
       if (((step / 64) | 0) % 2 === 1) { const L = song.leadByStep.get(k); if (L) A.lead(mtof(L[0]), t, S * L[1] * 0.95, dest, c.bus.echoIn, song); }
     }
+    function schedRen(c, t, S) {
+      const song = c.song, dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, i = k % 16;
+      const chord = song.chordsM[bar], root = song.rootsM[bar];
+      if (song.bass.includes(i)) gamba(root + (song.octave.includes(i) ? 12 : 0), t, S * song.bassLen, song.bass.length > 4 ? 0.045 : 0.06, dest, -0.15);
+      if (i % song.arpEvery === 0) laud(chord[(i / song.arpEvery) % chord.length], t, song.laud, dest, i % 4 < 2 ? -0.25 : 0.25);
+      if (song.tambor[i]) tamboril(t, song.tambor[i], dest);
+      if (song.leadPasses === 'all' || ((step / 64) | 0) % 2 === 1) {
+        const L = song.leadByStep.get(k);
+        if (!L) return;
+        const [m, len] = L, d = S * len * 0.95;
+        // un adorno corto desde la nota de arriba en las notas largas, como haría un flautista
+        if (len >= 4) {
+          let sup = m + 2; for (const x of [1, 2]) if (song.escala.includes((m + x) % 12)) { sup = m + x; break; }
+          flautaDulce(sup, t, S * 0.45, song.fl * 0.9, dest, 0.1); flautaDulce(m, t + S * 0.5, d - S * 0.5, song.fl, dest, 0.1);
+        } else flautaDulce(m, t, d, song.fl, dest, 0.1);
+      }
+    }
     function schedStep(c, t, S) {
       if (c.song.jp) { schedJp(c, t, S); return; }
+      if (c.song.ren) { schedRen(c, t, S); return; }
       const song = c.song, A = ARR[song.soft ? '8s' : '8'], dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, b = k % 16;
       const chord = song.chordsM[bar], root = song.rootsM[bar];
       if (song.bass.includes(b)) A.bass(mtof(root + (song.octave.includes(b) ? 12 : 0)), t, S * song.bassLen, dest);
