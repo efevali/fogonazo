@@ -45,8 +45,8 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 
 ## El sonido
 
-- **La música** (S-33, desde la 0.15.0): los cuatro temas de Fogonazo como primos renacentistas, con laúd, flauta dulce, viola da gamba y tamboril. **Taller** en el block y la práctica, **Siesta** en Fácil, **Placa** en Normal y **Urgente** en Difícil, a 120 y sin la caja.
-- **Los efectos** (S-34): la cinta de papel al tocar un botón; un clic apagado de aluminio al agarrar un pomo y un toque liviano al soltarlo (mientras se arrastra, nada); en la cuenta, tres notas de laúd que suben; en la revelación, una pincelada sobre el papel, igual para cualquier puntaje (lo distinto lo dicen las frases); al terminar, una cadencia de laúd y flauta, más larga y con el tamboril si hay récord.
+- **La música** (S-33): Taller, el tema del mapa de Fogonazo, como primo renacentista, con laúd, flauta dulce, viola da gamba y tamboril. Uno solo en todo el juego (desde la 0.15.1): los cuatro de la 0.15.0, uno por dificultad, no se llevaban bien al pasar de una pantalla a otra. Al terminar la partida baja y queda baja mientras se ve el total, como en Fogonazo.
+- **Los efectos** (S-34): la cinta de papel al tocar un botón; un clic apagado de aluminio al agarrar un pomo y un toque liviano al soltarlo (mientras se arrastra, nada); la cuenta, en silencio; en la revelación, una pincelada sobre el papel, igual para cualquier puntaje (lo distinto lo dicen las frases); al terminar, la hoja del block que se da vuelta y, si hay récord, un sello de goma (S-35). Desde la 0.15.1, todos unos 4 dB más bajos: sobresalían sobre la música.
 
 ## Por revisar jugando
 

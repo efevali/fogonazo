@@ -308,9 +308,10 @@ const Sound = (() => {
       src.connect(f); f.connect(g); g.connect(d); src.start(t, Math.random() * 0.5); src.stop(t + 0.34);
       for (let j = 0; j < 7; j++) noise({ at: t + 0.04 + j * 0.035, dur: 0.02, vol: 0.025, filter: 'bandpass', freq: 2500 + j * 300, q: 3, dest: d });
     },
-    // fin de partida: una cadencia de laúd y flauta; el récord, más larga y con el tamboril al cierre
-    bo_fin() { cadencia(ctx.currentTime, nivel(0.57), false); },
-    bo_record() { cadencia(ctx.currentTime, nivel(0.62), true); },
+    // fin de partida (S-35): la hoja del block que se da vuelta; el récord, la hoja y un sello de goma. Suenan con la
+    // música baja (la partida la baja al terminar)
+    bo_fin() { hojaBlock(ctx.currentTime, nivel(1)); },
+    bo_record() { const t = ctx.currentTime, d = nivel(0.9); hojaBlock(t, d); selloGoma(t + 0.5, d); },
   };
   // cada efecto de Buen ojo pasa por su nivel: el que tenía en la prueba (S-34), medido acá (los golpes muy cortos
   // salen más bajos con el ataque de noise(), por eso algunos niveles pasan de 1)
@@ -321,12 +322,18 @@ const Sound = (() => {
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.02);
   }
-  function cadencia(t, d, record) {
-    [55, 59, 62].forEach((m, j) => laud(m, t + j * 0.12, 0.22, d, -0.2 + j * 0.2));
-    [60, 64, 67, 72].forEach((m, j) => laud(m, t + 0.42 + j * 0.03, 0.24 * (1 - j * 0.08), d, -0.3 + j * 0.2));
-    if (!record) { flautaDulce(84, t + 0.42, 0.9, 0.1, d, 0.1); return; }
-    [[76, 0.42, 0.14], [79, 0.57, 0.14], [84, 0.72, 1.0]].forEach(([m, s, l]) => flautaDulce(m, t + s, l, 0.1, d, 0.1));
-    tamboril(t + 1.75, 0.2, d); tamboril(t + 1.95, 0.24, d);
+  // una hoja del block que se da vuelta: se levanta (la banda de ruido sube), pasa (un soplo) y cae sobre las otras
+  function hojaBlock(t, d) {
+    noise({ at: t, dur: 0.14, vol: 0.45, filter: 'bandpass', freq: 700, freq2: 2600, q: 0.9, attack: 0.05, dest: d, pan: -0.2 });
+    noise({ at: t + 0.1, dur: 0.2, vol: 0.6, filter: 'bandpass', freq: 2400, freq2: 1100, q: 0.7, attack: 0.03, dest: d, pan: 0.2 });
+    for (let j = 0; j < 5; j++) noise({ at: t + 0.03 + j * 0.04 + Math.random() * 0.015, dur: 0.014, vol: 0.15, filter: 'bandpass', freq: 4200 + Math.random() * 1800, q: 3, dest: d });
+    senoR(t + 0.27, 140, 90, 0.06, 0.25, d); noise({ at: t + 0.27, dur: 0.05, vol: 0.3, filter: 'lowpass', freq: 900, dest: d });
+  }
+  // un sello de goma sobre el papel: un golpe sordo con un toque del mango
+  function selloGoma(t, d) {
+    senoR(t, 115, 55, 0.11, 0.45, d);
+    noise({ at: t, dur: 0.06, vol: 0.27, filter: 'lowpass', freq: 650, q: 0.8, attack: 0.002, dest: d });
+    noise({ at: t + 0.004, dur: 0.025, vol: 0.08, filter: 'bandpass', freq: 1800, q: 1.5, attack: 0.002, dest: d });
   }
 
   function play(name, arg, gap) {
