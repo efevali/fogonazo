@@ -7,6 +7,7 @@ Las versiones publicadas de la colección, de la más nueva a la más vieja. Sig
 - Buen ojo (S-30): **las pinceladas parecen pintadas**, con el contorno curvo, bordes irregulares y una punta seca corta; antes se veían segmentadas.
 - **Una sola letra:** todo en Barlow; la birome queda solo para el puntaje y la frase de la revelación, con más interlineado.
 - **Botones más chicos y con volumen**, que se hunden al tocarlos.
+- **Los pomos de pintura** terminan en el pliegue plano de aluminio, con su borde dentado, en lugar de lo que parecía una rosca.
 - **El block con más aire:** «Dificultad» ya no queda tapado por la muestra elegida, Difícil no toca Partida, y los récords van debajo de cada muestra.
 
 ## 0.14.1 — 2/11/2026

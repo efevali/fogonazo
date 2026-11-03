@@ -164,7 +164,17 @@
   const despues = (ms, f) => G.timers.push(setTimeout(f, ms));
 
   // ------------------------------------------------------------ the strokes and the tubes
-  const TUBO = color => `<svg viewBox="0 0 30 60" aria-hidden="true"><defs><linearGradient id="al" x1="0" x2="1"><stop offset="0" stop-color="#8f9399"/><stop offset=".35" stop-color="#eef0f2"/><stop offset=".6" stop-color="#c4c8cd"/><stop offset="1" stop-color="#7d8188"/></linearGradient></defs><rect x="10" y="0" width="10" height="8" rx="1.5" fill="#1e1e1e"/><path d="M12 0V8M14 0V8M16 0V8M18 0V8" stroke="#555" stroke-width=".6"/><rect x="11.5" y="8" width="7" height="3" fill="url(#al)"/><path d="M11.5 11 L6 16 H24 L18.5 11 Z" fill="url(#al)"/><path d="M6 16 H24 L25 48 H5 Z" fill="url(#al)"/><path d="M6.1 19 H23.9 V22 H6.1Z" fill="#f6f4ee"/><path class="etiqueta" d="M6.2 22 H23.8 L24.4 40 H5.6 Z" fill="${color}"/><rect x="3" y="48" width="24" height="11" rx="1" fill="url(#al)"/><path d="M3 51H27M3 54H27M3 57H27" stroke="#7d8188" stroke-width=".6"/></svg>`;
+  const TUBO = color => `<svg viewBox="0 0 30 60" aria-hidden="true"><defs>
+    <linearGradient id="al" x1="0" x2="1"><stop offset="0" stop-color="#8f9399"/><stop offset=".35" stop-color="#eef0f2"/><stop offset=".6" stop-color="#c4c8cd"/><stop offset="1" stop-color="#7d8188"/></linearGradient>
+    <linearGradient id="alPlano" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dce0"/><stop offset=".55" stop-color="#c3c7cc"/><stop offset="1" stop-color="#a9adb3"/></linearGradient></defs>
+    <rect x="10" y="0" width="10" height="8" rx="1.5" fill="#1e1e1e"/><path d="M12 0V8M14 0V8M16 0V8M18 0V8" stroke="#555" stroke-width=".6"/>
+    <rect x="11.5" y="8" width="7" height="3" fill="url(#al)"/><path d="M11.5 11 L6 16 H24 L18.5 11 Z" fill="url(#al)"/>
+    <path d="M6 16 H24 L24.6 42 C25.4 46 27 49 28.4 51 H1.6 C3 49 4.6 46 5.4 42 Z" fill="url(#al)"/>
+    <path d="M6.1 19 H23.9 V22 H6.1Z" fill="#f6f4ee"/><path class="etiqueta" d="M6.2 22 H23.8 L24.3 39 H5.7 Z" fill="${color}"/>
+    <path d="M7.5 43 L4 50.5 M11 44 L9.5 50.5 M19 44 L20.5 50.5 M22.5 43 L26 50.5" stroke="#7d8188" stroke-opacity=".55" stroke-width=".5" fill="none"/>
+    <path d="M1.6 51 H28.4 V58.2 L27.6 59 L26.8 58.2 L26 59 L25.2 58.2 L24.4 59 L23.6 58.2 L22.8 59 L22 58.2 L21.2 59 L20.4 58.2 L19.6 59 L18.8 58.2 L18 59 L17.2 58.2 L16.4 59 L15.6 58.2 L14.8 59 L14 58.2 L13.2 59 L12.4 58.2 L11.6 59 L10.8 58.2 L10 59 L9.2 58.2 L8.4 59 L7.6 58.2 L6.8 59 L6 58.2 L5.2 59 L4.4 58.2 L3.6 59 L2.8 58.2 L2 59 L1.6 58.2 Z" fill="url(#alPlano)"/>
+    <path d="M1.6 51 H28.4" stroke="#8a8e95" stroke-width=".6"/><path d="M1.8 52 H28.2" stroke="#fff" stroke-opacity=".6" stroke-width=".4"/>
+    <path d="M3 54.6 H27" stroke="#9a9ea5" stroke-width=".35" stroke-dasharray=".5 .7"/></svg>`;
   const FILAS = [
     { el: $('filaH'), k: 'h', max: 360 },
     { el: $('filaS'), k: 's', max: 100 },
