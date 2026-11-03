@@ -79,9 +79,12 @@ for (const s of Object.values(SONGS)) {
 // S-36 (3/11): since 0.15.1 Buen ojo plays only Taller. Lighter versions, same structure (tempo, chords, bass line,
 // melody), with fewer notes: L1, the lute in quarter notes, the bass only on the strong beats and the tabor only at
 // the start of the bar; L2, also the bass once a bar, no tabor and no grace notes. Same level setting: fewer notes,
-// less weight. The other themes stay below for reference.
+// less weight. L3 (3/11), from L2: the lute twice a bar (the root and the fifth) and the melody in quarter notes: the
+// notes between beats go and the one before holds (the two D of bar 2 become one). The other themes stay below for reference.
+const MELODIA_L3 = new Map([[0, ['E5', 4]], [4, ['G5', 4]], [8, ['D5', 4]], [12, ['C5', 4]], [16, ['D5', 8]], [24, ['G5', 6]],
+  [32, ['C5', 4]], [36, ['A5', 4]], [40, ['G5', 4]], [44, ['C5', 4]], [48, ['A4', 4]], [52, ['F5', 4]], [56, ['E5', 4]], [60, ['D5', 4]]].map(([k, [n, l]]) => [k, [N(n), l]]));
 const VERSIONES = [
-  { tema: 'taller', para: 'todo el juego (desde la 0.15.1)', ops: [['A', 'Hoy (0.15.1)'], ['L1', 'L1 · más liviana'], ['L2', 'L2 · mínima']] },
+  { tema: 'taller', para: 'todo el juego (desde la 0.15.1)', ops: [['A', 'Hoy (0.15.1)'], ['L1', 'L1 · más liviana'], ['L2', 'L2 · mínima'], ['L3', 'L3 · menos que la mínima']] },
 ];
 // in A, per theme: the recorder level, the lute level and where the tabor plays (0 and 8 are the bar and the half)
 const ESTILO = {
@@ -204,7 +207,7 @@ function Motor(ctx) {
   function crear(tema, v) {
     const song = Object.assign({}, SONGS[tema]);
     if (v === 'A120') song.bpm = 120;
-    const b = ctx.createGain(); b.gain.value = TRIM[tema + ':' + (v === 'L1' || v === 'L2' ? 'A' : v)] || 1; b.connect(bus);
+    const b = ctx.createGain(); b.gain.value = TRIM[tema + ':' + (/^L/.test(v) ? 'A' : v)] || 1; b.connect(bus);
     const seco = ctx.createGain(); seco.connect(b);
     if (v !== 'original') { const rev = ctx.createGain(); rev.gain.value = 0.22; const conv = sala(1.4, 3.4); seco.connect(rev); rev.connect(conv); conv.connect(b); }
     return { tema, v, song, b, dest: seco };
@@ -227,6 +230,13 @@ function Motor(ctx) {
     // A: the viola da gamba plays the bass line, the lute arpeggiates the chord in its own register, the tabor marks
     // the bar (and in Urgente at 144, struck at the rim, the snare's part)
     const E = ESTILO[c.tema];
+    if (c.v === 'L3') {
+      if (AC && i === 0) gamba(root, t, S * 6, 0.06, dest, -0.15);
+      if (AC && i % 8 === 0) laud(chord[i === 0 ? 0 : 2], t, E.laud, dest, i === 0 ? -0.25 : 0.25);
+      const M = (song.leadPasses === 'all' || ((step / 64) | 0) % 2 === 1) ? MELODIA_L3.get(k) : null;
+      if (ME && M) flautaDulce(M[0], t, S * M[1] * 0.95, E.fl, dest, 0.1);
+      return;
+    }
     if (c.v === 'L1' || c.v === 'L2') {
       // the lute in quarter notes (the same chord tones, half as many), the bass on the strong beats only
       const bajo = c.v === 'L1' ? [0, 8] : [0];
