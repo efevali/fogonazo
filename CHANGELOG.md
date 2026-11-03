@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.14.3 — 3/11/2026
+
+- Buen ojo (S-31): **los pomos ya no tapan los rótulos.** TONO, SATURACIÓN y BRILLO van arriba y el pomo pasa por debajo de las letras; las pinceladas son un poco más finas, los pomos más chicos y las filas tienen más aire.
+- **Una cuenta regresiva antes de cada color:** 3, 2, 1 sobre la cartulina, con un toque suave, en los cinco colores de la partida. La práctica no la tiene.
+
 ## 0.14.2 — 2/11/2026
 
 - Buen ojo (S-30): **las pinceladas parecen pintadas**, con el contorno curvo, bordes irregulares y una punta seca corta; antes se veían segmentadas.

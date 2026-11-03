@@ -26,16 +26,22 @@
 .hoja { left: 512rem; top: 28rem; width: 368rem; height: 318rem; background: #f6f3ea;
   background-image: radial-gradient(rgba(0, 0, 0, .025) 1rem, transparent 1rem); background-size: 5rem 5rem; box-shadow: 0 5rem 12rem rgba(0, 0, 0, .4); }
 .hoja > * { position: absolute; }
-.fila { left: 0; width: 368rem; height: 84rem; touch-action: none; }
+.fila { left: 0; width: 368rem; height: 86rem; touch-action: none; }
 .fila > * { position: absolute; }
-.fila .rotulo { left: 22rem; top: 2rem; }
-.cifra { right: 22rem; top: 2rem; font-size: 14rem; line-height: 16rem; }
-.trazo { left: 22rem; top: 24rem; width: 324rem; height: 40rem; overflow: visible; }
-.vacio { left: 22rem; top: 29rem; width: 320rem; height: 27rem; border: 2rem dashed rgba(90, 90, 90, .28); border-radius: 14rem 18rem 12rem 20rem; }
-.pomo { top: 12rem; width: 32rem; height: 64rem; margin-left: -16rem; filter: drop-shadow(0 3rem 2rem rgba(0, 0, 0, .45)); pointer-events: none; }
+/* the label on top and the stroke below it, with room for the tube to pass under the letters (S-31) */
+.fila .rotulo { left: 22rem; top: 0; }
+.cifra { right: 22rem; top: 0; font-size: 14rem; line-height: 16rem; }
+.trazo { left: 22rem; top: 33rem; width: 324rem; height: 30rem; overflow: visible; }
+.vacio { left: 22rem; top: 37rem; width: 320rem; height: 20rem; border: 2rem dashed rgba(90, 90, 90, .28); border-radius: 11rem 14rem 9rem 15rem; }
+.pomo { top: 22rem; width: 26rem; height: 52rem; margin-left: -13rem; filter: drop-shadow(0 3rem 2rem rgba(0, 0, 0, .45)); pointer-events: none; }
 .pomo svg { width: 100%; height: 100%; display: block; }
-#accion { left: 214rem; top: 268rem; width: 130rem; height: 40rem; --r: -1.5deg; transform: rotate(-1.5deg); }
-#mirar { left: 24rem; top: 270rem; font-size: 17rem; }
+#accion { left: 214rem; top: 274rem; width: 130rem; height: 40rem; --r: -1.5deg; transform: rotate(-1.5deg); }
+#mirar { left: 24rem; top: 280rem; font-size: 17rem; }
+/* the countdown before the color (S-31): chalk numbers on the grey card, where the color will appear */
+#cuenta { left: 32rem; top: 32rem; width: 391rem; height: 254rem; display: flex; align-items: center; justify-content: center;
+  font: 700 96rem/1 Barlow, sans-serif; color: rgba(245, 245, 240, .88); text-shadow: 0 2rem 0 rgba(0, 0, 0, .12); }
+#cuenta.toca { animation: cuenta .6s ease-out; }
+@keyframes cuenta { from { opacity: 0; transform: scale(.86); } 25% { opacity: 1; transform: scale(1); } }
 
 #nota { left: 0; top: 0; width: 368rem; height: 260rem; }
 #nota > * { position: absolute; }
@@ -52,6 +58,7 @@
 #stage:not([data-fase=ver]):not([data-fase=practica]) .mitad, #stage:not([data-fase=ver]):not([data-fase=practica]) .etq { display: none; }
 #stage[data-fase=ver] #muestra, #stage[data-fase=practica] #muestra { display: none; }
 #stage:not([data-fase=mirar]) #tiza { visibility: hidden; }
+#stage:not([data-fase=espera]) #cuenta { visibility: hidden; }
 #stage:not([data-fase=espera]):not([data-fase=mirar]) .vacio, #stage:not([data-fase=espera]):not([data-fase=mirar]) #mirar { display: none; }
 #stage[data-fase=espera] .trazo, #stage[data-fase=mirar] .trazo, #stage[data-fase=espera] .pomo, #stage[data-fase=mirar] .pomo { display: none; }
 #stage:not([data-fase=ver]) #nota { display: none; }
@@ -93,19 +100,20 @@
     <div id="orig" class="mitad"></div><div id="tuyo" class="mitad"></div>
     <div class="etq" style="left:32rem">ORIGINAL</div><div class="etq" style="left:227.5rem">EL TUYO</div>
     <div id="tiza"></div>
+    <div id="cuenta" aria-live="polite"></div>
   </div>
   <div class="tira" aria-hidden="true" style="left:20rem;top:18rem;transform:rotate(-38deg)"></div>
   <div class="tira" aria-hidden="true" style="left:438rem;top:18rem;transform:rotate(38deg)"></div>
   <div id="ronda" class="tira texto"></div>
 
   <div class="hoja">
-    <div class="fila" id="filaH" style="top:10rem" role="slider" aria-label="Tono" aria-valuemin="0" aria-valuemax="360" tabindex="0">
+    <div class="fila" id="filaH" style="top:16rem" role="slider" aria-label="Tono" aria-valuemin="0" aria-valuemax="360" tabindex="0">
       <div class="rotulo">TONO</div><div class="cifra suave"></div><div class="vacio"></div><svg class="trazo" viewBox="0 0 324 40" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient x1="0" x2="1"></linearGradient></defs><g mask="url(#pincel)"><rect width="324" height="40"/></g></svg><div class="pomo"></div>
     </div>
-    <div class="fila" id="filaS" style="top:98rem" role="slider" aria-label="Saturación" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+    <div class="fila" id="filaS" style="top:102rem" role="slider" aria-label="Saturación" aria-valuemin="0" aria-valuemax="100" tabindex="0">
       <div class="rotulo">SATURACIÓN</div><div class="cifra suave"></div><div class="vacio"></div><svg class="trazo" viewBox="0 0 324 40" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient x1="0" x2="1"></linearGradient></defs><g mask="url(#pincel)"><rect width="324" height="40"/></g></svg><div class="pomo"></div>
     </div>
-    <div class="fila" id="filaV" style="top:186rem" role="slider" aria-label="Brillo" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+    <div class="fila" id="filaV" style="top:188rem" role="slider" aria-label="Brillo" aria-valuemin="0" aria-valuemax="100" tabindex="0">
       <div class="rotulo">BRILLO</div><div class="cifra suave"></div><div class="vacio"></div><svg class="trazo" viewBox="0 0 324 40" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient x1="0" x2="1"></linearGradient></defs><g mask="url(#pincel)"><rect width="324" height="40"/></g></svg><div class="pomo"></div>
     </div>
     <div id="mirar" class="suave">mirá bien…</div>
@@ -244,7 +252,15 @@
     $('muestra').classList.add('vacia');
     fase('espera');
     pintarTuyo();
-    despues(800, mirar);
+    cuenta(3);
+  }
+  // 3, 2, 1 on the card, every 0.6 s and with a soft tick, before the color appears; in all five rounds
+  function cuenta(n) {
+    const c = $('cuenta');
+    if (!n) { c.textContent = ''; mirar(); return; }
+    c.textContent = n; c.classList.remove('toca'); void c.offsetWidth; c.classList.add('toca');
+    fx('toc');
+    despues(600, () => cuenta(n - 1));
   }
   function mirar() {
     const m = $('muestra'), o = G.objetivo, tiza = $('tiza');
