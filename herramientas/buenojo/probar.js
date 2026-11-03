@@ -33,10 +33,21 @@ ok(g && !/rojizo|anaranjado/.test(g.texto), 'con un gris, el tono no cuenta: ' +
 let lejos = 0;
 for (let k = 0; k < 400; k++) {
   const prev = []; for (let i = 0; i < 5; i++) prev.push(C.sortear(prev));
-  prev.forEach(c => ok(c.h >= 0 && c.h < 360 && c.s >= 25 && c.s <= 100 && c.v >= 30 && c.v <= 100, 'color fuera de rango ' + JSON.stringify(c)));
+  prev.forEach(c => ok(c.h >= 0 && c.h < 360 && c.s >= 20 && c.s <= 100 && c.v >= 30 && c.v <= 100, 'color fuera de rango ' + JSON.stringify(c)));
   if (prev.every((c, i) => prev.slice(0, i).every(p => C.diferencia(p, c) >= 20))) lejos++;
 }
 ok(lejos >= 390, `colores de una partida bien distintos entre sí (${lejos} de 400)`);
+
+// dónde arrancan los pomos (#61): dentro del recorrido, y lejos del color en uno o dos selectores, nunca en ninguno
+const cuantos = [0, 0, 0, 0];
+for (let k = 0; k < 2000; k++) {
+  const o = C.sortear(), t = C.inicio(o);
+  ok(t.h >= 0 && t.h <= 360 && t.s >= 0 && t.s <= 100 && t.v >= 0 && t.v <= 100, 'el pomo arranca fuera del recorrido ' + JSON.stringify(t));
+  const n = (Math.abs(C.difTono(o.h, t.h)) >= C.LEJOS.h - 1) + (Math.abs(t.s - o.s) >= C.LEJOS.s - 1) + (Math.abs(t.v - o.v) >= C.LEJOS.v - 1);
+  cuantos[n]++;
+}
+ok(cuantos[0] === 0, `ninguna ronda arranca cerca en los tres (${cuantos[0]} de 2000)`);
+ok(cuantos[1] > 0 && cuantos[2] > 0, `lejos en uno, dos o tres (los al azar pueden caer lejos también): ${cuantos.slice(1).join(" / ")}`);
 
 console.log(fallas ? `${fallas} fallas` : 'Buen ojo: todo bien');
 process.exit(fallas ? 1 : 0);

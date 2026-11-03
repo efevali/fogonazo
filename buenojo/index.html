@@ -89,12 +89,12 @@ h1 { margin: 0; left: 48rem; top: 18rem; font: 700 36rem Barlow; color: #2a2a28;
   pintar();
   $('chips').addEventListener('click', e => {
     const b = e.target.closest('.chip'); if (!b || b.dataset.id === Est.dificultad) return;
-    fx('boton'); Est.dificultad = b.dataset.id; pintar();
+    fx('bo_cinta'); Est.dificultad = b.dataset.id; pintar();
   });
 
-  $('partida').addEventListener('click', () => { fx('boton'); App.ir('buenojo/partida.html?d=' + Est.dificultad); });
-  $('practica').addEventListener('click', () => { fx('boton'); App.ir('buenojo/partida.html?practica'); });
-  $('volver').addEventListener('click', () => { fx('boton'); App.volver(1 + App.extra); });
+  $('partida').addEventListener('click', () => { fx('bo_cinta'); App.ir('buenojo/partida.html?d=' + Est.dificultad); });
+  $('practica').addEventListener('click', () => { fx('bo_cinta'); App.ir('buenojo/partida.html?practica'); });
+  $('volver').addEventListener('click', () => { fx('bo_cinta'); App.volver(1 + App.extra); });
 })();
 </script>
 </body>

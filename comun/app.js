@@ -28,8 +28,9 @@
     // el mahjong: las primas orientales, Taller en el estuche y Siesta en la partida
     [/^mahjong\/partida\.html/, { lluvia: false, musica: 'zenO' }],
     [/^mahjong\//, { lluvia: false, musica: 'mapO' }],
-    // Buen ojo, por ahora sin música: solo los efectos (a revisar jugando)
-    [/^buenojo\//, { lluvia: false, musica: null }],
+    // Buen ojo: los primos renacentistas, Taller en el block; en la partida lo elige la pantalla según la dificultad
+    [/^buenojo\/partida\.html/, { lluvia: false, musica: 'pantalla' }],
+    [/^buenojo\//, { lluvia: false, musica: 'tallerR' }],
   ];
   function ambiente(url) {
     const a = (AMBIENTE.find(([re]) => re.test(url)) || [null, { lluvia: false, musica: null }])[1];
