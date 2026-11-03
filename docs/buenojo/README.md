@@ -45,6 +45,8 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 
 ## Por revisar jugando
 
+- **Los pomos tapan los rótulos** (TONO, SATURACIÓN, BRILLO) al pasar por arriba (3/11). Opciones para bocetar lado a lado: el rótulo a la izquierda de la pincelada; un pomo más corto que asome menos; o más aire entre rótulo y pincelada.
+
 - La curva del puntaje, los cortes de las bandas y el umbral de la ayuda (ΔE 6): propuestas de Desarrollo, sin probar en el teléfono.
 - Los tiempos de cada dificultad.
 - **El sonido:** por ahora sin música, solo efectos prestados del mahjong (los pomos, la revelación y el récord). Falta decidir si lleva un tema propio.
