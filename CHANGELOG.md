@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.14.1 — 2/11/2026
+
+- Buen ojo: **la mesa del pintor, pintada** (P-008), con su pincel y su trapo, en lugar de la dibujada con código. En el block y en el total, **el block de dibujo pintado** sobre la mesa (P-009), con lo escrito encima; lo de la hoja se acomodó a su nuevo lugar.
+
 ## 0.14.0 — 2/11/2026
 
 - **Buen ojo, el tercer juego** (S-29): se ve un color unos segundos y se lo arma de memoria con tres pomos de pintura (tono, saturación y brillo), sobre la mesa de un pintor. Cinco colores por partida, con un puntaje de 0 a 10 por color que mide la diferencia como la ve el ojo, una frase según el puntaje y, si la diferencia se nota, qué le faltó al tuyo. Tres dificultades (el color se ve 5, 3 o 1,5 segundos), cada una con su récord, y una práctica con el color a la vista y los números.

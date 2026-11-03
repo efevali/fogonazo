@@ -2,7 +2,7 @@
 
 El tercer juego de la colección: se ve un color unos segundos y se lo arma de memoria con tres pomos de pintura, uno para el tono, otro para la saturación y otro para el brillo. Es la mesa de un pintor vista desde arriba, como Fogonazo es el banco y el mahjong la mesa ratona. Se entra por el cuadro del arcoíris de la sala. Cómo se ve está en la [guía de estilo](../estilo.md#buen-ojo); por qué es así, en el [registro de decisiones](../decisiones.md#buen-ojo).
 
-- **En la app desde la 0.14.0**, con la mesa dibujada con código hasta que llegue el fondo pintado (P-008).
+- **En la app desde la 0.14.0.** Desde la 0.14.1, con la mesa pintada (P-008) y, en el block y el total, el block pintado sobre ella (P-009).
 - La mecánica es la de juegos como Dialed: la idea no tiene dueño; el nombre, el aspecto, los textos y el código son propios.
 
 ## Cómo es
@@ -48,7 +48,6 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 - La curva del puntaje, los cortes de las bandas y el umbral de la ayuda (ΔE 6): propuestas de Desarrollo, sin probar en el teléfono.
 - Los tiempos de cada dificultad.
 - **El sonido:** por ahora sin música, solo efectos prestados del mahjong (los pomos, la revelación y el récord). Falta decidir si lleva un tema propio.
-- El fondo pintado de la mesa (P-008).
 
 ## Bocetos
 
@@ -56,7 +55,7 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 |---|---|---|
 | S-29 | Las pantallas, dibujadas con código al tamaño del teléfono: [a · la sala, con el cuadro brillando](bocetos/S-29a-sala.jpg), [b · el block](bocetos/S-29b-block.jpg), [c · mirar](bocetos/S-29c-memorizar.jpg), [d · armar con los pomos](bocetos/S-29d-reconstruir.jpg), [e · la revelación con ayuda](bocetos/S-29e-revelacion-con-ayuda.jpg), [f · sin ayuda](bocetos/S-29f-revelacion-sin-ayuda.jpg), [g · el total](bocetos/S-29g-fin.jpg) y [h · la práctica](bocetos/S-29h-practica.jpg). Los colores y los puntajes son de ejemplo | Aprobado (2/11), con las frases por banda; sin frases para el total |
 | P-008 | El pedido del fondo: la mesa del pintor desde arriba. [Composición](bocetos/P-008-composicion.png) (la franja amarilla es lo que ve el teléfono; los recuadros, lo que dibuja el juego) y el texto, abajo. [La entrega](arte/P-008_fondo-mesa.jpg), de 2576 × 1438 | Aprobado (2/11), a la primera con Gemini |
-| P-009 | El block de dibujo abierto sobre esa mesa, para el block y el total: [composición](bocetos/P-009-composicion.png) sobre la entrega del P-008 y el texto, abajo | Por pedir |
+| P-009 | El block de dibujo abierto sobre esa mesa, para el block y el total: [composición](bocetos/P-009-composicion.png) sobre la entrega del P-008 y el texto, abajo. [La entrega](arte/P-009_block-mesa.jpg): la hoja quedó en x 355 a 2180 e y 201 a 1165, donde se pidió; Gemini sacó el pincel, que quedaba debajo | Aprobado (2/11), en el segundo intento: el primero centró el block y el boceto tapaba el trapo |
 
 ### El pedido P-008
 
@@ -100,6 +99,6 @@ Imágenes, en este orden: [la mesa aprobada](arte/P-008_fondo-mesa.jpg) (el P-00
 
 ## Notas técnicas
 
-- Vive en [`buenojo/`](../../buenojo/), en la app. `color.js` tiene las cuentas (de HSB a RGB y a Lab, CIEDE2000, el puntaje, las frases, la ayuda y el sorteo); `estado.js`, el guardado; `mesa.css`, lo común a las dos pantallas (la mesa, la cinta, el «Volver»).
+- Vive en [`buenojo/`](../../buenojo/), en la app. `color.js` tiene las cuentas (de HSB a RGB y a Lab, CIEDE2000, el puntaje, las frases, la ayuda y el sorteo); `estado.js`, el guardado; `mesa.css`, lo común a las dos pantallas (la mesa, la cinta, el «Volver»); `fondo.webp` y `fondo-block.webp`, el P-008 y el P-009 para la web, recortados arriba y abajo como el fondo del mahjong. Lo escrito en el block va sobre la hoja pintada: x 126 a 774 e y 22 a 364 del espacio de diseño.
 - **El acceso en la sala:** `sala/mask-cuadro.png` es la máscara del cuadro y su lámpara (sin lo que ya es del equipo de audio). La zona táctil del cuadro termina en y = 668 y la del equipo empieza en 670. Con cuatro objetos, el brillo da la vuelta en 6,8 s: uno cada 1,7 s, cada uno los mismos 2,2 s de antes.
 - **Las pruebas:** `node herramientas/buenojo/probar.js` verifica CIEDE2000 contra los pares de referencia de Sharma, Wu y Dalal, el puntaje, las frases, la ayuda y el sorteo. Para las herramientas, `window.__buenojo` deja ver el estado, poner un color y saltar a la revelación o al total.
