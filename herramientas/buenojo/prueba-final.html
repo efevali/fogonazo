@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!-- S-35, página de prueba del sonido del fin de partida y del récord de Buen ojo. En la 0.15.0 eran una cadencia de
+     laúd y flauta que sonaba encima de la música y no se entendía ninguna de las dos. Ahora la música baja al terminar
+     (como en Fogonazo) y el sonido es simple. A, del oficio: la hoja del block que se da vuelta y, si hay récord, un
+     sello de goma (el «Nuevo récord» de la pantalla). B, de la música: un acorde de laúd y, si hay récord, una nota de
+     flauta. Con la música de fondo (Taller renacentista) a los volúmenes que tenga la app en este teléfono. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5a3d28">
+<title>Buen ojo · prueba del final</title>
+<style>
+@font-face { font-family: Barlow; font-weight: 500; src: url(../../comun/fuentes/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: Barlow; font-weight: 700; src: url(../../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
+html, body { margin: 0; min-height: 100%; background: #5a3d28; }
+body { font-family: Barlow, "Arial Narrow", sans-serif; color: #3a332c; display: flex; justify-content: center; padding: 18px 16px 32px; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+.hoja { background: #f6f3ea; max-width: 640px; width: 100%; padding: 20px 20px 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, .4); box-sizing: border-box; }
+h1 { font-size: 22px; margin: 0 0 4px; } p { font-weight: 500; color: #7a6c5c; font-size: 15px; line-height: 1.4; margin: 0 0 10px; }
+h2 { font-size: 17px; margin: 18px 0 6px; }
+.fila { display: flex; gap: 8px; flex-wrap: wrap; }
+.op { flex: 1 1 140px; text-align: left; border: 0; margin: 0; padding: 9px 11px; font: inherit; color: inherit; cursor: pointer;
+  background: #fbfaf6; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); border-left: 6px solid #d9cfbd; }
+.op.hoy { border-left-color: #b9b0a2; }
+.op b { display: block; font-size: 16px; } .op span { display: block; font-weight: 500; font-size: 13px; color: #7a6c5c; margin-top: 2px; line-height: 1.3; }
+.op.on { border-left-color: #b5402e; background: #fff; }
+#musica { background: linear-gradient(#c95a3d, #a63f27); color: #fff6ec; font: 700 17px Barlow; border: 0; padding: 10px 20px; cursor: pointer; }
+small { display: block; margin-top: 16px; color: #9a8b78; font-weight: 500; font-size: 13px; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Buen ojo · el final (S-35)</h1>
+  <p>Primero, la música de fondo. Después, tocá un final: la música baja, suena el final y a los cuatro segundos la música vuelve (en el juego queda baja mientras se ve el total).</p>
+  <button id="musica" type="button">Música de fondo: apagada</button>
+  <h2>Fin de partida</h2>
+  <div class="fila">
+    <button class="op hoy" data-id="hoy:bo_fin"><b>Hoy (0.15.0)</b><span>la cadencia, sin bajar la música</span></button>
+    <button class="op" data-id="finA"><b>A</b><span>oficio: la hoja del block que se da vuelta</span></button>
+    <button class="op" data-id="finB"><b>B</b><span>un acorde de laúd</span></button>
+  </div>
+  <h2>Nuevo récord</h2>
+  <div class="fila">
+    <button class="op hoy" data-id="hoy:bo_record"><b>Hoy (0.15.0)</b><span>la cadencia larga, sin bajar la música</span></button>
+    <button class="op" data-id="recordA"><b>A</b><span>oficio: la hoja y un sello de goma</span></button>
+    <button class="op" data-id="recordB"><b>B</b><span>el acorde y una nota de flauta</span></button>
+  </div>
+  <small>Con los volúmenes de música y efectos que tenga la app en este teléfono. Los efectos ya van 4 dB más bajos, como en la 0.15.1.</small>
+</div>
+<script src="../../comun/sonido.js"></script>
+<script>
+'use strict';
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function Voces(ctx, out) {
+  const sr = ctx.sampleRate;
+  const noise = ctx.createBuffer(1, sr, sr); { const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  const salida = pan => { if (!pan) return out; const p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(out); return p; };
+  // a band of noise with its own envelope (attack, peak, decay) and a filter that can move
+  function soplo(t, dur, vol, tipo, f, f2, q, at, pan) {
+    const s = ctx.createBufferSource(); s.buffer = noise; const bf = ctx.createBiquadFilter(); bf.type = tipo; bf.Q.value = q || 0.8;
+    bf.frequency.setValueAtTime(f, t); if (f2) bf.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + (at || 0.004)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(bf); bf.connect(g); g.connect(salida(pan)); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+  }
+  function seno(t, f, f2, dur, vol) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.02);
+  }
+  const cuerdas = new Map();
+  function laud(m, t, vol, pan) {
+    let buf = cuerdas.get(m);
+    if (!buf) {
+      const f = mtof(m), P = Math.max(2, Math.round(sr / f - 0.5)), len = Math.floor(sr * 1.6); buf = ctx.createBuffer(1, len, sr);
+      const d = buf.getChannelData(0), ring = new Float32Array(P); let prev = 0; for (let i = 0; i < P; i++) { prev = prev * 0.55 + (Math.random() * 2 - 1) * 0.45; ring[i] = prev; }
+      const damp = 0.9955 - Math.min(0.006, f / 200000); let q = 0; for (let i = 0; i < len; i++) { const a = ring[q], b = ring[(q + 1) % P]; d[i] = a; ring[q] = damp * 0.5 * (a + b); q = (q + 1) % P; }
+      let pk = 0; for (let i = 0; i < len; i++) pk = Math.max(pk, Math.abs(d[i])); for (let i = 0; i < len; i++) d[i] /= pk || 1; cuerdas.set(m, buf);
+    }
+    const s = ctx.createBufferSource(); s.buffer = buf; const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; g.gain.value = vol;
+    s.connect(lp); lp.connect(g); g.connect(salida(pan)); s.start(t); s.stop(t + 1.6);
+  }
+  function flauta(m, t, d, vol) {
+    const f = mtof(m), o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(); o.frequency.value = f; o2.type = 'triangle'; o2.frequency.value = f; g2.gain.value = 0.55;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.035); g.gain.setValueAtTime(vol * 0.92, t + d - 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.1);
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(salida(0.1)); soplo(t, 0.05, vol * 0.5, 'bandpass', f * 2, 0, 3);
+    for (const x of [o, o2]) { x.start(t); x.stop(t + d + 0.15); }
+  }
+  // a page of the sketchbook turning: it lifts (the band of noise rises), flips (a soft rush) and falls on the others
+  function hoja(t) {
+    soplo(t, 0.14, 0.45, 'bandpass', 700, 2600, 0.9, 0.05, -0.2);
+    soplo(t + 0.1, 0.2, 0.6, 'bandpass', 2400, 1100, 0.7, 0.03, 0.2);
+    for (let j = 0; j < 5; j++) soplo(t + 0.03 + j * 0.04 + Math.random() * 0.015, 0.014, 0.15, 'bandpass', 4200 + Math.random() * 1800, 0, 3);
+    seno(t + 0.27, 140, 90, 0.06, 0.25); soplo(t + 0.27, 0.05, 0.3, 'lowpass', 900);
+  }
+  // a rubber stamp on the paper: a dull thump with a little knock of the handle
+  function sello(t) {
+    seno(t, 115, 55, 0.11, 0.45); soplo(t, 0.06, 0.27, 'lowpass', 650, 0, 0.8, 0.002); soplo(t + 0.004, 0.025, 0.08, 'bandpass', 1800, 0, 1.5, 0.002);
+  }
+  const acorde = (t, vol) => [60, 64, 67, 72].forEach((m, j) => laud(m, t + j * 0.03, vol * (1 - j * 0.08), -0.3 + j * 0.2));
+  return { hoja, sello, acorde, flauta };
+}
+const PROPUESTAS = {
+  finA(V, t) { V.hoja(t); },
+  recordA(V, t) { V.hoja(t); V.sello(t + 0.5); },
+  finB(V, t) { V.acorde(t, 0.24); },
+  recordB(V, t) { V.acorde(t, 0.24); V.flauta(84, t + 0.06, 0.8, 0.1); },
+};
+// each one at about 2 dB under the 0.15.0 cadence once that is 4 dB down (measured offline): the music is down now
+const NIVEL = { finA: 1, recordA: 1, finB: 0.6, recordB: 0.6 };
+
+let base = null, ctx = null, musica = false, vuelve = null; const VS = {};
+function voces(id) {
+  Sound.ensure(); const tap = Sound._tap(); if (!tap) return null; ctx = tap.ctx;
+  if (!base) { base = ctx.createGain(); base.gain.value = Sound.volume('efectos') / 10 * 0.875 * 0.63; base.connect(tap.master); }
+  if (!VS[id]) { const g = ctx.createGain(); g.gain.value = NIVEL[id]; g.connect(base); VS[id] = Voces(ctx, g); }
+  return VS[id];
+}
+document.getElementById('musica').addEventListener('click', e => {
+  Sound.ensure(); musica = !musica;
+  if (musica) Sound.music('tallerR'); else Sound.stopMusic();
+  e.target.textContent = 'Música de fondo: ' + (musica ? 'sonando' : 'apagada');
+});
+document.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => {
+  Sound.ensure(); const id = b.dataset.id;
+  document.querySelectorAll('.op').forEach(x => x.classList.toggle('on', x === b));
+  clearTimeout(vuelve);
+  if (id.startsWith('hoy:')) { Sound.duck(false); Sound.play(id.slice(4), null, 0); return; }
+  // as in the game: the music goes down, the end sounds; here it comes back after four seconds
+  Sound.duck(true); const v = voces(id); PROPUESTAS[id](v, ctx.currentTime + 0.15);
+  vuelve = setTimeout(() => Sound.duck(false), 4000);
+}));
+
+// for the tools: render one proposal offline (at the effects level of the game) and measure it
+window.__propuesta = async id => {
+  const sr = 44100, off = new OfflineAudioContext(2, sr * 3, sr), g = off.createGain(); g.gain.value = 0.7 * 0.63 * NIVEL[id]; g.connect(off.destination);
+  PROPUESTAS[id](Voces(off, g), 0.05); const b = await off.startRendering(), d = b.getChannelData(0), d1 = b.getChannelData(1);
+  const kw = x => { const o = new Float32Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0, w1 = 0, w2 = 0;
+    for (let i = 0; i < x.length; i++) { const y = 1.53512485958697 * x[i] - 2.69169618940638 * x1 + 1.19839281085285 * x2 + 1.69065929318241 * y1 - 0.73248077421585 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = y;
+      const w = y - 2 * u1 + u2 + 1.99004745483398 * w1 - 0.99007225036621 * w2; u2 = u1; u1 = y; w2 = w1; w1 = w; o[i] = w; } return o; };
+  const k0 = kw(d), k1 = kw(d1), W = Math.floor(sr * 0.1); let best = 0, pk = 0;
+  for (let i = 0; i + W < k0.length; i += Math.floor(W / 4)) { let s = 0; for (let j = i; j < i + W; j++) s += k0[j] * k0[j] + k1[j] * k1[j]; best = Math.max(best, s / W); }
+  for (let i = 0; i < d.length; i++) pk = Math.max(pk, Math.abs(d[i]));
+  return { pico: pk, lufs100: -0.691 + 10 * Math.log10(best || 1e-12), wav: (() => {
+    const n = d.length, gg = 6, dv = new DataView(new ArrayBuffer(44 + n * 4)), w = (o, t) => [...t].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+    w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true); dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);
+    for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, d[i] * gg)) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, d1[i] * gg)) * 32767, true); }
+    let bin = ''; const u = new Uint8Array(dv.buffer); for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin); })() };
+};
+</script>
+</body>
+</html>
