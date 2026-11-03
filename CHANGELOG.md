@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.15.2 — 3/11/2026
+
+- Buen ojo: **la música, con menos presencia** (S-36). Taller conserva su estructura con menos notas: el acompañamiento más despojado y la melodía en notas largas, con la flauta más suave.
+- **En la partida, la música suena un 30 % más baja**, para concentrarse. En el block y la práctica, igual.
+
 ## 0.15.1 — 3/11/2026
 
 - Buen ojo: **un solo tema, Taller renacentista, en todo el juego.** Ya no cambia (ni se corta) al pasar del block a la partida o a la práctica.
