@@ -55,7 +55,8 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 | Boceto | Qué es | Estado |
 |---|---|---|
 | S-29 | Las pantallas, dibujadas con código al tamaño del teléfono: [a · la sala, con el cuadro brillando](bocetos/S-29a-sala.jpg), [b · el block](bocetos/S-29b-block.jpg), [c · mirar](bocetos/S-29c-memorizar.jpg), [d · armar con los pomos](bocetos/S-29d-reconstruir.jpg), [e · la revelación con ayuda](bocetos/S-29e-revelacion-con-ayuda.jpg), [f · sin ayuda](bocetos/S-29f-revelacion-sin-ayuda.jpg), [g · el total](bocetos/S-29g-fin.jpg) y [h · la práctica](bocetos/S-29h-practica.jpg). Los colores y los puntajes son de ejemplo | Aprobado (2/11), con las frases por banda; sin frases para el total |
-| P-008 | El pedido del fondo: la mesa del pintor desde arriba. [Composición](bocetos/P-008-composicion.png) (la franja amarilla es lo que ve el teléfono; los recuadros, lo que dibuja el juego) y el texto, abajo | Por pedir |
+| P-008 | El pedido del fondo: la mesa del pintor desde arriba. [Composición](bocetos/P-008-composicion.png) (la franja amarilla es lo que ve el teléfono; los recuadros, lo que dibuja el juego) y el texto, abajo. [La entrega](arte/P-008_fondo-mesa.jpg), de 2576 × 1438 | Aprobado (2/11), a la primera con Gemini |
+| P-009 | El block de dibujo abierto sobre esa mesa, para el block y el total: [composición](bocetos/P-009-composicion.png) sobre la entrega del P-008 y el texto, abajo | Por pedir |
 
 ### El pedido P-008
 
@@ -74,6 +75,24 @@ Imágenes, en este orden: [la referencia](../mahjong/arte/P-006_fondo-mesa.jpg) 
 > - Abajo, debajo del recuadro de la izquierda, un pincel de mango de madera acostado, como en el boceto, y en la esquina de abajo a la izquierda un trapo de algodón chico, manchado de pintura, cortado por el borde.
 > - En los dos recuadros punteados y entre ellos, solo madera lisa, sin manchas fuertes ni objetos.
 > - Sin texto ni letras, sin pomos de pintura, sin hojas ni cartulinas, sin personas ni manos, sin marcos.
+
+### El pedido P-009
+
+Imágenes, en este orden: [la mesa aprobada](arte/P-008_fondo-mesa.jpg) (el P-008, que tiene que quedar igual) y [la composición](bocetos/P-009-composicion.png) (la misma mesa con el block dibujado plano encima). Texto:
+
+> Necesito agregarle un objeto a una ilustración que ya está aprobada, sin cambiar nada más. Es el fondo de un juego para celular: la mesa de trabajo de un pintor de los años 70 vista exactamente desde arriba. Encima de la mesa va un block de dibujo anillado, abierto en una hoja en blanco; lo que se escribe en la hoja lo pone el juego.
+>
+> Te mando dos imágenes:
+> 1. La ilustración aprobada: la mesa de pino con sus tablas, las manchas de pintura, el pincel y el trapo. Tiene que quedar idéntica: el mismo encuadre, las mismas tablas, la misma luz y los mismos colores. No la redibujes ni la reencuadres.
+> 2. Boceto de composición: la misma mesa con el block dibujado plano encima, en el lugar y del tamaño exactos que tiene que tener. El boceto es esquemático; la terminación tiene que ser la de la ilustración aprobada.
+>
+> Lo que tiene que tener el block:
+> - Un block de dibujo de los 70, horizontal, apoyado derecho sobre la mesa, con el anillado de espiral de alambre metálico del lado izquierdo, como en el boceto. Ocupa exactamente el rectángulo del boceto: el borde de la hoja coincide con el del dibujo.
+> - La hoja, en blanco: papel de dibujo grueso color marfil, con una textura de papel muy suave, sin renglones, sin cuadrícula, sin margen, sin manchas ni dibujos. Pareja en toda la superficie, porque el juego escribe encima.
+> - Debajo de la hoja, apenas a la vista por los bordes de abajo y de la derecha, el canto de las otras hojas, y una sombra suave sobre la madera, con la misma luz de la ilustración, que viene de arriba a la izquierda.
+> - El block tapa el pincel; el trapo de la esquina de abajo a la izquierda asoma por debajo, como en el boceto.
+> - Sin texto ni letras, sin tapa visible con marcas, sin lápices ni otros objetos nuevos, sin personas ni manos.
+> - El mismo tamaño que la ilustración aprobada: 2576 × 1438.
 
 ## Notas técnicas
 

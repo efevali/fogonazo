@@ -32,7 +32,7 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 
 | Pedido | Qué | Dónde |
 |---|---|---|
-| P-008 | El fondo de Buen ojo: la mesa del pintor desde arriba | [El pedido](buenojo/README.md#el-pedido-p-008) |
+| P-009 | El block de Buen ojo abierto sobre la mesa del P-008 | [El pedido](buenojo/README.md#el-pedido-p-009) |
 
 ## Pedidos cerrados
 
@@ -44,6 +44,7 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 | P-005 | Especiales y obstáculos de Fogonazo | Gemini, ya en una conversación común | [`fogonazo/arte/P-005_especiales-obstaculos.jpg`](fogonazo/arte/P-005_especiales-obstaculos.jpg) |
 | P-006 | El fondo de la partida del mahjong: la mesa ratona desde arriba | Gemini, a la primera | [`mahjong/arte/P-006_fondo-mesa.jpg`](mahjong/arte/P-006_fondo-mesa.jpg) |
 | P-007 | El ícono con la lámpara más arriba | Gemini: subió la lámpara, pero rehízo la imagen con un encuadre más abierto (ver abajo) | [`sala/arte/P-007_icono.jpg`](sala/arte/P-007_icono.jpg) |
+| P-008 | El fondo de Buen ojo: la mesa del pintor desde arriba | Gemini, a la primera | [`buenojo/arte/P-008_fondo-mesa.jpg`](buenojo/arte/P-008_fondo-mesa.jpg) |
 
 ## Un pedido que salió a la primera
 
