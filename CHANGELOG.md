@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.14.4 — 3/11/2026
+
+- Buen ojo: **la cuenta regresiva va a tiempo real**, un segundo por número (antes, 0,6 s).
+
 ## 0.14.3 — 3/11/2026
 
 - Buen ojo (S-31): **los pomos ya no tapan los rótulos.** TONO, SATURACIÓN y BRILLO van arriba y el pomo pasa por debajo de las letras; las pinceladas son un poco más finas, los pomos más chicos y las filas tienen más aire.
