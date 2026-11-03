@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.14.5 — 3/11/2026
+
+- Buen ojo (S-32): **los valores, a la vista.** Mientras se arma, cada pomo muestra su valor, chico, arriba a la derecha. En la revelación, siempre, una tabla con el tono, la saturación y el brillo de la referencia y de tu intento, en lugar de las diferencias sueltas.
+- **«Referencia» y «Tu intento»** en la cartulina (también en la práctica), y la ayuda dice «Te quedó…».
+
 ## 0.14.4 — 3/11/2026
 
 - Buen ojo: **la cuenta regresiva va a tiempo real**, un segundo por número (antes, 0,6 s).

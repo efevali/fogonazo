@@ -25,7 +25,7 @@ ok(C.frase(9.7) === '¡Buen ojo!', '«¡Buen ojo!» es fija en su banda');
 ok(C.ayuda({ h: 168, s: 58, v: 62 }, { h: 170, s: 57, v: 63 }, 1.5) === null, 'sin ayuda con poca diferencia');
 const a = C.ayuda({ h: 200, s: 60, v: 60 }, { h: 230, s: 30, v: 80 }, 20);
 ok(a && /azulado/.test(a.texto) && /apagado/.test(a.texto) && /claro/.test(a.texto), 'la ayuda nombra tono, saturación y brillo: ' + (a && a.texto));
-ok(a && a.desglose === 'tono +30° · saturación −30 · brillo +20', 'el desglose: ' + (a && a.desglose));
+ok(a && /^Te quedó /.test(a.texto), 'la ayuda habla de «te quedó»: ' + (a && a.texto));
 const g = C.ayuda({ h: 10, s: 70, v: 60 }, { h: 10, s: 5, v: 60 }, 25);
 ok(g && !/rojizo|anaranjado/.test(g.texto), 'con un gris, el tono no cuenta: ' + (g && g.texto));
 
