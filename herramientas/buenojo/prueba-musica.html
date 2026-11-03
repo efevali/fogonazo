@@ -35,8 +35,8 @@ small { display: block; margin-top: 16px; color: #9a8b78; font-weight: 500; font
 </head>
 <body>
 <div class="hoja">
-  <h1>Buen ojo · la música (S-33)</h1>
-  <p>Los cuatro temas en el estilo A (laúd, flauta dulce, viola da gamba y tamboril), cada uno junto a su original de Fogonazo. Tocá uno para escucharlo; tocá otro para cambiar.</p>
+  <h1>Buen ojo · la música (S-33, S-36)</h1>
+  <p>Taller renacentista, el tema de todo Buen ojo, como suena hoy y en dos versiones más livianas: la misma estructura, con menos notas. Abajo, el nivel de la música en la partida.</p>
   <div id="temas"></div>
   <button id="parar" type="button">Parar</button>
   <small>Mismo tempo, acordes, bajo y ritmo que en Fogonazo; cambian los instrumentos. En el juego, Taller, Siesta y Placa arrancan con una vuelta sin melodía; acá arrancan con ella.</small>
@@ -76,11 +76,12 @@ for (const s of Object.values(SONGS)) {
   s.leadByStep = new Map(s.lead.map(([st, n, len]) => [st, [N(n), len]]));
 }
 // the versions on the page: the original and A for each theme; Urgente also at 120, without the snare tabor
+// S-36 (3/11): since 0.15.1 Buen ojo plays only Taller. Lighter versions, same structure (tempo, chords, bass line,
+// melody), with fewer notes: L1, the lute in quarter notes, the bass only on the strong beats and the tabor only at
+// the start of the bar; L2, also the bass once a bar, no tabor and no grace notes. Same level setting: fewer notes,
+// less weight. The other themes stay below for reference.
 const VERSIONES = [
-  { tema: 'taller', para: 'el block y la práctica', ops: [['original', 'Original'], ['A', 'A']] },
-  { tema: 'siesta', para: 'Fácil', ops: [['original', 'Original'], ['A', 'A']] },
-  { tema: 'placa', para: 'Normal', ops: [['original', 'Original'], ['A', 'A']] },
-  { tema: 'urgente', para: 'Difícil', ops: [['original', 'Original'], ['A', 'A · a 144'], ['A120', 'A · a 120']] },
+  { tema: 'taller', para: 'todo el juego (desde la 0.15.1)', ops: [['A', 'Hoy (0.15.1)'], ['L1', 'L1 · más liviana'], ['L2', 'L2 · mínima']] },
 ];
 // in A, per theme: the recorder level, the lute level and where the tabor plays (0 and 8 are the bar and the half)
 const ESTILO = {
@@ -203,7 +204,7 @@ function Motor(ctx) {
   function crear(tema, v) {
     const song = Object.assign({}, SONGS[tema]);
     if (v === 'A120') song.bpm = 120;
-    const b = ctx.createGain(); b.gain.value = TRIM[tema + ':' + v] || 1; b.connect(bus);
+    const b = ctx.createGain(); b.gain.value = TRIM[tema + ':' + (v === 'L1' || v === 'L2' ? 'A' : v)] || 1; b.connect(bus);
     const seco = ctx.createGain(); seco.connect(b);
     if (v !== 'original') { const rev = ctx.createGain(); rev.gain.value = 0.22; const conv = sala(1.4, 3.4); seco.connect(rev); rev.connect(conv); conv.connect(b); }
     return { tema, v, song, b, dest: seco };
@@ -226,6 +227,19 @@ function Motor(ctx) {
     // A: the viola da gamba plays the bass line, the lute arpeggiates the chord in its own register, the tabor marks
     // the bar (and in Urgente at 144, struck at the rim, the snare's part)
     const E = ESTILO[c.tema];
+    if (c.v === 'L1' || c.v === 'L2') {
+      // the lute in quarter notes (the same chord tones, half as many), the bass on the strong beats only
+      const bajo = c.v === 'L1' ? [0, 8] : [0];
+      if (AC && bajo.includes(i)) gamba(root, t, S * (c.v === 'L1' ? 3 : 6), 0.06, dest, -0.15);
+      if (AC && i % 4 === 0) laud(chord[(i / 4) % chord.length], t, E.laud, dest, (i % 8 < 4 ? -0.25 : 0.25));
+      if (AC && c.v === 'L1' && i === 0) tamboril(t, E.tambor[0], dest);
+      if (ME && L) {
+        const [m, len] = L, d = S * len * 0.95;
+        if (c.v === 'L1' && len >= 4) { flautaDulce(arriba(m, c.tema), t, S * 0.45, E.fl * 0.9, dest, 0.1); flautaDulce(m, t + S * 0.5, d - S * 0.5, E.fl, dest, 0.1); }
+        else flautaDulce(m, t, d, E.fl, dest, 0.1);
+      }
+      return;
+    }
     if (AC && song.bass.includes(i)) gamba(root + (song.octave.includes(i) ? 12 : 0), t, S * song.bassLen, song.bass.length > 4 ? 0.045 : 0.06, dest, -0.15);
     if (AC && i % song.arpEvery === 0) laud(chord[(i / song.arpEvery) % chord.length], t, E.laud, dest, (i % 4 < 2 ? -0.25 : 0.25));
     if (AC && E.tambor[i]) tamboril(t, E.tambor[i], dest);
@@ -237,7 +251,7 @@ function Motor(ctx) {
       else flautaDulce(m, t, d, E.fl, dest, 0.1);
     }
   }
-  return { crear, paso };
+  return { crear, paso, bus };
 }
 let SOLO = null;   // for the tools: 'melodia' or 'resto', to measure the balance
 
@@ -247,12 +261,20 @@ for (const V of VERSIONES) {
   temas.insertAdjacentHTML('beforeend', `<h2>${SONGS[V.tema].name}</h2><p>En Buen ojo: ${V.para}. ${SONGS[V.tema].bpm} bpm en Fogonazo.</p><div class="par">` +
     V.ops.map(([v, t]) => `<button class="op" data-t="${V.tema}" data-v="${v}"><b>${t}</b><span>${v === 'original' ? 'como en Fogonazo' : v === 'A120' ? 'más lento, sin la caja' : 'Renacimiento'}</span></button>`).join('') + '</div>');
 }
-let ctx = null, motor = null, cur = null, step = 0, nextT = 0, timer = null;
+let ctx = null, motor = null, cur = null, step = 0, nextT = 0, timer = null, NIVEL_PARTIDA = 1;
+// the level of the music in a game: as in the sketchbook, 20 % down or 30 % down
+temas.insertAdjacentHTML('beforeend', `<h2>Nivel en la partida</h2><p>Con el tema sonando, elegí el nivel: como en el block, o más bajo para la partida.</p><div class="par">` +
+  [[1, '100 %', 'como en el block'], [0.8, '80 %', '20 % más bajo'], [0.7, '70 %', '30 % más bajo']].map(([f, t, d]) => `<button class="op nivel" data-f="${f}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+document.querySelectorAll('.nivel').forEach(b => b.addEventListener('click', () => {
+  NIVEL_PARTIDA = +b.dataset.f; document.querySelectorAll('.nivel').forEach(x => x.classList.toggle('on', x === b));
+  if (motor) { const g = motor.bus.gain, t = ctx.currentTime; g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(0.35 * 0.6 * NIVEL_PARTIDA, t + 0.4); }
+}));
 function sonar(tema, v) {
   if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); motor = Motor(ctx); }
   if (ctx.state === 'suspended') ctx.resume();
   parar(0.25);
   cur = motor.crear(tema, v); step = cur.song.leadPasses === 'all' ? 0 : 64; nextT = ctx.currentTime + 0.1;
+  motor.bus.gain.value = 0.35 * 0.6 * NIVEL_PARTIDA;
   timer = setInterval(() => { const S = 60 / cur.song.bpm / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
   marcar(tema, v);
 }
@@ -261,8 +283,8 @@ function parar(fade) {
   if (cur) { const b = cur.b, t = ctx.currentTime; b.gain.setValueAtTime(b.gain.value, t); b.gain.linearRampToValueAtTime(0, t + (fade || 0.3)); setTimeout(() => { try { b.disconnect(); } catch (e) {} }, 3000); }
   cur = null; marcar();
 }
-function marcar(tema, v) { document.querySelectorAll('.op').forEach(b => b.classList.toggle('on', b.dataset.t === tema && b.dataset.v === v)); }
-document.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => sonar(b.dataset.t, b.dataset.v)));
+function marcar(tema, v) { document.querySelectorAll('.op:not(.nivel)').forEach(b => b.classList.toggle('on', b.dataset.t === tema && b.dataset.v === v)); }
+document.querySelectorAll('.op:not(.nivel)').forEach(b => b.addEventListener('click', () => sonar(b.dataset.t, b.dataset.v)));
 document.getElementById('parar').addEventListener('click', () => parar(0.3));
 document.addEventListener('visibilitychange', () => { if (document.hidden) parar(0.1); });
 
