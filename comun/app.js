@@ -28,13 +28,15 @@
     // el mahjong: las primas orientales, Taller en el estuche y Siesta en la partida
     [/^mahjong\/partida\.html/, { lluvia: false, musica: 'zenO' }],
     [/^mahjong\//, { lluvia: false, musica: 'mapO' }],
-    // Buen ojo: Taller renacentista en todo el juego, sin cortarse al pasar de una pantalla a otra
+    // Buen ojo: Taller renacentista en todo el juego, sin cortarse al pasar de una pantalla a otra; en la partida (no en
+    // la práctica), un 30 % más baja, para concentrarse
+    [/^buenojo\/partida\.html\?d=/, { lluvia: false, musica: 'tallerR', foco: 0.7 }],
     [/^buenojo\//, { lluvia: false, musica: 'tallerR' }],
   ];
   function ambiente(url) {
     const a = (AMBIENTE.find(([re]) => re.test(url)) || [null, { lluvia: false, musica: null }])[1];
     Sound.rain(a.lluvia);
-    Sound.duck(false);
+    Sound.duck(false); Sound.focus(a.foco || 1);
     if (a.musica === 'pantalla') return;
     if (a.musica) Sound.music(a.musica); else Sound.stopMusic();
   }

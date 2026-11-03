@@ -15,7 +15,7 @@ const Sound = (() => {
   const CLAVE = 'coleccion.sonido';
   const vol = { musica: 7, efectos: 8, lluvia: 7 };
   try { const v = JSON.parse(localStorage.getItem(CLAVE)); if (v) for (const k in vol) if (Number.isFinite(v[k])) vol[k] = Math.max(0, Math.min(10, Math.round(v[k]))); } catch (e) {}
-  const set = { sfx: 0.7, music: 0.35, mute: false };
+  const set = { sfx: 0.7, music: 0.35, mute: false, foco: 1 };   // foco: la música más baja para concentrarse (Buen ojo, en la partida)
   const fromVol = () => { set.sfx = vol.efectos / 10 * 0.875; set.music = vol.musica / 10 * 0.5; };
   fromVol();
   const last = {};
@@ -54,7 +54,7 @@ const Sound = (() => {
     if (!ctx) return;
     const m = set.mute ? 0 : 1;
     sfxBus.gain.setTargetAtTime(set.sfx * m, ctx.currentTime, 0.02);
-    musicBus.gain.setTargetAtTime(set.music * 0.6 * m * (Music.ducked ? 0.3 : 1), ctx.currentTime, 0.05);
+    musicBus.gain.setTargetAtTime(set.music * 0.6 * m * (Music.ducked ? 0.3 : 1) * set.foco, ctx.currentTime, 0.3);
     if (set.music * m > 0) Music.resume(); else Music.halt();
     Rain.apply();
   }
@@ -412,8 +412,13 @@ const Sound = (() => {
   // con la dificultad, no se llevaban bien al pasar de una pantalla a otra). Mismo tempo, ritmo, acordes y bajo que el
   // de Fogonazo. Laúd en los arpegios, flauta dulce en la melodía con un adorno corto en las notas largas, viola da
   // gamba en el bajo y tamboril. Suena tan fuerte como el original (trim, medido en herramientas/buenojo/prueba-musica.html).
+  // 0.15.2 (S-36, L3): con menos presencia y la misma estructura: la gamba una nota larga por compás, el laúd dos (la
+  // fundamental y la quinta), sin tamboril, y la melodía en negras, sin adornos (las notas entre tiempos se van y la
+  // anterior se sostiene), con la flauta unos 3 dB más baja.
   const RENACENTISTAS = {
-    tallerR: ['map', { fl: 0.085, laud: 0.09, tambor: { 0: 0.09, 8: 0.06 }, trim: 0.363 }],
+    tallerR: ['map', { fl: 0.06, laud: 0.09, tambor: {}, trim: 0.363, bass: [0], bassLen: 6, arpEvery: 8, arpNotas: [0, 2], adorno: false,
+      lead: [[0, 'E5', 4], [4, 'G5', 4], [8, 'D5', 4], [12, 'C5', 4], [16, 'D5', 8], [24, 'G5', 6],
+        [32, 'C5', 4], [36, 'A5', 4], [40, 'G5', 4], [44, 'C5', 4], [48, 'A4', 4], [52, 'F5', 4], [56, 'E5', 4], [60, 'D5', 4]] }],
   };
   for (const [id, [base, o]] of Object.entries(RENACENTISTAS))
     SONGS[id] = Object.assign({}, SONGS[base], { name: SONGS[base].name + ' renacentista', ren: true, soft: false, escala: [0, 2, 4, 5, 7, 9, 11] }, o);
@@ -498,14 +503,14 @@ const Sound = (() => {
       const song = c.song, dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, i = k % 16;
       const chord = song.chordsM[bar], root = song.rootsM[bar];
       if (song.bass.includes(i)) gamba(root + (song.octave.includes(i) ? 12 : 0), t, S * song.bassLen, song.bass.length > 4 ? 0.045 : 0.06, dest, -0.15);
-      if (i % song.arpEvery === 0) laud(chord[(i / song.arpEvery) % chord.length], t, song.laud, dest, i % 4 < 2 ? -0.25 : 0.25);
+      if (i % song.arpEvery === 0) { const j = i / song.arpEvery; laud(chord[song.arpNotas ? song.arpNotas[j % song.arpNotas.length] : j % chord.length], t, song.laud, dest, (song.arpNotas ? j % 2 === 0 : i % 4 < 2) ? -0.25 : 0.25); }
       if (song.tambor[i]) tamboril(t, song.tambor[i], dest);
       if (song.leadPasses === 'all' || ((step / 64) | 0) % 2 === 1) {
         const L = song.leadByStep.get(k);
         if (!L) return;
         const [m, len] = L, d = S * len * 0.95;
         // un adorno corto desde la nota de arriba en las notas largas, como haría un flautista
-        if (len >= 4) {
+        if (len >= 4 && song.adorno !== false) {
           let sup = m + 2; for (const x of [1, 2]) if (song.escala.includes((m + x) % 12)) { sup = m + x; break; }
           flautaDulce(sup, t, S * 0.45, song.fl * 0.9, dest, 0.1); flautaDulce(m, t + S * 0.5, d - S * 0.5, song.fl, dest, 0.1);
         } else flautaDulce(m, t, d, song.fl, dest, 0.1);
@@ -636,6 +641,7 @@ const Sound = (() => {
     stopMusic() { Music.stop(); },
     rain(on) { Rain.want(on); },
     duck(on) { Music.duck(on); },
+    focus(f) { set.foco = f; apply(); },
     nowPlaying() { return Music.current(); },
     FX: Object.keys(FX8),
     _tap() { return ctx ? { ctx, master } : null; },
