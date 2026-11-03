@@ -28,8 +28,7 @@
     // el mahjong: las primas orientales, Taller en el estuche y Siesta en la partida
     [/^mahjong\/partida\.html/, { lluvia: false, musica: 'zenO' }],
     [/^mahjong\//, { lluvia: false, musica: 'mapO' }],
-    // Buen ojo: los primos renacentistas, Taller en el block; en la partida lo elige la pantalla según la dificultad
-    [/^buenojo\/partida\.html/, { lluvia: false, musica: 'pantalla' }],
+    // Buen ojo: Taller renacentista en todo el juego, sin cortarse al pasar de una pantalla a otra
     [/^buenojo\//, { lluvia: false, musica: 'tallerR' }],
   ];
   function ambiente(url) {

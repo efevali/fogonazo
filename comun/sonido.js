@@ -3,8 +3,8 @@
    - Los efectos y los cuatro temas de Fogonazo (Placa, Taller, Urgente y Siesta), su sonido de siempre.
    - Los del mahjong: voces orientales (koto, flauta, bloque de madera, tamborcito y campana), sus efectos y Siesta y
      Taller como primas orientales: mismo tempo, ritmo, acordes y bajo, la melodía en do pentatónica mayor.
-   - Los de Buen ojo (S-33, S-34): voces renacentistas (laúd, flauta dulce, viola da gamba y tamboril), los cuatro
-     temas de Fogonazo como primos renacentistas y efectos con esos instrumentos y sonidos del oficio del pintor.
+   - Los de Buen ojo (S-33, S-34): voces renacentistas (laúd, flauta dulce, viola da gamba y tamboril), Taller como
+     primo renacentista y efectos con esos instrumentos y sonidos del oficio del pintor.
    - La lluvia de la sala: un colchón de ruido rosa apagado y gotitas en el vidrio.
    - Un solo juego de volúmenes para toda la colección (música, efectos y lluvia, de 0 a 10), guardado en Chrome.
    Vive en la página contenedora (index.html), así que no se corta al pasar de una pantalla a otra. */
@@ -299,8 +299,6 @@ const Sound = (() => {
     bo_agarra() { const t = ctx.currentTime, d = nivel(2.56); [[2500, 0.045, 0.045], [3900, 0.03, 0.03], [5800, 0.02, 0.015]].forEach(([f, l, v]) => senoR(t, f, 0, l, v, d)); noise({ at: t, dur: 0.012, vol: 0.1, filter: 'bandpass', freq: 3000, q: 1.2, dest: d }); },
     // soltar el pomo: un toque liviano sobre la mesa
     bo_suelta() { const t = ctx.currentTime, d = nivel(2); noise({ at: t, dur: 0.016, vol: 0.12, filter: 'bandpass', freq: 1500, q: 1.8, dest: d }); senoR(t, 330, 250, 0.03, 0.06, d); },
-    // la cuenta: tres notas de laúd que suben (3, 2, 1)
-    bo_cuenta(n) { laud([0, 67, 65, 64][n] || 64, ctx.currentTime, 0.26 * 0.3, sfxBus); },
     // la revelación: una pincelada sobre el papel, igual para cualquier puntaje
     bo_pincel() {
       const t = ctx.currentTime, d = nivel(2.5);
@@ -316,7 +314,8 @@ const Sound = (() => {
   };
   // cada efecto de Buen ojo pasa por su nivel: el que tenía en la prueba (S-34), medido acá (los golpes muy cortos
   // salen más bajos con el ataque de noise(), por eso algunos niveles pasan de 1)
-  function nivel(v) { const g = ctx.createGain(); g.gain.value = v; g.connect(sfxBus); setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 4000); return g; }
+  const BAJA_BO = 0.63;   // 0.15.1: todos unos 4 dB más bajos, porque sobresalían sobre la música
+  function nivel(v) { const g = ctx.createGain(); g.gain.value = v * BAJA_BO; g.connect(sfxBus); setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 4000); return g; }
   function senoR(t, f, f2, dur, vol, dest) {
     const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
@@ -402,16 +401,12 @@ const Sound = (() => {
       lead: [[0, 'E5', 4], [4, 'G5', 2], [6, 'E5', 2], [8, 'D5', 4], [12, 'C5', 4], [16, 'D5', 2], [18, 'A4', 2], [20, 'D5', 4], [24, 'G5', 6],
         [32, 'C5', 2], [34, 'E5', 2], [36, 'A5', 4], [40, 'G5', 2], [42, 'E5', 2], [44, 'C5', 4], [48, 'A4', 2], [50, 'C5', 2], [52, 'G5', 4], [56, 'E5', 3], [60, 'D5', 4]] },
   });
-  // Primos renacentistas para Buen ojo (S-33): mismo tempo, ritmo, acordes y bajo que los de Fogonazo (Urgente, a 120 y
-  // sin la caja, porque el armado no corre contra reloj). Laúd en los arpegios, flauta dulce en la melodía con un
-  // adorno corto en las notas largas, viola da gamba en el bajo y tamboril. Cada uno suena tan fuerte como su original
-  // (trim, medido en herramientas/buenojo/prueba-musica.html). Taller en el block y la práctica, Siesta en Fácil,
-  // Placa en Normal y Urgente en Difícil.
+  // El primo renacentista de Taller, para todo Buen ojo (S-33; 0.15.1: un solo tema, porque los cuatro, que cambiaban
+  // con la dificultad, no se llevaban bien al pasar de una pantalla a otra). Mismo tempo, ritmo, acordes y bajo que el
+  // de Fogonazo. Laúd en los arpegios, flauta dulce en la melodía con un adorno corto en las notas largas, viola da
+  // gamba en el bajo y tamboril. Suena tan fuerte como el original (trim, medido en herramientas/buenojo/prueba-musica.html).
   const RENACENTISTAS = {
     tallerR: ['map', { fl: 0.085, laud: 0.09, tambor: { 0: 0.09, 8: 0.06 }, trim: 0.363 }],
-    siestaR: ['zen', { fl: 0.1, laud: 0.08, tambor: { 0: 0.06 }, trim: 0.221 }],
-    placaR: ['game', { fl: 0.1, laud: 0.05, tambor: { 0: 0.09, 8: 0.06, 4: 0.03, 12: 0.03 }, trim: 0.38 }],
-    urgenteR: ['timed', { bpm: 120, fl: 0.085, laud: 0.055, tambor: { 0: 0.1, 8: 0.08 }, trim: 0.49, escala: [0, 2, 4, 5, 7, 8, 9, 11] }],
   };
   for (const [id, [base, o]] of Object.entries(RENACENTISTAS))
     SONGS[id] = Object.assign({}, SONGS[base], { name: SONGS[base].name + ' renacentista', ren: true, soft: false, escala: [0, 2, 4, 5, 7, 9, 11] }, o);
