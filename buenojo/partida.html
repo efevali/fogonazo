@@ -271,7 +271,6 @@
     const c = $('cuenta');
     if (!n) { c.textContent = ''; mirar(); return; }
     c.textContent = n; c.classList.remove('toca'); void c.offsetWidth; c.classList.add('toca');
-    fx('bo_cuenta', n);
     despues(1000, () => cuenta(n - 1));
   }
   function mirar() {
@@ -333,12 +332,14 @@
       `<div class="ficha" style="--r:${ROT[i]}deg"><div><i style="background:${C.css(x.objetivo.h, x.objetivo.s, x.objetivo.v)}"></i><i style="background:${C.css(x.tuyo.h, x.tuyo.s, x.tuyo.v)}"></i></div><b>${C.coma(x.p)}</b></div>`).join('');
     $('fin').hidden = false;
     fase('fin');
+    App.sonido.duck(true);   // the music goes down so the end is heard, as at the end of a level in Fogonazo
     fx(r.record ? 'bo_record' : 'bo_fin');
   }
   function nuevaPartida() {
     G.timers.forEach(clearTimeout); G.timers = [];
     G.ronda = 0; G.resultados = []; G.usadas = new Set();
     $('fin').hidden = true;
+    App.sonido.duck(false);
     ronda();
   }
 
@@ -367,8 +368,6 @@
   // for the tools (herramientas/capturas.js): see the state and jump to a moment
   window.__buenojo = { G, fase: () => stage.dataset.fase, ver, fin, armar, ronda, poner: t => { Object.assign(G.tuyo, t); pintarTuyo(); }, objetivo: o => { G.objetivo = o; } };
 
-  // the music: Taller in the practice (as in the sketchbook), and by difficulty in a game (S-33)
-  App.sonido.musica(PRACTICA ? 'tallerR' : { facil: 'siestaR', normal: 'placaR', dificil: 'urgenteR' }[DIF]);
   if (PRACTICA) practica(); else ronda();
 })();
 </script>
