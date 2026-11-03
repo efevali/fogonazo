@@ -254,13 +254,13 @@
     pintarTuyo();
     cuenta(3);
   }
-  // 3, 2, 1 on the card, every 0.6 s and with a soft tick, before the color appears; in all five rounds
+  // 3, 2, 1 on the card, one second each (real time) and with a soft tick, before the color appears; in all five rounds
   function cuenta(n) {
     const c = $('cuenta');
     if (!n) { c.textContent = ''; mirar(); return; }
     c.textContent = n; c.classList.remove('toca'); void c.offsetWidth; c.classList.add('toca');
     fx('toc');
-    despues(600, () => cuenta(n - 1));
+    despues(1000, () => cuenta(n - 1));
   }
   function mirar() {
     const m = $('muestra'), o = G.objetivo, tiza = $('tiza');
