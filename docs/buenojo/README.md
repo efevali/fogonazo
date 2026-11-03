@@ -15,7 +15,7 @@ la sala ── el cuadro ──► el block (S-29b) ── Partida ──► la 
 
 - **El block** (`index.html`): un block de dibujo abierto sobre la mesa. Tres muestras de pintura eligen la dificultad, que es cuánto se ve el color: **Fácil, 5 s; Normal, 3 s; Difícil, 1,5 s**. La elegida queda levantada, con borde ámbar, y se recuerda. Debajo de cada una, su récord en birome. Dos cintas: **Partida** (cinco colores) y **Práctica**.
 - **La partida** (`partida.html?d=…`), cinco veces:
-  1. **Mirar:** el color aparece en una cartulina gris media pegada con cinta (gris para que el entorno no engañe a la vista), mientras una línea de tiza se acorta. En la hoja de la derecha, las tres pinceladas todavía vacías.
+  1. **Mirar:** primero, una cuenta regresiva en tiza sobre la cartulina (3, 2, 1, cada 0,6 s, con un toque suave), en los cinco colores. Después el color aparece en esa cartulina, gris media y pegada con cinta (gris para que el entorno no engañe a la vista), mientras una línea de tiza se acorta. En la hoja de la derecha, las tres pinceladas todavía vacías.
   2. **Armar:** en la misma cartulina, el color que se va armando. Cada pincelada está pintada con el color del momento (el tono con todos los tonos, la saturación del gris al color vivo, el brillo del negro a la luz) y sobre cada una corre un pomo de aluminio, con la etiqueta del color actual. Agarrar el pomo lo mueve desde donde está; tocar la pincelada lo lleva ahí. Todas las rondas arrancan del mismo lugar (tono 180, saturación y brillo 50). Sin números a la vista. **Listo** pasa a la revelación.
   3. **Revelación:** el original y el tuyo lado a lado; el puntaje de 0 a 10 encerrado en birome roja y una frase de su banda. Si la diferencia ya se ve sin esfuerzo (ΔE mayor a 6), debajo, la ayuda: «El tuyo quedó un poco más celeste, más apagado y más claro», y el desglose en tono, saturación y brillo.
 - **El total** (S-29g): una hoja del block con las cinco muestras (original y tuyo, con su puntaje), el total de 0 a 50 y, si lo es, el sello «Nuevo récord» con el anterior. **Otra partida** u «◀ Volver».
@@ -45,7 +45,6 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 
 ## Por revisar jugando
 
-- **Los pomos tapan los rótulos** (TONO, SATURACIÓN, BRILLO) al pasar por arriba (3/11). Opciones para bocetar lado a lado: el rótulo a la izquierda de la pincelada; un pomo más corto que asome menos; o más aire entre rótulo y pincelada.
 
 - La curva del puntaje, los cortes de las bandas y el umbral de la ayuda (ΔE 6): propuestas de Desarrollo, sin probar en el teléfono.
 - Los tiempos de cada dificultad.
@@ -57,6 +56,7 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 |---|---|---|
 | S-29 | Las pantallas, dibujadas con código al tamaño del teléfono: [a · la sala, con el cuadro brillando](bocetos/S-29a-sala.jpg), [b · el block](bocetos/S-29b-block.jpg), [c · mirar](bocetos/S-29c-memorizar.jpg), [d · armar con los pomos](bocetos/S-29d-reconstruir.jpg), [e · la revelación con ayuda](bocetos/S-29e-revelacion-con-ayuda.jpg), [f · sin ayuda](bocetos/S-29f-revelacion-sin-ayuda.jpg), [g · el total](bocetos/S-29g-fin.jpg) y [h · la práctica](bocetos/S-29h-practica.jpg). Los colores y los puntajes son de ejemplo | Aprobado (2/11), con las frases por banda; sin frases para el total |
 | S-30 | Ajustes después de probarlo: [a · tres pinceladas](bocetos/S-30a-pinceladas.png) (A, contorno curvo; B, bordes irregulares y punta seca; C, B con vetas) y [b · las pantallas](bocetos/S-30b-pantallas.jpg): Barlow en todo salvo la nota de la revelación, botones de cinta más chicos y con volumen, y más aire en el block | Aprobado (2/11) con la pincelada B y la punta seca más corta y suave; además, más interlineado en la nota |
+| S-31 | Los pomos tapaban los rótulos y una cuenta antes del color: [a y b · tres arreglos y dos cuentas](bocetos/S-31ab-pomos-y-cuenta.jpg) (A, rótulo a la izquierda; B, pomo más chico; C, más aire; números o palotes), [c · pinceladas más finas](bocetos/S-31c-pinceladas.jpg) (C1, de 30; C2, de 22) y [d · C1 con el pomo más chico](bocetos/S-31d-pomos.jpg) | Aprobado (3/11): C1, el pomo al 80 % y la cuenta con números más chicos, en los cinco colores |
 | P-008 | El pedido del fondo: la mesa del pintor desde arriba. [Composición](bocetos/P-008-composicion.png) (la franja amarilla es lo que ve el teléfono; los recuadros, lo que dibuja el juego) y el texto, abajo. [La entrega](arte/P-008_fondo-mesa.jpg), de 2576 × 1438 | Aprobado (2/11), a la primera con Gemini |
 | P-009 | El block de dibujo abierto sobre esa mesa, para el block y el total: [composición](bocetos/P-009-composicion.png) sobre la entrega del P-008 y el texto, abajo. [La entrega](arte/P-009_block-mesa.jpg): la hoja quedó en x 355 a 2180 e y 201 a 1165, donde se pidió; Gemini sacó el pincel, que quedaba debajo | Aprobado (2/11), en el segundo intento: el primero centró el block y el boceto tapaba el trapo |
 

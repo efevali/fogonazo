@@ -124,5 +124,7 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **Una sola letra, con la birome como toque** (2/11, S-30): Barlow en todo; la birome, solo en la nota de la revelación. Producto: el toque sutil suma, pero mucho genera ruido visual. *Descartado:* la birome en récords, ayuda y total.
 - **Pinceladas de contorno curvo, bordes irregulares y punta seca corta** (2/11, S-30, B). Las de polígono se veían segmentadas. *Descartadas:* el contorno liso (A), demasiado prolijo, y las vetas de cerdas (C).
 - **Botones de cinta, más chicos y con volumen** (2/11, S-30). Grandes y planos no se entendía que eran botones. *Descartadas:* las etiquetas Dymo, que no dan el estilo de este juego.
+- **El rótulo arriba y el pomo por debajo de las letras** (3/11, S-31, C1): pincelada más fina (30 en lugar de 40), pomo al 80 % y más aire entre filas; TONO ya no queda pegado al borde. *Descartados:* el rótulo a la izquierda (A), que le quita largo a la pincelada y precisión, y solo achicar el pomo (B), que igual rozaba las letras.
+- **Una cuenta regresiva antes de cada color** (3/11, S-31): 3, 2, 1 en tiza sobre la cartulina, donde va a aparecer el color, cada 0,6 s y con un toque suave; en los cinco colores, no en la práctica. *Descartados:* los palotes de tiza, que se leen más lento que un número.
 - **Primero el OK, después implementar y publicar** (2/11): aprobar una imagen no es aprobar su implementación; la 0.14.1 salió sin que se pidiera.
 
