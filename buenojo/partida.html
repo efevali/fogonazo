@@ -65,36 +65,26 @@
 #stage[data-fase=fin] .cartulina, #stage[data-fase=fin] .hoja, #stage[data-fase=fin] .tira { display: none; }
 
 /* the end of a game (S-29g): a page of the sketchbook with the five chips, the total and the record */
-#fin { left: 60rem; top: 24rem; width: 680rem; height: 360rem; background: #f4f1e8; border-radius: 2rem; box-shadow: 0 8rem 16rem rgba(0, 0, 0, .45); z-index: 2; }
+/* on the page of the painted sketchbook (P-009), which the table shows in this moment */
+#fin { left: 126rem; top: 22rem; width: 648rem; height: 342rem; z-index: 2; }
 #fin > * { position: absolute; }
-#fin .espiral { left: -11rem; top: 14rem; bottom: 14rem; width: 24rem; background: repeating-linear-gradient(180deg, transparent 0 6rem, #8f9297 6rem 12rem, #c9ccd0 12rem 15rem, transparent 15rem 22rem); }
-#finDif { left: 48rem; top: 22rem; color: var(--ladrillo); }
-#total { left: 46rem; top: 36rem; font-size: 80rem; line-height: 86rem; white-space: nowrap; }
+#finDif { left: 48rem; top: 18rem; color: var(--ladrillo); }
+#total { left: 46rem; top: 32rem; font-size: 80rem; line-height: 86rem; white-space: nowrap; }
 #total small { font-size: 38rem; }
-#sello { left: 410rem; top: 34rem; transform: rotate(8deg); border: 3rem solid var(--rojo); border-radius: 6rem; padding: 3rem 14rem;
+#sello { left: 398rem; top: 30rem; transform: rotate(8deg); border: 3rem solid var(--rojo); border-radius: 6rem; padding: 3rem 14rem;
   font-weight: 700; font-size: 25rem; letter-spacing: .1em; color: var(--rojo); opacity: .9; }
-#antes { left: 430rem; top: 88rem; font-size: 23rem; color: var(--birome-suave); }
-#fichas { left: 48rem; top: 140rem; display: flex; gap: 16rem; }
+#antes { left: 418rem; top: 84rem; font-size: 23rem; color: var(--birome-suave); }
+#fichas { left: 48rem; top: 132rem; display: flex; gap: 16rem; }
 .ficha { width: 88rem; box-sizing: border-box; padding: 5rem 5rem 0; background: #fbfaf6; box-shadow: 0 2rem 4rem rgba(0, 0, 0, .3); transform: rotate(var(--r)); }
 .ficha div { height: 80rem; display: flex; } .ficha div i { flex: 1; }
 .ficha b { display: block; font: 600 31rem/38rem Caveat, cursive; text-align: center; color: var(--birome); }
-#leyenda { left: 50rem; top: 270rem; font-size: 22rem; color: var(--birome-suave); }
-#otra { left: 448rem; top: 298rem; width: 180rem; height: 48rem; --r: -1.5deg; transform: rotate(-1.5deg); }
+#leyenda { left: 50rem; top: 260rem; font-size: 22rem; color: var(--birome-suave); }
+#otra { left: 440rem; top: 286rem; width: 180rem; height: 48rem; --r: -1.5deg; transform: rotate(-1.5deg); }
 </style>
 </head>
 <body>
 <div id="stage" data-fase="espera">
-  <div id="mesa" aria-hidden="true">
-    <i style="left:40rem;top:400rem;width:24rem;height:18rem;border-radius:40% 60% 50% 50%;background:#c8553d"></i>
-    <i style="left:600rem;top:398rem;width:30rem;height:20rem;border-radius:55% 45% 60% 40%;background:#4f6db3"></i>
-    <i style="left:952rem;top:70rem;width:14rem;height:12rem;border-radius:50%;background:#e0b84c"></i>
-  </div>
-  <!-- a brush resting below the card -->
-  <div aria-hidden="true" style="left:150rem;top:362rem;width:240rem;height:16rem;transform:rotate(-2deg)">
-    <div style="position:absolute;left:74rem;top:3rem;width:166rem;height:10rem;border-radius:5rem;background:linear-gradient(#c79a5c,#8b6033)"></div>
-    <div style="position:absolute;left:42rem;top:3rem;width:34rem;height:10rem;background:linear-gradient(#e2e4e7,#9a9ea4)"></div>
-    <div style="position:absolute;left:10rem;top:2rem;width:34rem;height:12rem;border-radius:50% 10% 10% 50%;background:#3a2a1e"></div>
-  </div>
+  <div id="mesa" aria-hidden="true"></div>
 
   <div class="cartulina">
     <div id="muestra" class="vacia"></div>
@@ -125,7 +115,6 @@
   </div>
 
   <div id="fin" hidden>
-    <div class="espiral" aria-hidden="true"></div>
     <div id="finDif" class="rotulo"></div>
     <div id="total" class="birome"></div>
     <div id="sello" hidden>NUEVO RÉCORD</div>

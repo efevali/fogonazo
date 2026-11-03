@@ -59,12 +59,12 @@ La mesa ratona de la sala vista de cerca, desde arriba, como Fogonazo es el banc
 
 La mesa de trabajo de un pintor vista desde arriba, como Fogonazo es el banco y el mahjong la mesa ratona (S-29). Se entra por el cuadro del arcoíris de la sala.
 
-- **La mesa:** pino claro y gastado, con manchas chicas de pintura seca y la luz cálida desde arriba a la izquierda. Mientras no esté pintada (P-008), se dibuja con código, con un frasco de agua y un pincel.
+- **La mesa** (P-008): pino claro de tablas anchas, con manchas chicas de pintura seca, un pincel y un trapo, y la luz cálida desde arriba a la izquierda. En el block y el total, con el block pintado encima (P-009).
 - **La cartulina:** gris media, pegada con cinta de enmascarar, porque un entorno neutro no engaña a la vista. El color aparece siempre en el mismo lugar, el que se recuerda y el que se arma. Mientras se mira, una línea de tiza se acorta.
 - **La hoja de las pinceladas:** una por tono, saturación y brillo, con el rótulo en Barlow y la pista pintada con el color del momento. Sobre cada una corre un pomo de pintura de aluminio, con tapa negra, cierre plegado y la etiqueta del color actual. Sin números, salvo en la práctica.
 - **Lo escrito:** en birome azul (Caveat), como las notas de Fogonazo; el puntaje, encerrado en birome roja; la ayuda, más chica, y el desglose, en un azul más apagado.
 - **Los botones,** tiras de cinta de enmascarar con letras en Barlow; la principal, roja ladrillo. «◀ Volver», en Dymo, como en toda la colección.
-- **El block** (S-29b y g): un block de dibujo anillado. La dificultad, en muestras de pintura de tres tonos; la elegida, levantada y con borde ámbar. El récord, con un sello rojo.
+- **El block** (S-29b y g): un block de dibujo anillado, pintado (P-009); lo escrito, encima, con código. La dificultad, en muestras de pintura de tres tonos; la elegida, levantada y con borde ámbar. El récord, con un sello rojo.
 
 ## Sonido
 

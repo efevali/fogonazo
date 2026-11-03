@@ -28,12 +28,6 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 - **Se revisa antes de aprobar:** que respete la composición, el orden y los colores pedidos; la lógica de los objetos; que lo importante quede en la franja central; y, en las piezas, que el fondo sea parejo y el recorte salga limpio.
 - **Lo aprobado se guarda en la carpeta `arte/` de su parte**, y se cuenta en su README. Lo que reemplaza a otra imagen la reemplaza en el repositorio: la anterior queda en el historial de Git.
 
-## Pedidos abiertos
-
-| Pedido | Qué | Dónde |
-|---|---|---|
-| P-009 | El block de Buen ojo abierto sobre la mesa del P-008 | [El pedido](buenojo/README.md#el-pedido-p-009) |
-
 ## Pedidos cerrados
 
 | Pedido | Qué | Con qué IA | Vigente |
@@ -45,6 +39,7 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 | P-006 | El fondo de la partida del mahjong: la mesa ratona desde arriba | Gemini, a la primera | [`mahjong/arte/P-006_fondo-mesa.jpg`](mahjong/arte/P-006_fondo-mesa.jpg) |
 | P-007 | El ícono con la lámpara más arriba | Gemini: subió la lámpara, pero rehízo la imagen con un encuadre más abierto (ver abajo) | [`sala/arte/P-007_icono.jpg`](sala/arte/P-007_icono.jpg) |
 | P-008 | El fondo de Buen ojo: la mesa del pintor desde arriba | Gemini, a la primera | [`buenojo/arte/P-008_fondo-mesa.jpg`](buenojo/arte/P-008_fondo-mesa.jpg) |
+| P-009 | El block de Buen ojo sobre la mesa del P-008 | Gemini, al segundo intento: el primero lo centró. Con la posición en píxeles y las distancias a los bordes, la respetó | [`buenojo/arte/P-009_block-mesa.jpg`](buenojo/arte/P-009_block-mesa.jpg) |
 
 ## Un pedido que salió a la primera
 
