@@ -1,6 +1,7 @@
 /* Buen ojo: lo común a sus dos pantallas. La mesa de trabajo de un pintor vista desde arriba, con la luz cálida de
    la lámpara desde arriba a la izquierda (S-29), pintada por la IA: sola (P-008) o con el block abierto (P-009).
    Espacio de diseño: 915 × 412, como el mahjong. */
+@font-face { font-family: Barlow; font-weight: 500; src: url(../comun/fuentes/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); }
 @font-face { font-family: Barlow; font-weight: 600; src: url(../comun/fuentes/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); }
 @font-face { font-family: Barlow; font-weight: 700; src: url(../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
 @font-face { font-family: Caveat; font-weight: 600; src: url(../comun/fuentes/caveat-latin-600-normal.woff2) format('woff2'); }
@@ -18,14 +19,18 @@ button:focus { outline: none; }
 #mesa { left: 0; top: -49.4rem; width: 915rem; height: 510.8rem; pointer-events: none; background: url(fondo.webp) 0 0 / 100% 100%; }
 #mesa.block, #stage[data-fase=fin] #mesa { background-image: url(fondo-block.webp); }
 
+/* the handwriting is only for the note of the reveal (score and phrase); the rest is Barlow */
 .birome { font-family: Caveat, cursive; font-weight: 600; color: var(--birome); }
+.texto { font-family: Barlow, sans-serif; font-weight: 600; color: #3a332c; }
+.suave { font-family: Barlow, sans-serif; font-weight: 500; color: #7a6c5c; }
 .rotulo { font-weight: 600; font-size: 15rem; letter-spacing: .14em; color: var(--rotulo); }
 /* masking tape as a button; the main one, brick red */
-.cinta { display: flex; align-items: center; justify-content: center; font: 700 21rem Barlow; letter-spacing: .03em; color: #2a2a28; background: var(--cinta);
+.cinta { display: flex; align-items: center; justify-content: center; font: 700 18rem Barlow; letter-spacing: .04em; color: #2a2a28;
+  background: linear-gradient(#f1e7c9, #dccfa8); box-shadow: inset 0 2rem 0 rgba(255, 255, 255, .45), inset 0 -3rem 0 rgba(0, 0, 0, .12);
   clip-path: polygon(0 8%, 3% 0, 6% 10%, 9% 2%, 91% 0, 94% 9%, 97% 1%, 100% 6%, 100% 94%, 97% 100%, 94% 91%, 91% 99%, 9% 100%, 6% 92%, 3% 100%, 0 93%);
-  filter: drop-shadow(0 1rem 1.5rem rgba(0, 0, 0, .35)); }
-.cinta.principal { background: #b5482f; color: #fff6ec; }
-.cinta:active { transform: translateY(1.5rem) rotate(var(--r, 0deg)); }
+  filter: drop-shadow(0 3rem 2.5rem rgba(0, 0, 0, .4)); transition: transform .08s, filter .08s; }
+.cinta.principal { background: linear-gradient(#c95a3d, #a63f27); color: #fff6ec; text-shadow: 0 -1rem 0 rgba(0, 0, 0, .25); }
+.cinta:active { transform: translateY(2rem) rotate(var(--r, 0deg)); filter: drop-shadow(0 1rem 1rem rgba(0, 0, 0, .35)); }
 .tira { position: absolute; width: 62rem; height: 22rem; background: var(--cinta); box-shadow: 0 1rem 2rem rgba(0, 0, 0, .25); }
 
 #volver { left: 773rem; top: 366rem; width: 124rem; height: 30rem; z-index: 3; }

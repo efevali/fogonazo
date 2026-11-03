@@ -13,21 +13,22 @@
 /* the page of the painted sketchbook (P-009): x 126 to 774, y 22 to 364 */
 .block { left: 126rem; top: 22rem; width: 648rem; height: 342rem; }
 .block > * { position: absolute; }
-h1 { margin: 0; left: 48rem; top: 16rem; font: 700 36rem Barlow; color: #2a2a28; letter-spacing: .02em; }
-.lema { left: 204rem; top: 24rem; font-size: 26rem; }
-.dif { left: 48rem; top: 76rem; color: var(--ladrillo); }
-.chip { position: absolute; top: 100rem; width: 126rem; height: 180rem; box-sizing: border-box; padding: 7rem; background: #fbfaf6; text-align: left;
+h1 { margin: 0; left: 48rem; top: 18rem; font: 700 36rem Barlow; color: #2a2a28; letter-spacing: .02em; }
+.lema { left: 206rem; top: 32rem; font-size: 17rem; letter-spacing: .02em; }
+.dif { left: 48rem; top: 74rem; color: var(--ladrillo); }
+.chip { position: absolute; top: 104rem; width: 118rem; height: 166rem; box-sizing: border-box; padding: 7rem; background: #fbfaf6; text-align: left;
   box-shadow: 0 2rem 4rem rgba(0, 0, 0, .3); transform: rotate(var(--r)); transition: transform .15s, box-shadow .15s; }
-.chip span { display: block; height: 32rem; }
+.chip span { display: block; height: 30rem; }
 .chip b { display: block; margin-top: 7rem; font: 700 21rem/22rem Barlow; color: #2a2a28; }
 .chip small { display: block; font: 600 15rem Barlow; color: #5a5a55; }
 .chip.elegida { transform: rotate(var(--r)) translateY(-6rem); box-shadow: 0 0 0 3rem #e0a43a, 0 10rem 14rem rgba(0, 0, 0, .35); }
 #chips { left: 0; top: 0; }
-.rec { position: absolute; top: 286rem; width: 126rem; font-size: 24rem; line-height: 24rem; }
-.rec.nada { color: #8a8aa6; }
-#partida { left: 462rem; top: 118rem; width: 166rem; height: 60rem; --r: -2deg; transform: rotate(-2deg); }
-#practica { left: 462rem; top: 222rem; width: 166rem; height: 60rem; --r: 1.5deg; transform: rotate(1.5deg); }
-.pie { left: 468rem; font-size: 23rem; }
+.rec { position: absolute; top: 284rem; width: 118rem; font-size: 12rem; letter-spacing: .14em; line-height: 16rem; }
+.rec b { display: block; font: 700 22rem/24rem Barlow; letter-spacing: 0; color: #3a332c; }
+.rec.nada { color: #a09482; }
+#partida { left: 474rem; top: 118rem; width: 136rem; height: 46rem; --r: -2deg; transform: rotate(-2deg); }
+#practica { left: 474rem; top: 212rem; width: 136rem; height: 46rem; --r: 1.5deg; transform: rotate(1.5deg); }
+.pie { left: 478rem; font-size: 15rem; }
 </style>
 </head>
 <body>
@@ -36,13 +37,13 @@ h1 { margin: 0; left: 48rem; top: 16rem; font: 700 36rem Barlow; color: #2a2a28;
 
   <div class="block">
     <h1>Buen ojo</h1>
-    <div class="lema birome">mirá, acordate, armalo</div>
+    <div class="lema suave">mirá, acordate, armalo</div>
     <div class="dif rotulo">DIFICULTAD</div>
     <div id="chips" role="radiogroup" aria-label="Dificultad"></div>
     <button id="partida" class="cinta principal" type="button">Partida</button>
-    <div class="pie birome" style="top:182rem">5 colores</div>
+    <div class="pie suave" style="top:172rem">5 colores</div>
     <button id="practica" class="cinta" type="button">Práctica</button>
-    <div class="pie birome" style="top:286rem">con el color a la vista</div>
+    <div class="pie suave" style="top:266rem">con el color a la vista</div>
   </div>
   <button id="volver" type="button" aria-label="Volver a la sala"><svg viewBox="0 0 132 34" aria-hidden="true"><path d="M2,4 h126 l-4,13 l4,13 h-126 l4,-13 z" fill="#1c1c1c"/><text x="66" y="23" text-anchor="middle" font-family="Barlow" font-weight="700" font-size="14" letter-spacing="2.2" fill="#f4f1ea">◀ VOLVER</text></svg></button>
 </div>
@@ -71,9 +72,9 @@ h1 { margin: 0; left: 48rem; top: 16rem; font: 700 36rem Barlow; color: #2a2a28;
 
   // the three paint chips: three shades of one color each, the name and the seconds
   const CHIPS = {
-    facil: { x: 48, r: -2, tonos: ['#a9d3c8', '#5fae9b', '#2f7a68'] },
-    normal: { x: 192, r: 1, tonos: ['#f0d68e', '#e0b84c', '#a8822a'] },
-    dificil: { x: 336, r: -1, tonos: ['#eaa79a', '#c8553d', '#8a2f20'] },
+    facil: { x: 44, r: -2, tonos: ['#a9d3c8', '#5fae9b', '#2f7a68'] },
+    normal: { x: 180, r: 1, tonos: ['#f0d68e', '#e0b84c', '#a8822a'] },
+    dificil: { x: 316, r: -1, tonos: ['#eaa79a', '#c8553d', '#8a2f20'] },
   };
   const seg = s => String(s).replace('.', ',') + ' segundos';
   function pintar() {
@@ -82,7 +83,7 @@ h1 { margin: 0; left: 48rem; top: 16rem; font: 700 36rem Barlow; color: #2a2a28;
       const D = Est.DIFICULTADES[id], r = Est.record(id);
       return `<button class="chip${id === elegida ? ' elegida' : ''}" type="button" role="radio" aria-checked="${id === elegida}" data-id="${id}"
         style="left:${c.x}rem;--r:${c.r}deg" aria-label="${D.nombre}, ${seg(D.segundos)}${r ? ', récord ' + C.coma(r) : ''}">${c.tonos.map(t => `<span style="background:${t}"></span>`).join('')}<b>${D.nombre}</b><small>${seg(D.segundos)}</small></button>` +
-        `<div class="rec birome${r ? '' : ' nada'}" style="left:${c.x + 8}rem">${r ? 'récord<br>' + C.coma(r) : 'todavía<br>nada'}</div>`;
+        `<div class="rec suave${r ? '' : ' nada'}" style="left:${c.x + 4}rem">${r ? 'RÉCORD<b>' + C.coma(r) + '</b>' : 'SIN RÉCORD'}</div>`;
     }).join('');
   }
   pintar();

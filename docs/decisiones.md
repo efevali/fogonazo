@@ -121,4 +121,8 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **La ayuda solo si la diferencia se ve** (2/11): con ΔE mayor a 6 (a ajustar jugando). Por debajo, solo el puntaje y la frase.
 - **Frases por banda de puntaje** (2/11), tres a cinco por banda, sorteadas sin repetir en una partida; «¡Buen ojo!» fija en la suya; burla fuerte solo en la más baja, porque en Difícil los puntajes bajos van a ser frecuentes. *Descartado:* frases también para el total de la partida («ya es mucho»).
 - **Cinco colores por partida** (2/11).
+- **Una sola letra, con la birome como toque** (2/11, S-30): Barlow en todo; la birome, solo en la nota de la revelación. Producto: el toque sutil suma, pero mucho genera ruido visual. *Descartado:* la birome en récords, ayuda y total.
+- **Pinceladas de contorno curvo, bordes irregulares y punta seca corta** (2/11, S-30, B). Las de polígono se veían segmentadas. *Descartadas:* el contorno liso (A), demasiado prolijo, y las vetas de cerdas (C).
+- **Botones de cinta, más chicos y con volumen** (2/11, S-30). Grandes y planos no se entendía que eran botones. *Descartadas:* las etiquetas Dymo, que no dan el estilo de este juego.
+- **Primero el OK, después implementar y publicar** (2/11): aprobar una imagen no es aprobar su implementación; la 0.14.1 salió sin que se pidiera.
 
