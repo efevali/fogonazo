@@ -61,9 +61,9 @@ La mesa de trabajo de un pintor vista desde arriba, como Fogonazo es el banco y 
 
 - **La mesa** (P-008): pino claro de tablas anchas, con manchas chicas de pintura seca, un pincel y un trapo, y la luz cálida desde arriba a la izquierda. En el block y el total, con el block pintado encima (P-009).
 - **La cartulina:** gris media, pegada con cinta de enmascarar, porque un entorno neutro no engaña a la vista. El color aparece siempre en el mismo lugar, el que se recuerda y el que se arma. Mientras se mira, una línea de tiza se acorta.
-- **La hoja de las pinceladas:** una por tono, saturación y brillo, con el rótulo en Barlow y la pista pintada con el color del momento. Sobre cada una corre un pomo de pintura de aluminio, con tapa negra, cierre plegado y la etiqueta del color actual. Sin números, salvo en la práctica.
-- **Lo escrito:** en birome azul (Caveat), como las notas de Fogonazo; el puntaje, encerrado en birome roja; la ayuda, más chica, y el desglose, en un azul más apagado.
-- **Los botones,** tiras de cinta de enmascarar con letras en Barlow; la principal, roja ladrillo. «◀ Volver», en Dymo, como en toda la colección.
+- **La hoja de las pinceladas:** una por tono, saturación y brillo, con el rótulo en Barlow y la pista pintada con el color del momento. Cada pincelada (S-30, B) tiene el contorno curvo, más gruesa al centro, con bordes irregulares y una punta seca corta a la derecha. Sobre cada una corre un pomo de pintura de aluminio, con tapa negra, cierre plegado y la etiqueta del color actual. Sin números, salvo en la práctica.
+- **Lo escrito** (S-30): todo en Barlow, en un tono oscuro para lo principal y un gris cálido para lo secundario. La birome (Caveat) queda solo para la nota de la revelación, el puntaje encerrado en rojo y la frase en azul: un toque sutil, no ruido. La nota, con interlineado amplio.
+- **Los botones,** tiras de cinta de enmascarar con letras en Barlow, chicas y con volumen (un filo de luz arriba, sombra debajo; se hunden al tocarlas); la principal, roja ladrillo. «◀ Volver», en Dymo, como en toda la colección.
 - **El block** (S-29b y g): un block de dibujo anillado, pintado (P-009); lo escrito, encima, con código. La dificultad, en muestras de pintura de tres tonos; la elegida, levantada y con borde ámbar. El récord, con un sello rojo.
 
 ## Sonido
