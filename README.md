@@ -22,7 +22,7 @@ Una colección de minijuegos para el celular, en horizontal, que se instala desd
 | Cómo se ve y cómo suena cada parte | [`docs/estilo.md`](docs/estilo.md) |
 | Cómo se piden y se montan las imágenes hechas con IA | [`docs/imagenes.md`](docs/imagenes.md) |
 | Por qué se decidió cada cosa y qué se descartó | [`docs/decisiones.md`](docs/decisiones.md) |
-| La sala, Fogonazo y el mahjong: estado, reglas, bocetos y arte | [`docs/sala/`](docs/sala/README.md), [`docs/fogonazo/`](docs/fogonazo/README.md), [`docs/mahjong/`](docs/mahjong/README.md), [`docs/buenojo/`](docs/buenojo/README.md) |
+| Cada parte (la sala, Fogonazo, el mahjong y Buen ojo): estado, reglas, bocetos y arte | [`docs/sala/`](docs/sala/README.md), [`docs/fogonazo/`](docs/fogonazo/README.md), [`docs/mahjong/`](docs/mahjong/README.md), [`docs/buenojo/`](docs/buenojo/README.md) |
 | El método de trabajo | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Lo publicado | [`CHANGELOG.md`](CHANGELOG.md) |
 
@@ -52,7 +52,7 @@ Hace falta Node 18 o más nuevo; para las capturas, `npm install` y, la primera 
 
 - `herramientas/capturas.js`: recorre la app como en el teléfono (sala, ajustes, Fogonazo, mapa, partida, pausa y vuelta), verifica el «atrás» de Android y que abra sin conexión, y saca una captura de cada pantalla en `dist/capturas/`. Se corre antes de publicar.
 - `herramientas/version.js`: sube la versión (`parche`, `menor` o `mayor`) en `sw.js`, con la fecha, y rehace la lista de archivos que el *service worker* guarda. Sin argumento, solo rehace la lista: hace falta cada vez que se suma o se quita un archivo de la app.
-- `herramientas/mahjong/probar.js`: verifica los tableros del mahjong y juega cada reparto al azar, para dar una idea de la dificultad. `herramientas/mahjong/boceto-mahjong.html` y `composicion-p006.html`: los bocetos S-19 y S-20 y la composición del P-006. `herramientas/mahjong/prueba-barajado.html`: la página de prueba del S-25 (el barajado automático, A y B).
+- `herramientas/mahjong/probar.js`: verifica los tableros del mahjong y juega cada reparto al azar, para dar una idea de la dificultad. `herramientas/mahjong/boceto-mahjong.html` y `composicion-p006.html`: los bocetos S-19 y S-20 y la composición del P-006.
 - `herramientas/buenojo/probar.js`: verifica las cuentas de Buen ojo (CIEDE2000 contra los pares de referencia, el puntaje, las frases, la ayuda y el sorteo de colores).
 - `herramientas/iconos.py`: los íconos provisorios, desde la imagen del P-007, la ventana con la lámpara (Python con Pillow).
 - `herramientas/probar.js`: juega 180 partidas con el bot y 6 partidas zen de 300 jugadas, y verifica que la placa quede siempre consistente. Se corre después de tocar el motor de Fogonazo.
