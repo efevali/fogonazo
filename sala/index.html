@@ -371,7 +371,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       <div class="face">
         <div class="head"><h2 id="tSteps">Instalar Minijuegos</h2><span>Ajustes</span></div>
         <div id="stepsBody"></div>
-        <div class="foot"><button class="btn ghost" type="button" data-close>Entendido</button></div>
+        <div class="foot"><button class="btn ghost" type="button" data-close id="stepsOk">Entendido</button><button class="btn dark" type="button" id="chromeBtn" hidden><span class="lamp"></span>Abrir en Chrome</button></div>
       </div>
       <div class="cap"></div>
     </div>
@@ -561,8 +561,15 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
         : `<ol class="steps"><li><span class="n">1</span><span>Tocá ${K} arriba a la derecha de Chrome.</span></li>` +
           '<li><span class="n">2</span><span>Elegí <b>«Instalar app»</b>. Si dice «Agregar a la pantalla principal», tocá esa y después <b>«Instalar»</b>.</span></li></ol>' +
           `<p class="hint">Si abriste el enlace desde otra app, como WhatsApp o Gmail, primero tocá ${K} y <b>«Abrir en Chrome»</b>.</p>`;
+    // in Samsung Internet, like Kasa: «Abrir en Chrome» (primary) and «Ahora no»
+    document.getElementById('chromeBtn').hidden = !I.samsung;
+    document.getElementById('stepsOk').textContent = I.samsung ? 'Ahora no' : 'Entendido';
     show('sheetSteps');
   }
+  document.getElementById('chromeBtn').addEventListener('click', () => {
+    close();
+    setTimeout(() => App.instalacion.abrirEnChrome(), 150);   // the sheet closes first, as in Kasa
+  });
   document.getElementById('instBtn').addEventListener('click', async () => {
     fx('click');
     if (App.instalacion.cuadro && !App.instalacion.samsung) { await App.instalacion.abrir(); pintarAjustes(); return; }

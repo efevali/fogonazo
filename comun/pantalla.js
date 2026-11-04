@@ -16,6 +16,6 @@ window.App = (() => {
     salir: async () => false,
     extra: 0,
     sonido: { fx() {}, volumen: () => 7, setVolumen() {}, duck() {}, musica() {} },
-    instalacion: { disponible: true, cuadro: false, abrir: async () => false, samsung: false, ios: false },
+    instalacion: { disponible: true, cuadro: false, abrir: async () => false, samsung: false, ios: false, abrirEnChrome() {} },
   };
 })();

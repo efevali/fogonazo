@@ -8,8 +8,8 @@
 
    El sitio, efevali.github.io, es el mismo de Kasa: lo guardado lleva el prefijo «coleccion-» y solo se borra lo
    propio, más lo que guardaba el Fogonazo publicado («fogonazo-»), al que esta versión reemplaza. */
-const VERSION = '0.15.2';
-const FECHA = '3/11/2026';
+const VERSION = '0.15.3';
+const FECHA = '4/11/2026';
 const CACHE = 'coleccion-v' + VERSION;
 const ARCHIVOS = [
   './',
