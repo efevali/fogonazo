@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.15.3 — 4/11/2026
+
+- **En Samsung Internet, «Instalar» lleva a Chrome con un toque** (#31), como en Kasa: desde ese navegador Android bloquea la instalación, así que la hoja ofrece «Abrir en Chrome» y «Ahora no», en lugar de pedir que se abra Chrome a mano.
+
 ## 0.15.2 — 3/11/2026
 
 - Buen ojo: **la música, con menos presencia** (S-36). Taller conserva su estructura con menos notas: el acompañamiento más despojado y la melodía en notas largas, con la flauta más suave.

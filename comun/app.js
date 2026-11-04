@@ -209,7 +209,10 @@
         try { c.prompt(); const r = await c.userChoice; if (r && r.outcome === 'accepted') instalada = true; } catch (e) {}
         return true;
       },
+      // Samsung Internet arma el paquete de la app con una versión vieja de Android y Android 14 en adelante lo
+      // bloquea (sin arreglo desde la página): desde ahí se ofrece seguir en Chrome, como en Kasa (0.2.1).
       samsung: /SamsungBrowser/i.test(navigator.userAgent),
+      abrirEnChrome() { location.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end'; },
       ios: /iPhone|iPad|iPod/i.test(navigator.userAgent),
     },
   };
