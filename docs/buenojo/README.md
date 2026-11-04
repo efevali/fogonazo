@@ -2,23 +2,23 @@
 
 El tercer juego de la colección: se ve un color unos segundos y se lo arma de memoria con tres pomos de pintura, uno para el tono, otro para la saturación y otro para el brillo. Es la mesa de un pintor vista desde arriba, como Fogonazo es el banco y el mahjong la mesa ratona. Se entra por el cuadro del arcoíris de la sala. Cómo se ve está en la [guía de estilo](../estilo.md#buen-ojo); por qué es así, en el [registro de decisiones](../decisiones.md#buen-ojo).
 
-- **En la app desde la 0.14.0.** Desde la 0.14.1, con la mesa pintada (P-008) y, en el block y el total, el block pintado sobre ella (P-009).
+- **En la app desde la 0.14.0.** Desde la 0.14.1, con la mesa pintada (P-008) y, en el block y el total, el block pintado sobre ella (P-009). Producto lo jugó hasta la 0.15.2 (3/11 y 4/11) y no pide cambios en el puntaje, las bandas, la ayuda, los tiempos ni el sonido: no hay nada pendiente.
 - La mecánica es la de juegos como Dialed: la idea no tiene dueño; el nombre, el aspecto, los textos y el código son propios.
 
 ## Cómo es
 
 ```
-la sala ── el cuadro ──► el block (S-29b) ── Partida ──► la partida (S-29c a g) ── 5 colores ──► el total
+la sala ── el cuadro ──► el block (S-30b) ── Partida ──► la partida (S-30b a S-32) ── 5 colores ──► el total
                           ◀ Volver: la sala ── Práctica ──► la práctica (S-29h)
                                                ◀ Volver: el block
 ```
 
 - **El block** (`index.html`): un block de dibujo abierto sobre la mesa. Tres muestras de pintura eligen la dificultad, que es cuánto se ve el color: **Fácil, 5 s; Normal, 3 s; Difícil, 1,5 s**. La elegida queda levantada, con borde ámbar, y se recuerda. Debajo de cada una, su récord en birome. Dos cintas: **Partida** (cinco colores) y **Práctica**.
 - **La partida** (`partida.html?d=…`), cinco veces:
-  1. **Mirar:** primero, una cuenta regresiva en tiza sobre la cartulina (3, 2, 1, un segundo cada uno, con un toque suave), en los cinco colores. Después el color aparece en esa cartulina, gris media y pegada con cinta (gris para que el entorno no engañe a la vista), mientras una línea de tiza se acorta. En la hoja de la derecha, las tres pinceladas todavía vacías.
+  1. **Mirar:** primero, una cuenta regresiva en tiza sobre la cartulina (3, 2, 1, un segundo cada uno, en silencio), en los cinco colores. Después el color aparece en esa cartulina, gris media y pegada con cinta (gris para que el entorno no engañe a la vista), mientras una línea de tiza se acorta. En la hoja de la derecha, las tres pinceladas todavía vacías.
   2. **Armar:** en la misma cartulina, el color que se va armando. Cada pincelada está pintada con el color del momento (el tono con todos los tonos, la saturación del gris al color vivo, el brillo del negro a la luz) y sobre cada una corre un pomo de aluminio, con la etiqueta del color actual. Agarrar el pomo lo mueve desde donde está; tocar la pincelada lo lleva ahí. Cada ronda los pomos arrancan en un lugar al azar, y adrede lejos del color en uno o dos de los tres selectores: al menos un 30 % del recorrido (#61). Arriba a la derecha de cada pincelada, chico y gris claro, el valor elegido (S-32); el de la referencia nunca se ve. **Listo** pasa a la revelación.
   3. **Revelación:** la referencia y tu intento lado a lado (así dice la cartulina); el puntaje de 0 a 10 encerrado en birome roja y una frase de su banda. Si la diferencia ya se ve sin esfuerzo (ΔE mayor a 6), debajo, la ayuda: «Te quedó un poco más celeste, más apagado y más claro». Siempre, una tabla informal con el tono, la saturación y el brillo de la referencia y de tu intento (S-32). Si no entra todo, la frase y la ayuda se achican un poco; la tabla no.
-- **El total** (S-29g): una hoja del block con las cinco muestras (original y tuyo, con su puntaje), el total de 0 a 50 y, si lo es, el sello «Nuevo récord» con el anterior. **Otra partida** u «◀ Volver».
+- **El total** (S-30b): una hoja del block con las cinco muestras (original y tuyo, con su puntaje), el total de 0 a 50 y, si lo es, el sello «Nuevo récord» con el anterior. **Otra partida** u «◀ Volver».
 - **La práctica** (`partida.html?practica`): el color a la vista al lado del tuyo, con los números de cada pomo y los del original, sin puntaje ni récord. **Otro color** sortea uno nuevo.
 - **«Atrás»** vuelve de la partida o la práctica al block, y del block a la sala.
 - **Guardado** (`estado.js`), en Chrome: el récord de cada dificultad (el mejor total) y la dificultad elegida.
@@ -48,64 +48,19 @@ Se sortean sin repetir dentro de una partida. «¡Buen ojo!» es fija en su band
 - **La música** (S-33): Taller, el tema del mapa de Fogonazo, como primo renacentista, con laúd, flauta dulce, viola da gamba y tamboril. Uno solo en todo el juego (desde la 0.15.1): los cuatro de la 0.15.0, uno por dificultad, no se llevaban bien al pasar de una pantalla a otra. Desde la 0.15.2, con menos presencia (S-36): la viola da gamba, una nota larga por compás; el laúd, dos; sin tamboril; la melodía en negras, sin adornos, y la flauta más baja. En la partida suena un 30 % más baja, para concentrarse; al terminar baja más y queda así mientras se ve el total, como en Fogonazo.
 - **Los efectos** (S-34): la cinta de papel al tocar un botón; un clic apagado de aluminio al agarrar un pomo y un toque liviano al soltarlo (mientras se arrastra, nada); la cuenta, en silencio; en la revelación, una pincelada sobre el papel, igual para cualquier puntaje (lo distinto lo dicen las frases); al terminar, la hoja del block que se da vuelta y, si hay récord, un sello de goma (S-35). Desde la 0.15.1, todos unos 4 dB más bajos: sobresalían sobre la música.
 
-## Por revisar jugando
-
-- Producto lo jugó (3/11) y no pide cambios en la curva del puntaje, las bandas, el umbral de la ayuda ni los tiempos: queda así salvo que algo aparezca jugando.
-
 ## Bocetos
 
-| Boceto | Qué es | Estado |
+Quedan los que muestran cómo es hoy cada pantalla; los superados y las opciones descartadas se borraron (están en el historial de Git, y el porqué, en el [registro de decisiones](../decisiones.md#buen-ojo)). Los colores y los puntajes son de ejemplo.
+
+| Boceto | Qué fija | Estado |
 |---|---|---|
-| S-29 | Las pantallas, dibujadas con código al tamaño del teléfono: [a · la sala, con el cuadro brillando](bocetos/S-29a-sala.jpg), [b · el block](bocetos/S-29b-block.jpg), [c · mirar](bocetos/S-29c-memorizar.jpg), [d · armar con los pomos](bocetos/S-29d-reconstruir.jpg), [e · la revelación con ayuda](bocetos/S-29e-revelacion-con-ayuda.jpg), [f · sin ayuda](bocetos/S-29f-revelacion-sin-ayuda.jpg), [g · el total](bocetos/S-29g-fin.jpg) y [h · la práctica](bocetos/S-29h-practica.jpg). Los colores y los puntajes son de ejemplo | Aprobado (2/11), con las frases por banda; sin frases para el total |
-| S-30 | Ajustes después de probarlo: [a · tres pinceladas](bocetos/S-30a-pinceladas.png) (A, contorno curvo; B, bordes irregulares y punta seca; C, B con vetas) y [b · las pantallas](bocetos/S-30b-pantallas.jpg): Barlow en todo salvo la nota de la revelación, botones de cinta más chicos y con volumen, y más aire en el block | Aprobado (2/11) con la pincelada B y la punta seca más corta y suave; además, más interlineado en la nota |
-| S-31 | Los pomos tapaban los rótulos y una cuenta antes del color: [a y b · tres arreglos y dos cuentas](bocetos/S-31ab-pomos-y-cuenta.jpg) (A, rótulo a la izquierda; B, pomo más chico; C, más aire; números o palotes), [c · pinceladas más finas](bocetos/S-31c-pinceladas.jpg) (C1, de 30; C2, de 22) y [d · C1 con el pomo más chico](bocetos/S-31d-pomos.jpg) | Aprobado (3/11): C1, el pomo al 80 % y la cuenta con números más chicos, en los cinco colores |
-| S-32 | Los valores a la vista: [c · el armado](bocetos/S-32c-armar.jpg), con el valor de cada pomo arriba a la derecha (11, gris claro), y [f · la revelación](bocetos/S-32f-revelacion.jpg), con «Te quedó…», la tabla Referencia / Tu intento y la cartulina con esos mismos nombres. Antes: a y b (número a 12, renglones «→ el tuyo»), d y e (tabla con la primera columna ancha, números mal centrados por el °) | Aprobado (3/11) |
-| S-33 | La música. Primero el estilo general sobre «Taller»: A · Renacimiento (laúd, flauta dulce con un adorno corto en las notas largas, viola da gamba, tamboril), B · Barroco (clave, violín, violonchelo, trinos), A2 en consort (laúd rasgueado, dos flautas en terceras) y A3 todo ligado y de fondo. Después, los cuatro temas en el estilo A junto a su original: Taller (block y práctica), Siesta (Fácil), Placa (Normal) y Urgente (Difícil, a 144 o a 120 sin la caja). Para escucharla en el teléfono, `herramientas/buenojo/prueba-musica.html` | Elegido el A (3/11), con la flauta más presente; descartados el B (los trinos no van con el tono de la colección), A2 y A3. Aprobados (3/11) los cuatro temas en el estilo A, con Urgente a 120 y sin la caja. En la app desde la 0.15.0; desde la 0.15.1, solo Taller, en todo el juego |
-| S-34 | Los efectos, en sintonía con la música: cada momento (cinta, agarrar y soltar el pomo, la cuenta y el color, la revelación, el fin y el récord) con el sonido de hoy y propuestas con laúd, flauta dulce, tamboril y sonidos del oficio (aluminio, mesa, cinta de papel, pincelada). La revelación, igual para cualquier puntaje. Para escucharlos en el teléfono, `herramientas/buenojo/prueba-efectos.html` | Aprobado (3/11): la cinta de papel (B, un poco más fuerte), el clic de aluminio (A, más apagado), el toque liviano al soltar (B), las tres notas de laúd sin el acorde final (B), la pincelada en la revelación (B) y la cadencia de fin y de récord. En la app desde la 0.15.0 |
-| S-35 | El fin y el récord, más simples y con la música baja (en la 0.15.0 la cadencia sonaba encima de la música y no se entendía ninguna): A, del oficio, la hoja del block que se da vuelta y, en el récord, un sello de goma; B, un acorde de laúd y, en el récord, una nota de flauta. Para escucharlos en el teléfono, con la música de fondo, `herramientas/buenojo/prueba-final.html` | Aprobado (3/11) el A. En la app desde la 0.15.1 |
-| S-36 | Taller con menos presencia, misma estructura: L1, el laúd en negras, el bajo solo en los tiempos fuertes y el tamboril solo al empezar el compás; L2, además el bajo una vez por compás, sin tamboril y sin adornos en la flauta; L3, sobre L2, el laúd dos veces por compás (la fundamental y la quinta) y la melodía en negras (se van las notas entre tiempos y la anterior se sostiene). Y el nivel de la música en la partida: 100, 80 o 70 %. Para escucharlo en el teléfono, `herramientas/buenojo/prueba-musica.html` | Aprobado (3/11): L3 con la flauta un poco más baja, y la música al 70 % en la partida. En la app desde la 0.15.2 |
-| P-008 | El pedido del fondo: la mesa del pintor desde arriba. [Composición](bocetos/P-008-composicion.png) (la franja amarilla es lo que ve el teléfono; los recuadros, lo que dibuja el juego) y el texto, abajo. [La entrega](arte/P-008_fondo-mesa.jpg), de 2576 × 1438 | Aprobado (2/11), a la primera con Gemini |
-| P-009 | El block de dibujo abierto sobre esa mesa, para el block y el total: [composición](bocetos/P-009-composicion.png) sobre la entrega del P-008 y el texto, abajo. [La entrega](arte/P-009_block-mesa.jpg): la hoja quedó en x 355 a 2180 e y 201 a 1165, donde se pidió; Gemini sacó el pincel, que quedaba debajo | Aprobado (2/11), en el segundo intento: el primero centró el block y el boceto tapaba el trapo |
-
-### El pedido P-008
-
-Imágenes, en este orden: [la referencia](../mahjong/arte/P-006_fondo-mesa.jpg) (el fondo del mahjong, del mismo mundo) y [la composición](bocetos/P-008-composicion.png). Texto:
-
-> Necesito una ilustración para el fondo de un juego de memoria de colores para celular, en horizontal. Es la mesa de trabajo de un pintor aficionado de los años 70, vista exactamente desde arriba. La cartulina con el color y la hoja con las pinceladas las dibuja el juego encima, así que esas dos zonas tienen que quedar solo con madera.
->
-> Te mando dos imágenes:
-> 1. Referencia de estilo: el fondo de otro juego de la misma colección, una mesa ratona vista desde arriba. La imagen nueva tiene que ser del mismo mundo: el mismo estilo de ilustración pintada, la misma luz cálida de lámpara y la misma vista cenital.
-> 2. Boceto de composición: dónde va cada cosa. Respetá las posiciones. El boceto es plano y esquemático; la terminación tiene que ser la de la referencia.
->
-> Lo que tiene que tener:
-> - Formato horizontal 16:9. El teléfono recorta arriba y abajo: lo importante, dentro de la franja marcada en amarillo.
-> - Vista cenital estricta, sin perspectiva. La madera ocupa toda la imagen: sin bordes de la mesa ni piso.
-> - Madera de pino clara y gastada, de tablas anchas horizontales, con algunas manchas chicas de pintura seca de colores (azul, rojo, ocre) y algún rastro de lápiz. Luz cálida que entra desde arriba a la izquierda y los bordes un poco más oscuros.
-> - Abajo, debajo del recuadro de la izquierda, un pincel de mango de madera acostado, como en el boceto, y en la esquina de abajo a la izquierda un trapo de algodón chico, manchado de pintura, cortado por el borde.
-> - En los dos recuadros punteados y entre ellos, solo madera lisa, sin manchas fuertes ni objetos.
-> - Sin texto ni letras, sin pomos de pintura, sin hojas ni cartulinas, sin personas ni manos, sin marcos.
-
-### El pedido P-009
-
-Imágenes, en este orden: [la mesa aprobada](arte/P-008_fondo-mesa.jpg) (el P-008, que tiene que quedar igual) y [la composición](bocetos/P-009-composicion.png) (la misma mesa con el block dibujado plano encima). El block va en x 352 a 2182 e y 201 a 1164 de la imagen: más arriba que el centro y sin tapar el trapo. Si llega corrido, el código acomoda lo que va escrito encima. Texto:
-
-> Necesito agregarle un objeto a una ilustración que ya está aprobada, sin cambiar nada más. Es el fondo de un juego para celular: la mesa de trabajo de un pintor de los años 70 vista exactamente desde arriba. Encima de la mesa va un block de dibujo anillado, abierto en una hoja en blanco; lo que se escribe en la hoja lo pone el juego, por eso el lugar del block tiene que ser exacto.
->
-> Te mando dos imágenes:
-> 1. La ilustración aprobada: la mesa de pino con sus tablas, las manchas de pintura, el pincel y el trapo. Tiene que quedar idéntica: el mismo encuadre, las mismas tablas, la misma luz y los mismos colores. No la redibujes ni la reencuadres.
-> 2. Boceto de composición: la misma mesa con el block dibujado plano encima, en el lugar y del tamaño exactos que tiene que tener. El boceto es esquemático; la terminación tiene que ser la de la ilustración aprobada.
->
-> Dónde va el block (es lo más importante):
-> - NO va centrado en la imagen. Copiá la posición del boceto: la hoja empieza a unos 350 píxeles del borde izquierdo y termina a unos 395 del derecho; empieza a unos 200 píxeles del borde de arriba y termina a unos 275 del de abajo. Es decir, queda más cerca del borde de arriba que del de abajo.
-> - En píxeles de la imagen de 2576 × 1438: la esquina de arriba a la izquierda de la hoja en (352, 201) y la de abajo a la derecha en (2182, 1164).
-> - El trapo de la esquina de abajo a la izquierda queda entero a la vista, sin que el block lo toque. El pincel queda en parte debajo del block y asoma por su borde de abajo, como en el boceto.
->
-> Cómo es el block:
-> - Un block de dibujo de los 70, horizontal, apoyado derecho sobre la mesa (sin girar), con el anillado de espiral de alambre metálico del lado izquierdo, como en el boceto.
-> - La hoja, en blanco: papel de dibujo grueso color marfil, con una textura de papel muy suave, sin renglones, sin cuadrícula, sin margen, sin manchas ni dibujos. Pareja en toda la superficie, porque el juego escribe encima.
-> - Debajo de la hoja, apenas a la vista por los bordes de abajo y de la derecha, el canto de las otras hojas, y una sombra suave sobre la madera, con la misma luz de la ilustración, que viene de arriba a la izquierda.
-> - Sin texto ni letras, sin tapa visible con marcas, sin lápices ni otros objetos nuevos, sin personas ni manos.
-> - El mismo tamaño que la ilustración aprobada: 2576 × 1438.
+| S-29 | [a · la sala, con el cuadro brillando](bocetos/S-29a-sala.jpg) y [h · la práctica](bocetos/S-29h-practica.jpg) | Aprobado (2/11) |
+| S-30 | [b · las pantallas](bocetos/S-30b-pantallas.jpg): el block, el armado, la revelación y el total, con Barlow en todo salvo la nota de la revelación (en birome) y los botones de cinta con volumen | Aprobado (2/11), con más interlineado en la nota |
+| S-31 | [c · las pinceladas más finas](bocetos/S-31c-pinceladas.jpg) (la C1, de 30) y [d · el pomo al 80 %](bocetos/S-31d-pomos.jpg), por debajo de los rótulos | Aprobado (3/11): C1 |
+| S-32 | [c · el armado](bocetos/S-32c-armar.jpg), con el valor de cada pomo arriba a la derecha, y [f · la revelación](bocetos/S-32f-revelacion.jpg), con «Te quedó…» y la tabla Referencia / Tu intento | Aprobado (3/11) |
+| S-33 a S-36 | El sonido (música, efectos, fin y récord, y Taller con menos presencia). Se aprobó escuchándolo en páginas de prueba, que ya se borraron; lo que quedó está en «El sonido» | Aprobados (3/11). En la app desde la 0.15.0 a la 0.15.2 |
+| P-008 | La mesa del pintor desde arriba: [composición](bocetos/P-008-composicion.png) (la franja amarilla es lo que ve el teléfono; los recuadros, lo que dibuja el juego) y [la entrega](arte/P-008_fondo-mesa.jpg), de 2576 × 1438 | Aprobado (2/11), a la primera con Gemini |
+| P-009 | El block abierto sobre esa mesa, para el block y el total: [composición](bocetos/P-009-composicion.png) y [la entrega](arte/P-009_block-mesa.jpg). La hoja quedó en x 355 a 2180 e y 201 a 1165, donde se pidió | Aprobado (2/11), en el segundo intento. Cómo se pidió, en [imágenes](../imagenes.md#pedidos-cerrados) |
 
 ## Notas técnicas
 

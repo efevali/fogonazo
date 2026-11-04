@@ -57,4 +57,6 @@ Sala ── banco de electrónica ──► Fogonazo
 ## Lo que sigue
 
 1. **Los menús, y la sala como juego de buscar y encontrar.**
-2. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio.
+2. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
+
+Las ideas sueltas están en los [issues abiertos](https://github.com/efevali/fogonazo/issues). Una, a evaluar: un gato que duerme en el sofá de la sala.

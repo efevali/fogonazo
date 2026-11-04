@@ -9,5 +9,6 @@
 | [sala/](sala/README.md) | La sala, la pantalla de inicio: estado, imagen, objetos activos y prototipo. |
 | [fogonazo/](fogonazo/README.md) | Fogonazo: estructura, reglas, niveles, dificultad, cómo está hecho, bocetos y arte. |
 | [mahjong/](mahjong/README.md) | El mahjong: cómo es, bocetos, arte y lo que sigue. |
+| [buenojo/](buenojo/README.md) | Buen ojo: cómo es, el puntaje, las frases, el sonido, bocetos y arte. |
 
 El método de trabajo está en [CONTRIBUTING.md](../CONTRIBUTING.md).

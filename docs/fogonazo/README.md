@@ -16,6 +16,7 @@ Lo que vale para todo el juego:
 - **Arte vigente**, en [`arte/`](arte/): las siete piezas ([P-003](arte/P-003_piezas-fogonazo.jpg)), la escena de la pantalla-instrumento ([P-004](arte/P-004_escena-instrumento.png), de 1679 × 937; el teléfono la estira un 43 %, aceptable por el estilo pintado) y los especiales y obstáculos ([P-005](arte/P-005_especiales-obstaculos.jpg)). Los recortes listos para usar están en [`fogonazo/piezas/`](../../fogonazo/piezas/), en la app.
 - **El motor** (`codigo/`) ya está en la placa de 10 × 8, con los 30 niveles hechos a mano pasados a horizontal, sin nombres ni textos, y recalibrados (0.3.0); la partida lo usa desde la 0.4.0.
 - **Estrellas con umbrales a la vista y ayuda de piezas por dificultad, desde la 0.12.0** (S-28): ver «Dificultad, estrellas y récords».
+- **Cada dificultad con su propia curva, desde la 0.13.0.** Producto la jugó (4/11): las oleadas se sienten en los tres modos y no pide ajustes, tampoco en los niveles que más se apartan de lo buscado (el 23 en Difícil y el 14, el 29 y el 30).
 - **Los generados, del 31 en adelante, sin fin, desde la 0.9.0:** el generador y su fórmula en `codigo/levels.js` y el mapa sin tope (ver «Niveles: un camino continuo»). Los pasos que siguen están en [la colección](../coleccion.md#lo-que-sigue).
 
 ## Recorrido
