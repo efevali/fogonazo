@@ -72,3 +72,7 @@ En el teléfono, la versión nueva se baja sola y entra al cerrar la app del tod
 ## Versiones
 
 Versionado semántico: MAYOR.MENOR.PARCHE. Un parche arregla sin sumar nada; una menor suma algo sin romper lo anterior; mientras el primer número sea 0, la colección está en desarrollo. Cada versión se encuentra en el historial («Commits») porque el título de su commit empieza con el número, y se registra en [CHANGELOG.md](CHANGELOG.md).
+
+## Licencia
+
+Todos los derechos reservados: el repositorio se puede ver y jugar, pero reutilizar el código, los dibujos o la música pide permiso (ver [LICENSE](LICENSE)). Las tipografías conservan sus propias licencias, en `comun/fuentes/`.
