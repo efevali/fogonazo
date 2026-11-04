@@ -31,7 +31,6 @@ la sala ── mesa ratona ──► el estuche (S-20) ── una tarjeta ──
 ## Lo que sigue
 
 - Más tableros, que se suman en el estuche deslizando de costado.
-- Los palitos en blanco de la entrada como accesos, por ejemplo al sonido (#50).
 - El nombre del juego, sin decidir.
 
 ## Bocetos

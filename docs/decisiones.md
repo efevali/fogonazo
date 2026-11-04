@@ -50,9 +50,9 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 ## La sala
 
 - **Un living ilustrado como pantalla de inicio** (24/10). Living de los 70 cálidos, en un departamento actual con ambientación de época, al atardecer con lluvia y lámparas cálidas. *Descartados:* el pixel art (demasiado pobre para esta pantalla), un living neutro y las luces exageradas de las primeras pruebas.
-- **Vista frontal** (24/10). Llena la pantalla, los muebles se ven de frente y admiten más detalle, y no hay ambigüedades de profundidad. *Descartados:* la isométrica recortada (deja esquinas vacías) y una isométrica más grande que la pantalla, que se arrastra (como menú suma un paso; puede servir para buscar y encontrar).
+- **Vista frontal** (24/10). Llena la pantalla, los muebles se ven de frente y admiten más detalle, y no hay ambigüedades de profundidad. *Descartados:* la isométrica recortada (deja esquinas vacías) y una isométrica más grande que la pantalla, que se arrastra (como menú suma un paso).
 - **Objetos activos** (24/10; el cuadro, 2/11): el banco de electrónica lleva a Fogonazo, la mesa ratona con el mahjong al mahjong, el equipo de audio al sonido y el cuadro del arcoíris a Buen ojo. Se marcan solo con un brillo tenue. *Descartados:* círculos, punteados y carteles.
-- **La sala, más adelante, como juego de buscar y encontrar** (24/10).
+- **La sala, sin indicaciones** (4/11). Quien la ve por primera vez no tiene ninguna pista de qué hacer: va tocando aquí y allá y encuentra, de a poco, los juegos y los ajustes. Esa sensación de buscar y encontrar ya es la sala, y se queda así. *Descartado:* convertirla en un juego de buscar y encontrar (24/10): era una forma de describir la pantalla, no una mejora.
 - **La lámpara de arco se queda como está** (26/10). Se lee apoyada contra la ventana y no sobre la mesa, pero corregirla toca la geometría de la imagen y es arriesgado.
 
 ## Imágenes

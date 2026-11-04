@@ -48,4 +48,4 @@ Las referencias de estilo de terceros (ilustraciones isométricas, fotos de livi
 ## Por definir
 
 - La transición de la sala a cada juego. Para la 0.1.0, un fundido corto, provisorio.
-- Los menús, y la sala como juego de buscar y encontrar.
+- Los menús.
