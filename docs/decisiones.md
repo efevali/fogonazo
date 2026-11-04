@@ -13,7 +13,7 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **Sin duplicados, y lo superado se borra** (27/10). La documentación se reorganizó para la colección y se purgó de lo superado, con la aprobación de Producto, para que lo que se lee esté vigente. Lo borrado queda en el historial de Git.
 - **Una rama con su pull request por versión** (4/11), que se une con el OK para publicar y se borra sola. Muestra qué está en curso y no hay que realinear nada después de cada versión; cuesta casi lo mismo. *Descartado:* una sola rama `trabajo` sin pull requests (27/10 a la 0.13.0).
 - **Sin llave de prueba** (4/10). Los niveles se juegan en orden, también para probarlos. *Descartado:* una llave que destrabe todos los niveles, como la de Kasa.
-- **Licencia: pendiente** ([#5](https://github.com/efevali/fogonazo/issues/5)). Hoy rigen los derechos de autor por defecto.
+- **Todos los derechos reservados, dicho de forma explícita** (4/11, #5), en `LICENSE`, a nombre de la cuenta efevali: el repositorio se puede ver y jugar, pero reutilizar algo pide permiso. No hace falta registrar nada: el derecho de autor nace con la obra, también bajo seudónimo. Las tipografías conservan sus licencias. Si alguien suma trabajo, se acuerda en ese momento que ceda sus aportes. *Descartados:* abrir el código con MIT y el arte con Creative Commons sin uso comercial, y abrir todo.
 
 ## La colección
 
