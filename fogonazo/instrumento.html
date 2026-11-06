@@ -7,7 +7,8 @@
 <title>Fogonazo · instrumento</title>
 <style>
 /* Fogonazo's own screen (P-004, ChatGPT) with the game's layer on top, in the image's coordinates (1679 × 937).
-   The viewBox keeps the central 20:9 band and slices to fill the screen. */
+   The viewBox keeps the central 20:9 band and slices to fill the screen; on a narrower screen (a monitor) the band fits
+   whole, with more of the image above and below (Pantalla.encuadre, comun/pantalla.js). */
 @font-face { font-family: Barlow; font-weight: 600; src: url(../comun/fuentes/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); }
 @font-face { font-family: Barlow; font-weight: 700; src: url(../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
 @font-face { font-family: Plex; font-weight: 600; src: url(../comun/fuentes/ibm-plex-mono-latin-600-normal.woff2) format('woff2'); }
@@ -374,6 +375,7 @@ svg#scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: blo
     }
   }
   const svg = $('scene');
+  Pantalla.encuadre(svg, [0, 91, 1679, 755], 937);
   // a pot turns with the finger around it: every 27° is one step, the same the pointer turns
   let drag = null;
   const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
