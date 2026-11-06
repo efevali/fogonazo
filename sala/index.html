@@ -417,10 +417,8 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   for (let x = 240; x <= 330; x += 1) d += (x === 240 ? 'M' : 'L') + x + ',' + (769 + 13 * Math.sin((x - 240) / 28 * 2 * Math.PI)).toFixed(2);
   tp.setAttribute('d', d);
 
-  // portrait: show the whole room instead of cropping it
-  const mq = window.matchMedia('(orientation: portrait)');
-  const fit = () => svg.setAttribute('preserveAspectRatio', mq.matches ? 'xMidYMid meet' : 'xMidYMid slice');
-  fit(); mq.addEventListener ? mq.addEventListener('change', fit) : mq.addListener(fit);
+  // a monitor or a portrait phone: the band fits whole, with more of the room above and below (comun/pantalla.js)
+  Pantalla.encuadre(svg, [0, 120, 2576, 1200], 1438);
 
   // touch zones, to check them: sala/?zonas
   if (new URLSearchParams(location.search).has('zonas')) svg.classList.add('zones');

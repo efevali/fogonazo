@@ -21,6 +21,14 @@ body { font-family: Barlow, "Arial Narrow", sans-serif; color: var(--ink); -webk
 #stage { position: fixed; left: 0; top: 0; font-size: 1px; width: 915em; height: 412em; overflow: clip; }
 #stage > * { position: absolute; }
 #bg { left: 0; top: 0; width: 100%; height: 100%; display: block; }
+/* on a screen narrower than the stage (a monitor), the bands above and below: the edge of the table as it shows on the
+   stage (the image with #light over it), stretched and blurred, fading into the plain wood, instead of a hard line where
+   the image ends. They overlap the stage's edge by a few units of bare wood, on top of it, so the blur melts the seam. */
+.orla { position: fixed; z-index: 1; left: 0; top: 0; width: 0; height: 0; pointer-events: none; background-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+/* with the pause or the end of the match open, the bands dim like the stage under the sheet */
+body:has(.sheet:not([hidden])) { background: #2c180b; }
+#stage:has(> .sheet:not([hidden])) ~ .orla { --tenue: .45; }
 #hud { left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 /* the canvas covers the board and a margin around it (the sockets of the valves, the effects) */
 #cv { left: 220.5em; top: 14em; width: 474em; height: 388em; pointer-events: none; }
@@ -173,6 +181,8 @@ body { font-family: Barlow, "Arial Narrow", sans-serif; color: var(--ink); -webk
   </div>
 </div>
 <div id="rotate">Girá el teléfono para jugar en horizontal</div>
+<div class="orla" id="orlaArriba" aria-hidden="true"></div>
+<div class="orla" id="orlaAbajo" aria-hidden="true"></div>
 
 <script src="../comun/pantalla.js"></script>
 <script src="../codigo/engine.js"></script>
@@ -209,8 +219,50 @@ body { font-family: Barlow, "Arial Narrow", sans-serif; color: var(--ink); -webk
     document.documentElement.style.fontSize = s + 'px';
     stage.style.left = ((w - 915 * s) / 2) + 'px';
     stage.style.top = ((h - 412 * s) / 2) + 'px';
+    orlas(w, h);
     const nk = s * Math.min(3, window.devicePixelRatio || 1);
     if (Math.abs(nk - k) > .001 || !cv.width) { k = nk; cv.width = Math.round(474 * k); cv.height = Math.round(388 * k); if (ready) { buildSprites(); buildLayers(); } }
+  }
+  // the first and last rows of the stage's table: the background image with the two lights of #light over it
+  const bordes = {};
+  function borde(src) {
+    if (bordes[src]) return bordes[src];
+    const b = bordes[src] = { arriba: '', abajo: '' }, img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = 915; c.height = 412;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, 915, 412);
+      const luz = (cx, cy, rx, ry, stops) => {
+        x.save(); x.translate(cx, cy); x.scale(1, ry / rx);
+        const gr = x.createRadialGradient(0, 0, 0, 0, 0, rx); stops.forEach(([o, col]) => gr.addColorStop(o, col));
+        x.fillStyle = gr; x.fillRect(-cx - 1, -cy * rx / ry - 1, 917, 414 * rx / ry); x.restore();
+      };
+      // the same two gradients as #light, painted in its order: the glow, and its first layer, the vignette, on top
+      luz(201.3, 20.6, 823.5, 370.8, [[0, 'rgba(255,217,160,.42)'], [.5, 'rgba(255,176,96,.12)'], [1, 'rgba(255,176,96,0)']]);
+      luz(457.5, 206, 686.25, 309, [[0, 'rgba(0,0,0,0)'], [.6, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,.5)']]);
+      const fila = y => { const f = document.createElement('canvas'); f.width = 915; f.height = 1;
+        f.getContext('2d').drawImage(c, 0, y, 915, 1, 0, 0, 915, 1); return f.toDataURL(); };
+      b.arriba = fila(1); b.abajo = fila(409);   // the image's last row is a dark line: two rows up
+      fit();
+    };
+    img.src = src;
+    return b;
+  }
+  function orlas(w, h) {
+    const band = (h - 412 * s) / 2, ov = 6 * s, pad = 24, x0 = (w - 915 * s) / 2, fade = Math.min(band, 60 * s);
+    const b = band >= 1 ? borde($('bg').getAttribute('src')) : null;
+    [['orlaArriba', 'top', 'arriba'], ['orlaAbajo', 'bottom', 'abajo']].forEach(([id, edge, k]) => {
+      const o = $(id), st = o.style;
+      if (!b || !b[k]) { o.hidden = true; return; }
+      o.hidden = false;
+      st.left = (x0 - pad) + 'px'; st.width = (915 * s + 2 * pad) + 'px';
+      st.top = (edge === 'top' ? 0 : band + 412 * s - ov) + 'px'; st.height = (band + ov) + 'px';
+      st.backgroundImage = `url(${b[k]})`; st.backgroundSize = `${915 * s}px 100%`; st.backgroundPosition = `${pad}px 0`;
+      st.filter = `blur(${Math.max(3, 4 * s).toFixed(1)}px) brightness(var(--tenue, 1))`;
+      // measured from the far edge of the screen: plain wood, then the table's edge, solid where it meets the stage
+      const m = `linear-gradient(to ${edge === 'top' ? 'bottom' : 'top'}, transparent 0, transparent ${band - fade}px, rgba(0,0,0,.55) ${band - fade * .45}px, #000 ${band}px)`;
+      st.webkitMaskImage = m; st.maskImage = m;
+    });
   }
   addEventListener('resize', fit); if (window.visualViewport) visualViewport.addEventListener('resize', fit);
 
@@ -946,6 +998,7 @@ body { font-family: Barlow, "Arial Narrow", sans-serif; color: var(--ink); -webk
     resetView();
     // the scoreboard of each kind of match: moves, time (the label engraved as «TIEMPO») or zen
     $('bg').src = ZEN ? 'fondo-zen.webp' : g.mode === 'time' ? 'fondo-tiempo.webp' : 'fondo.webp';
+    fit();
     buildDisplay(ZEN || g.mode === 'time'); shownStr = '';
     const label = ZEN ? 'ZEN' : `NIVEL ${N} · ${NOMBRE_MODO.toUpperCase()}`, lw = Math.round(22 + label.length * 9.4);
     $('dymo').innerHTML = `<g transform="rotate(-1.5 113.25 27)"><path d="M${113.25 - lw / 2},16 h${lw} l-3,11 l3,11 h-${lw} l3,-11 z" fill="#1c1c1c"/><text x="113.25" y="32" text-anchor="middle" font-family="Barlow" font-weight="700" font-size="14" letter-spacing="2.2" fill="#f4f1ea">${label}</text></g>`;

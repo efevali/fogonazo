@@ -8,7 +8,7 @@ Las reglas vigentes de cómo se ve y cómo suena la colección. Por qué se deci
 - **La IA pinta, el código dibuja encima** lo que cambia (números, textos, estados) y lo que se anima. Lo que se anima se hace chico y simple; si la imagen ya trae algo que se va a animar, se repinta encima.
 - **Los botones de volver,** abajo a la derecha: una etiqueta Dymo negra, un poco torcida, con letras blancas en Barlow Semi Condensed, de unos 132 × 34 píxeles en el teléfono en todas las pantallas. «◀ Volver» en los juegos; «Salir ▶» en la sala, con la flecha a la derecha.
 - **Letras legibles en el teléfono:** nada por debajo de unos 10 píxeles reales. Las escenas se ven achicadas (la del instrumento de Fogonazo, a un 55 %), así que los tamaños se miden en píxeles del teléfono, no de la imagen.
-- **Lo importante, en la franja central:** las imágenes son casi 16:9 y el teléfono en horizontal ronda 20:9, así que se recortan arriba y abajo. Lo que importa va en el 80 % central del alto.
+- **Lo importante, en la franja central:** las imágenes son casi 16:9 y el teléfono en horizontal ronda 20:9, así que se recortan arriba y abajo. Lo que importa va en el 80 % central del alto. En una computadora, más angosta, se ve la franja entera y más de la imagen arriba y abajo.
 - **Sin texto, logos ni personas** en las imágenes. Los textos los pone el código.
 
 ## La sala
