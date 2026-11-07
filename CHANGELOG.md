@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.16.0 — 7/11/2026
+
+- **Registro de partidas**, para calibrar los juegos con personas y no solo con bots. Cada juego anota en el teléfono lo que se juega: en Fogonazo, cada partida con su semilla y sus movidas, cuánto se pensó cada una, cómo terminó y las estrellas; en el mahjong, cada reparto con sus pares, pistas y barajadas; en Buen ojo, cada color con la referencia y el intento; y las sesiones de la app. No se ve en ningún lado ni sale del teléfono solo: **cinco toques seguidos en la lámpara de arco de la sala** lo exportan como archivo (la lámpara parpadea y se abre el menú de compartir). El avance no cambia.
+
 ## 0.15.4 — 6/11/2026
 
 - **En la computadora, todo entra en pantalla** (#72). La sala y el instrumento de Fogonazo ya no se recortan a los costados (en el instrumento quedaban cortados «Volver» y la perilla de Récords): entran enteros y arriba y abajo se ve más de la imagen, como en el mahjong y Buen ojo. En la partida de Fogonazo, las bandas de arriba y abajo continúan el borde de la mesa y se funden con la madera, sin un corte donde termina la imagen. En el teléfono, todo igual.

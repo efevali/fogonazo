@@ -154,6 +154,7 @@ button:focus { outline: none; }
 <script src="fichas.js"></script>
 <script src="tableros.js"></script>
 <script src="estado.js"></script>
+<script src="../comun/registro.js"></script>
 <script>
 (() => {
   'use strict';
@@ -195,7 +196,21 @@ button:focus { outline: none; }
   const G = { cara: {}, occ: new Set(), libre: {}, sel: -1, puntos: 0, cadena: 0, ultimoPar: 0, undo: [], t: 0, empezado: false, fin: false, ocupado: false };
   let el = [], pausado = false;
   function setCara(i) { el[i].querySelector('use').setAttribute('href', '#f-' + G.cara[i]); el[i].setAttribute('aria-label', F.FACE[G.cara[i]].name); }
+
+  // the play log (comun/registro.js): each deal, how it went and what helped (undo, hints, shuffles)
+  const Reg = window.Registro || { anotar() {}, borrador() {} };
+  let reg = null;
+  const regBorrador = () => { if (reg) Reg.borrador('mahjong', Object.assign({}, reg, { segundos: Math.round(G.t), puntos: G.puntos, quedan: G.occ.size })); };
+  function regCerrar(resultado) {
+    if (!reg) return;
+    Reg.anotar('mahjong', Object.assign(reg, { resultado, segundos: Math.round(G.t), puntos: G.puntos, quedan: G.occ.size }));
+    reg = null;
+  }
+  addEventListener('pagehide', () => regCerrar('abandono'));
+
   function repartir() {
+    regCerrar('sin salida');   // only open here when the shuffle found no way out and deals again
+    reg = { ev: 'partida', tablero: TAB.id, fichas: P.length, pares: [], deshacer: 0, pistas: 0, barajadas: 0, barajadasSolas: 0, pausas: 0 };
     Object.assign(G, { cara: T.nuevo(TAB), occ: new Set(P.map((_, i) => i)), sel: -1, puntos: 0, cadena: 0, ultimoPar: 0, undo: [], t: 0, empezado: false, fin: false, ocupado: false });
     capa.innerHTML = P.map((t, i) => `<button class="ficha entra" type="button" data-i="${i}" style="left:${posX(i)}em;top:${posY(i)}em;--d:${Math.min(i * 6, 700)}ms"><svg class="f" viewBox="0 0 42 56" aria-hidden="true">${F.cuerpo(G.cara[i])}</svg></button>`).join('');
     el = [...capa.children];
@@ -240,8 +255,9 @@ button:focus { outline: none; }
     flota((posX(a) + posX(b)) / 2 + W / 2, Math.min(posY(a), posY(b)) - 6, G.cadena > 1 ? `+${pts} · ×${G.cadena}` : `+${pts}`);
     fx('par', G.cadena);
     marcarLibres(); hud();
+    if (reg) { reg.pares.push(Math.round(G.t * 10) / 10); regBorrador(); }   // when each pair went, in seconds
     if (!G.occ.size) { limpio(); return; }
-    if (!T.pares(G.occ, G.cara, P).length) { G.ocupado = true; setTimeout(() => { aviso('No quedan pares libres: se barajan solas', 2600); setTimeout(barajar, 1000); }, 400); }
+    if (!T.pares(G.occ, G.cara, P).length) { G.ocupado = true; setTimeout(() => { aviso('No quedan pares libres: se barajan solas', 2600); setTimeout(() => barajar(true), 1000); }, 400); }
   }
   function flota(x, y, texto, grande) {
     const d = document.createElement('div');
@@ -249,7 +265,8 @@ button:focus { outline: none; }
     d.style.left = x + 'em'; d.style.top = y + 'em';
     capa.appendChild(d); setTimeout(() => d.remove(), 950);
   }
-  function barajar() {
+  function barajar(solas) {
+    if (reg) { if (solas) reg.barajadasSolas++; else reg.barajadas++; }
     deseleccionar(); G.cadena = 0; G.ultimoPar = 0;
     const asign = T.barajar(G.occ, G.cara, P);
     if (!asign) { aviso('Este reparto no tiene salida: va uno nuevo'); G.ocupado = true; setTimeout(repartir, 1100); return; }
@@ -264,13 +281,15 @@ button:focus { outline: none; }
     deseleccionar();
     for (const i of [u.a, u.b]) { G.occ.add(i); const e = el[i]; clearTimeout(e._tm); e.hidden = false; e.classList.remove('sale'); reanimar(e, 'vuelve'); }
     G.puntos = Math.max(0, G.puntos - u.pts); G.cadena = 0; G.ultimoPar = 0;
+    if (reg) reg.deshacer++;
     marcarLibres(); hud(); fx('deshacer');
   }
   function pista() {
     if (G.ocupado || G.fin) return;
     const pp = T.pares(G.occ, G.cara, P);
-    if (!pp.length) { barajar(); return; }
+    if (!pp.length) { barajar(true); return; }
     empezar(); G.cadena = 0; G.ultimoPar = 0; hud();
+    if (reg) reg.pistas++;
     for (const i of T.azar(pp)) { const e = el[i]; reanimar(e, 'pista'); clearTimeout(e._pt); e._pt = setTimeout(() => e.classList.remove('pista'), 2300); }
     fx('pista');
   }
@@ -301,6 +320,7 @@ button:focus { outline: none; }
     G.fin = true; G.puntos += 100; G.cadena = 0; hud(); soltarPantalla();
     G.t = Math.max(1, Math.round(G.t));   // the clock, the card and the record show the same second
     const rec = Est.limpio(TAB.id, G.t, G.puntos);
+    regCerrar('limpio');
     flota(bw / 2, bh / 2 - 20, 'Tablero limpio +100', true);
     fx('limpio');
     setTimeout(() => {
@@ -321,6 +341,7 @@ button:focus { outline: none; }
   function pausar(gastada) {
     if (G.fin || !menu.hidden) return;
     pausado = true; pausaGastada = gastada; deseleccionar();
+    if (reg) reg.pausas++;
     $('pResumen').innerHTML = `${TAB.nombre} · <b>${fmtT(G.t)}</b> · <b>${fmtN(G.puntos)}</b> puntos`;
     menu.hidden = false; App.sonido.duck(true);
   }
@@ -335,6 +356,7 @@ button:focus { outline: none; }
     const b = e.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act;
     fx('boton');
+    if ((act === 'otra' || act === 'estuche') && !G.fin) regCerrar('abandono');
     if (act === 'seguir') seguir();
     if (act === 'otra') {
       const devolver = !menu.hidden && pausaGastada;
@@ -345,7 +367,7 @@ button:focus { outline: none; }
     if (act === 'estuche') { App.sonido.duck(false); App.volver(App.extra + 1); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) seguir(); });
-  $('volver').addEventListener('click', () => { fx('boton'); App.sonido.duck(false); App.volver(App.extra + 1); });
+  $('volver').addEventListener('click', () => { fx('boton'); if (!G.fin) regCerrar('abandono'); App.sonido.duck(false); App.volver(App.extra + 1); });
   $('b-deshacer').addEventListener('click', () => deshacer());
   $('b-pista').addEventListener('click', () => pista());
   $('b-barajar').addEventListener('click', () => { if (!G.ocupado && !G.fin) { empezar(); barajar(); } });

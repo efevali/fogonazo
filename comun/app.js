@@ -72,11 +72,19 @@
     doc.addEventListener('keydown', desbloquear, true);
     const url = frame.contentWindow.location.pathname.replace(base, '') + frame.contentWindow.location.search;
     ambiente(url);
+    anotar(primera ? { ev: 'inicio', instalada: enApp(), url } : { ev: 'pantalla', url });
+    primera = false;
     requestAnimationFrame(() => velo.classList.remove('on'));
     // the sign goes away with the veil (it is inside it), and then it is hidden for good
     if (!aviso.hidden) setTimeout(() => { aviso.hidden = true; }, 300);
   }
   function desbloquear() { Sound.ensure(); girar(); }
+
+  // el registro de partidas (comun/registro.js, que carga después): las pantallas que se abren y cuándo la app queda
+  // a la vista o escondida, para medir las sesiones. Lo de cada partida lo anota su juego.
+  let primera = true;
+  const anotar = d => { try { if (window.Registro) window.Registro.anotar('app', d); } catch (e) {} };
+  document.addEventListener('visibilitychange', () => anotar({ ev: document.hidden ? 'oculta' : 'visible' }));
 
   // En horizontal. La ficha de instalación lo pide, pero una app instalada antes (la 0.6.1, en vertical) conserva su
   // orientación hasta que Chrome actualiza la ficha, y eso puede tardar días. Por eso se pide también desde acá; en

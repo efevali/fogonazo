@@ -45,6 +45,17 @@ Sala ── banco de electrónica ──► Fogonazo
 - **Arranca de cero:** el avance del Fogonazo publicado no se conserva ni se migra.
 - **El sitio es el mismo de Kasa** (`efevali.github.io`): comparten los datos de Chrome, aunque cada uno guarda lo suyo con sus propias claves. Borrar los datos del sitio desde la configuración de Chrome borra el avance de los dos.
 
+## Registro de partidas
+
+Desde la 0.16.0, cada juego anota en el teléfono lo que se juega, para calibrar con datos de personas y no solo con bots (ver [decisiones](decisiones.md#la-colección)). Vive en Chrome, aparte del avance, y no se ve en ningún lado. **No sale del teléfono por su cuenta:** con cinco toques seguidos en la lámpara de arco de la sala (menos de un segundo y medio entre uno y otro), la lámpara parpadea y se abre el menú de compartir con un archivo `registro-….json`; en la computadora, se descarga. Producto lo trae a la conversación y `herramientas/registro.js` lo resume.
+
+- **Fogonazo**, por partida: nivel, modo, la semilla y cada movida (las dos casillas, cuánto se pensó sin contar las pausas, si no armó línea y volvió, y si la pista estaba a la vista), las movidas o el tiempo y las estrellas vigentes, las estrellas que ya tenía, el resultado (ganó, perdió, abandonó, o en el zen terminó o salió), en qué movida completó el pedido, los puntos con y sin el bonus, las estrellas, la duración y las pausas. Con la semilla y las movidas, la partida se vuelve a jugar entera en el motor.
+- **Mahjong**, por reparto: tablero, cuándo salió cada par, deshacer, pistas, barajadas a mano y solas, pausas, tiempo, puntos, cuántas fichas quedaron y el resultado (limpio, abandonado o sin salida).
+- **Buen ojo**, por partida: dificultad y, por color, la referencia, dónde arrancaron los pomos, el intento, el ΔE, el puntaje y cuánto se tardó en armarlo; en la práctica, cada color al pasar al siguiente o salir, si se movieron los pomos.
+- **La app:** cada apertura y cada pantalla que se abre, y cuándo la app queda escondida o vuelve, para medir las sesiones.
+
+Cada evento lleva la hora y la versión. Si la app se cierra en medio de una partida, queda anotada como «interrumpida» la próxima vez que se abre. Cada lista tiene un tope (2500 partidas de Fogonazo, 600 del mahjong, 600 de Buen ojo, 1500 eventos de la app): al pasarlo se van las más viejas. Una partida de Fogonazo ocupa unos cientos de bytes.
+
 ## Publicación
 
 - **En GitHub Pages**, en https://efevali.github.io/fogonazo/, la dirección del Fogonazo publicado. La colección lo **reemplazó directamente** con su 0.1.0, sin publicarse antes en paralelo: es lo que menos trabajo de mantenimiento exige. La app instalada en el teléfono es la colección en desarrollo.
@@ -56,6 +67,7 @@ Sala ── banco de electrónica ──► Fogonazo
 
 ## Lo que sigue
 
-1. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
+1. **Un bot que juegue como una persona y la recalibración de Fogonazo.** El bot de calibración ve todas las jugadas con sus cascadas y saca estrellas que a una persona le cuestan mucho más (el 16 en Normal). Con el registro de partidas de unos días, se arma un bot que ve el tablero y no el futuro, nota solo parte de las jugadas y a veces elige una «suficiente», se ajusta contra las partidas reales y se recalibran los 30 niveles y la fórmula de los generados, con las mismas tasas de victoria. El avance de los niveles arranca de cero con la recalibración.
+2. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
 
 Las ideas sueltas están en los [issues abiertos](https://github.com/efevali/fogonazo/issues). Entre ellas, dos juegos nuevos: una carrera de gotas de lluvia sobre el vidrio ([#70](https://github.com/efevali/fogonazo/issues/70)) y un juego de ordenar en la biblioteca baja ([#71](https://github.com/efevali/fogonazo/issues/71)). Y una, a evaluar en una charla aparte: un gato que duerme en el sofá de la sala.
