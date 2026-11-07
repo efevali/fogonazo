@@ -44,7 +44,7 @@ function reproducir(p) {
 }
 
 const pct = (a, b) => b ? Math.round(a / b * 100) + ' %' : '—';
-const mediana = v => { if (!v.length) return null; const s = v.slice().sort((x, y) => x - y); return s[s.length >> 1]; };
+const mediana = v => { if (!v.length) return null; const s = v.slice().sort((x, y) => x - y); return Math.round(s[s.length >> 1] * 10) / 10; };
 
 const archivos = process.argv.slice(2);
 if (!archivos.length) { console.log('Uso: node herramientas/registro.js registro.json [otro.json…]'); process.exit(1); }
@@ -102,7 +102,7 @@ console.log(`\nBUEN OJO · ${BP.length} partidas, ${BO.length - BP.length} color
 for (const dif of [...new Set(BP.map(p => p.dificultad))]) {
   const ps = BP.filter(p => p.dificultad === dif && p.resultado === 'terminada'), cs = ps.flatMap(p => p.colores);
   const dh = cs.map(c => Math.abs(((c.tuyo.h - c.objetivo.h + 540) % 360) - 180)), ds = cs.map(c => Math.abs(c.tuyo.s - c.objetivo.s)), dv = cs.map(c => Math.abs(c.tuyo.v - c.objetivo.v));
-  console.log(`  ${dif.padEnd(8)} ${ps.length} terminadas, total mediano ${mediana(ps.map(p => p.total)) ?? '—'}, ΔE mediano ${mediana(cs.map(c => c.dE)) ?? '—'} · desvío mediano: tono ${mediana(dh) == null ? "—" : Math.round(mediana(dh))}°, saturación ${mediana(ds) ?? '—'}, brillo ${mediana(dv) ?? '—'}`);
+  console.log(`  ${dif.padEnd(8)} ${ps.length} terminadas, total mediano ${mediana(ps.map(p => p.total)) ?? '—'}, ΔE mediano ${mediana(cs.map(c => c.dE)) ?? '—'} · desvío mediano: tono ${mediana(dh) ?? '—'}°, saturación ${mediana(ds) ?? '—'}, brillo ${mediana(dv) ?? '—'}`);
 }
 
 // ---------- La app
