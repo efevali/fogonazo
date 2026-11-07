@@ -83,6 +83,13 @@ body { margin: 0; background: var(--night); color: var(--chip-fg); overflow: hid
 .hit:focus, .hit:focus-visible { outline: none; }
 .zone-label { display: none; font: 600 34px var(--label); fill: var(--dial); letter-spacing: .06em; }
 .zones .zone-label { display: block; }
+/* the arc lamp: not an active object, so no highlight and no pointer; five taps in a row export the play log
+   (comun/registro.js) and the lamp flickers, like a bulb about to go */
+.secreto { fill: transparent; outline: none; -webkit-tap-highlight-color: transparent; }
+.zones .secreto { fill: rgba(255, 210, 120, .10); stroke: #ffd27a; stroke-width: 4; stroke-dasharray: 6 10; }
+#luzArco { opacity: 0; pointer-events: none; }
+#luzArco.titila { animation: titila 1.1s linear 1; }
+@keyframes titila { 0% { opacity: 0; } 6% { opacity: .85; } 12% { opacity: .1; } 20% { opacity: .7; } 26% { opacity: 0; } 34% { opacity: .95; } 60% { opacity: .6; } 100% { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   .streak, .drop, .blob, .spin, .breathe, .vu, .blink, .trace, .steam, .hl, .fl { animation: none !important; }
@@ -294,6 +301,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       <ellipse class="breathe" cx="2492" cy="820" rx="150" ry="110" fill="url(#warm)" style="--lo:.07;--hi:.12;animation-duration:5.5s"/>
       <ellipse class="breathe" cx="1860" cy="462" rx="140" ry="50" fill="url(#cream)" style="--lo:.05;--hi:.10;animation-duration:7s"/>
       <ellipse class="breathe" cx="1104" cy="728" rx="90" ry="22" fill="url(#cream)" style="--lo:.25;--hi:.38;animation-duration:6s"/>
+      <g id="luzArco"><ellipse cx="1104" cy="700" rx="120" ry="70" fill="url(#cream)"/><ellipse cx="1104" cy="745" rx="150" ry="34" fill="url(#cream)"/></g>
       <ellipse class="breathe" cx="402" cy="690" rx="70" ry="40" fill="url(#cream)" style="--lo:.18;--hi:.3;animation-duration:4.4s"/>
       <ellipse class="breathe" cx="269" cy="769" rx="44" ry="40" fill="url(#greenGlow)" style="--lo:.08;--hi:.16;animation-duration:1.6s"/>
       <ellipse class="breathe" cx="1946" cy="767" rx="90" ry="12" fill="url(#cyan)" style="--lo:.10;--hi:.24;animation-duration:3.8s"/>
@@ -315,6 +323,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       d="M1495,670H2250V1052H1495Z"/>
     <path class="hit" id="hitCuadro" data-href="buenojo/index.html" data-hl="hlCuadro" role="button" tabindex="0" aria-label="Abrir Buen ojo"
       d="M1675,428H2040V668H1675Z"/>
+    <path class="secreto" id="lampara" aria-hidden="true" d="M1000,620H1210V762H1000Z"/>
     <text class="zone-label" x="383" y="470" text-anchor="middle">FOGONAZO</text>
     <text class="zone-label" x="1096" y="860" text-anchor="middle">MAHJONG</text>
     <text class="zone-label" x="1872" y="630" text-anchor="middle">AJUSTES</text>
@@ -379,6 +388,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
 </div>
 
 <script src="../comun/pantalla.js"></script>
+<script src="../comun/registro.js"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -463,6 +473,21 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
   document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', (e) => { if (e.target === s) close(); }));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  // ---------- the arc lamp: five taps in a row (less than 1.5 s apart) export the play log ----------
+  const luzArco = document.getElementById('luzArco');
+  luzArco.addEventListener('animationend', () => luzArco.classList.remove('titila'));
+  let toques = 0, ultimoToque = 0;
+  document.getElementById('lampara').addEventListener('click', () => {
+    if (abiertos.length) return;
+    const ahora = performance.now();
+    toques = ahora - ultimoToque < 1500 ? toques + 1 : 1; ultimoToque = ahora;
+    if (toques < 5) return;
+    toques = 0;
+    luzArco.classList.remove('titila'); void luzArco.getBoundingClientRect(); luzArco.classList.add('titila');
+    // the share sheet waits for the flicker to start; the tap's permission to share lasts a few seconds
+    setTimeout(() => { if (window.Registro) window.Registro.exportar(); }, 350);
+  });
 
   // ---------- «Salir» ----------
   const aviso = document.getElementById('avisoSalir');

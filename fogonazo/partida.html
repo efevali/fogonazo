@@ -188,6 +188,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
 <script src="../codigo/engine.js"></script>
 <script src="../codigo/levels.js"></script>
 <script src="estado.js"></script>
+<script src="../comun/registro.js"></script>
 <script>
 (() => {
   'use strict';
@@ -971,6 +972,36 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
   let timeLeft = 0, timeUp = false, idle = 0, warned = 99, elapsed = 0, savedAt = 0, recShown = false;
   let usadas = null, segundos = null;   // when the order was completed: moves used and time played (S-28)
   let CAL = {};
+
+  // ---------- the play log (comun/registro.js): each match with its seed and its moves, enough to replay it in the
+  // engine move by move (herramientas/), plus how long each move took to think and how the match ended
+  const Reg = window.Registro || { anotar() {}, borrador() {} };
+  let reg = null, regT0 = 0;                     // the match being logged and when it opened
+  let listo = 0, pausaMs = 0, pausaDesde = 0;    // when the board was ready for the next move; time paused since then
+  function regAbrir(semilla) {
+    const M = window.MODES[Est.modo];
+    reg = { ev: 'partida', nivel: N, modo: ZEN ? 'zen' : M.id, semilla, antes: ZEN ? 0 : Est.stars(N),
+      def: { movidas: def.moves || 0, tiempo: def.time || 0, estrellas: def.stars, por: def.starsBy || null, colores: def.colors, ayuda: def.ayuda || 0 },
+      movidas: [], pausas: 0 };
+    regT0 = performance.now(); listo = regT0; pausaMs = 0;
+  }
+  // each move: [a, b, ms thinking] plus, if any, flags: 1 the swap did not match (it went back), 2 the hint was showing
+  function regMovida(a, b, valida, conPista) {
+    if (!reg || reg.movidas.length >= 1500) return;
+    const ms = Math.max(0, Math.min(600000, Math.round((performance.now() - listo - pausaMs) / 10) * 10));
+    const f = (valida ? 0 : 1) | (conPista ? 2 : 0);
+    reg.movidas.push(f ? [a, b, ms, f] : [a, b, ms]);
+    pausaMs = 0;
+  }
+  const regListo = () => { listo = performance.now(); pausaMs = 0; };
+  function regBorrador() { if (reg) Reg.borrador('fogonazo', Object.assign({}, reg, { puntos: g.score, duracion: Math.round((performance.now() - regT0) / 1000) })); }
+  function regCerrar(resultado, datos) {
+    if (!reg) return;
+    Object.assign(reg, { resultado, puntos: g ? g.score : 0, duracion: Math.round((performance.now() - regT0) / 1000) }, datos || {});
+    Reg.anotar('fogonazo', reg);
+    reg = null;
+  }
+  addEventListener('pagehide', () => regCerrar(ZEN ? 'salio' : 'abandono'));
   function levelDef(n) {
     // the made-by-hand ones with their calibration; from 31 on, generated from their number (codigo/levels.js)
     const d = window.levelAt(n, CAL);
@@ -985,7 +1016,8 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
   let tries = 0;
   function open() {
     def = ZEN ? zenDef() : levelDef(N);
-    g = E.createGame(def, SEED ? SEED + tries++ : (Math.random() * 1e9) | 0);
+    const semilla = SEED ? SEED + tries++ : (Math.random() * 1e9) | 0;
+    g = E.createGame(def, semilla);
     if (ZEN) {   // the first order is random too
       const o = g.goals[0], R = def.order;
       o.color = (g.rng() * def.colors) | 0;
@@ -1015,6 +1047,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     $('menu').hidden = true; $('end').hidden = true;
     App.sonido.duck(false);
     App.sonido.musica(ZEN ? 'zen' : g.mode === 'time' ? 'timed' : 'game');
+    regAbrir(semilla);
   }
 
   const canInput = () => playing && !busy && !paused && !ended && $('menu').hidden && $('end').hidden;
@@ -1041,17 +1074,19 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     const r = E.trySwap(g, a, b);
     if (r.blocked) { nudge(E.swappable(g.p[a]) ? b : a); fx('bad'); return; }
     if (!r.steps.length) return;
+    regMovida(a, b, r.valid, !!hint);
     busy = true; touch(); sel = -1;
     if (r.valid && g.mode === 'moves') { movesShown = g.moves; hud(pre); }   // only the moves go down: the score follows the combos
     await play(r.steps);
-    if (!r.valid) { busy = false; return; }
+    if (!r.valid) { busy = false; regListo(); return; }
     hud();
-    if (ZEN) { afterZen(); busy = false; idle = 0; return; }
+    regBorrador();
+    if (ZEN) { afterZen(); busy = false; idle = 0; regListo(); return; }
     if (g.mode === 'time') { g.timeLeft = timeLeft; E.evaluateEnd(g, timeUp); }
     else E.evaluateEnd(g);
     if (g.won && usadas === null) { usadas = g.movesUsed; segundos = def.time ? def.time - timeLeft : 0; }
     if (g.over || timeUp) await finish();
-    else { busy = false; idle = 0; }
+    else { busy = false; idle = 0; regListo(); }
   }
 
   // ---------- zen: the order is optional; when done it adds its bonus and another one comes; records as you play
@@ -1066,6 +1101,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     ended = true; playing = false; busy = true; hint = null; sel = -1;
     const time = Math.floor(elapsed), p = zenPrev;
     Est.zenRecord(g.score, time);
+    regCerrar('terminada', { segundos: time });
     App.sonido.duck(true);
     const recP = g.score > p.puntos && g.score > 0, recT = time > p.tiempo && time > 0;
     showTag({ head: 'PARTE DE TRABAJO', n: 'ZEN', title: 'Partida libre',
@@ -1102,6 +1138,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     // level, from the goals, bonus included
     const r = { won: g.won, usadas: usadas === null ? g.movesUsed : usadas, segundos: segundos === null ? def.time - timeLeft : segundos, puntos: g.score };
     const stars = window.estrellasDe(def, r);
+    regCerrar(g.won ? 'gano' : 'perdio', { usadas: g.won ? r.usadas : null, segundos: def.time ? Math.round(r.segundos * 10) / 10 : null, puntosJugada: before, estrellas: stars });
     Est.record(N, stars, g.score);
     await untilResumed();
     const title = `Nivel ${N} · ${NOMBRE_MODO}`, extra = g.score - before;
@@ -1235,8 +1272,9 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     if (ended || !menu.hidden) return;
     paused = true; pauseSpent = spent; sel = -1;
     menu.hidden = false;
+    pausaDesde = performance.now(); if (reg) reg.pausas++;
   }
-  function resume() { menu.hidden = true; paused = false; idle = 0; if (pauseSpent) App.abrir(); pauseSpent = false; }
+  function resume() { menu.hidden = true; paused = false; idle = 0; if (pauseSpent) App.abrir(); pauseSpent = false; pausaMs += performance.now() - pausaDesde; }
   window.Pantalla.atras = () => {
     if (ended || !end.hidden || !menu.hidden) { App.volver(); return; }
     pause(true);
@@ -1249,6 +1287,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     const act = b.dataset.act;
     fx('click');
     if (act === 'resume') resume();
+    if ((act === 'restart' || act === 'map') && !ended) regCerrar(ZEN ? 'salio' : 'abandono', ZEN ? { segundos: Math.floor(elapsed) } : null);
     if (act === 'restart') { const give = !menu.hidden && pauseSpent; menu.hidden = true; end.hidden = true; paused = false; pauseSpent = false; if (give) App.abrir(); open(); }
     if (act === 'end') { menu.hidden = true; paused = false; endZen(); }
     if (act === 'map') App.volver(App.extra + 1);
@@ -1256,7 +1295,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) resume(); });
   // «Volver», abajo a la derecha: sale sin pasar por la pausa (los controles de Android están escondidos)
-  const volver = () => { fx('click'); if (ZEN && g && !ended) Est.zenRecord(g.score, Math.floor(elapsed)); App.volver(App.extra + 1); };
+  const volver = () => { fx('click'); if (ZEN && g && !ended) Est.zenRecord(g.score, Math.floor(elapsed)); if (!ended) regCerrar(ZEN ? 'salio' : 'abandono', ZEN ? { segundos: Math.floor(elapsed) } : null); App.volver(App.extra + 1); };
   $('volver').addEventListener('click', volver);
   $('volver').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); volver(); } });
 

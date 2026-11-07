@@ -149,6 +149,7 @@
 <script src="../comun/pantalla.js"></script>
 <script src="color.js"></script>
 <script src="estado.js"></script>
+<script src="../comun/registro.js"></script>
 <script>
 (() => {
   'use strict';
@@ -177,6 +178,28 @@
   // the state of the game
   const G = { ronda: 0, objetivo: null, tuyo: { h: 180, s: 50, v: 50 }, resultados: [], usadas: new Set(), timers: [] };
   const fase = f => { stage.dataset.fase = f; };
+
+  // the play log (comun/registro.js): each color, where the tubes started, where they ended and how long it took
+  const Reg = window.Registro || { anotar() {}, borrador() {} };
+  const r1 = c => ({ h: Math.round(c.h * 10) / 10, s: Math.round(c.s * 10) / 10, v: Math.round(c.v * 10) / 10 });
+  let reg = null, inicio = null, desde = 0;
+  const regPartida = () => ({ ev: 'partida', dificultad: DIF, exposicion: SEGUNDOS, colores: [] });
+  function regCerrar(resultado) {
+    if (!reg) return;
+    reg.resultado = resultado;
+    if (reg.ev === 'partida') reg.total = Math.round(G.resultados.reduce((a, x) => a + x.p, 0) * 10) / 10;
+    Reg.anotar('buenojo', reg);
+    reg = null;
+  }
+  // a practice color is logged when it is left, if the tubes were moved
+  function regPractica() {
+    if (!PRACTICA || !G.objetivo || !inicio) return;
+    const t = G.tuyo;
+    if (t.h === inicio.h && t.s === inicio.s && t.v === inicio.v) return;
+    reg = { ev: 'practica', objetivo: r1(G.objetivo), inicio: r1(inicio), tuyo: r1(t), dE: Math.round(C.diferencia(G.objetivo, t) * 10) / 10, ms: Math.round(performance.now() - desde) };
+    regCerrar('cambio'); inicio = null;
+  }
+  addEventListener('pagehide', () => { if (PRACTICA) regPractica(); else if (stage.dataset.fase !== 'fin') regCerrar('abandono'); });
   const despues = (ms, f) => G.timers.push(setTimeout(f, ms));
 
   // ------------------------------------------------------------ the strokes and the tubes
@@ -259,7 +282,8 @@
   function ronda() {
     G.ronda++;
     G.objetivo = C.sortear(G.resultados.map(r => r.objetivo));
-    G.tuyo = INICIO();
+    G.tuyo = INICIO(); inicio = Object.assign({}, G.tuyo);
+    if (!reg) reg = regPartida();
     $('ronda').textContent = G.ronda + ' / ' + RONDAS;
     $('muestra').classList.add('vacia');
     fase('espera');
@@ -287,7 +311,7 @@
     });
   }
   function armar() {
-    fase('armar');
+    fase('armar'); desde = performance.now();
     $('accion').textContent = 'Listo';
     pintarTuyo();
     $('muestra').classList.remove('vacia');
@@ -297,6 +321,7 @@
     const o = G.objetivo, t = Object.assign({}, G.tuyo);
     const dE = C.diferencia(o, t), p = C.puntaje(dE);
     G.resultados.push({ objetivo: o, tuyo: t, dE, p });
+    if (reg) { reg.colores.push({ objetivo: r1(o), inicio: r1(inicio), tuyo: r1(t), dE: Math.round(dE * 10) / 10, p, ms: Math.round(performance.now() - desde) }); Reg.borrador('buenojo', reg); }
     $('orig').style.background = C.css(o.h, o.s, o.v);
     $('tuyo').style.background = C.css(t.h, t.s, t.v);
     $('nro').textContent = C.coma(p);
@@ -323,6 +348,7 @@
   function fin() {
     const total = Math.round(G.resultados.reduce((s, r) => s + r.p, 0) * 10) / 10;
     const r = Est.terminada(DIF, total);
+    regCerrar('terminada');
     $('finDif').textContent = 'PARTIDA · ' + Est.DIFICULTADES[DIF].nombre.toUpperCase();
     $('total').innerHTML = `${C.coma(total)}<small> de 50</small>`;
     $('sello').hidden = !r.record;
@@ -337,6 +363,7 @@
   }
   function nuevaPartida() {
     G.timers.forEach(clearTimeout); G.timers = [];
+    regCerrar('abandono');   // only if the last one did not end
     G.ronda = 0; G.resultados = []; G.usadas = new Set();
     $('fin').hidden = true;
     App.sonido.duck(false);
@@ -345,8 +372,9 @@
 
   // ------------------------------------------------------------ the practice: the color stays in view, with numbers
   function practica() {
+    regPractica();
     G.objetivo = C.sortear(G.objetivo ? [G.objetivo] : []);
-    G.tuyo = INICIO();
+    G.tuyo = INICIO(); inicio = Object.assign({}, G.tuyo); desde = performance.now();
     $('ronda').textContent = 'práctica';
     $('ronda').style.width = '100rem'; $('ronda').style.left = '213rem';
     $('orig').style.background = C.css(G.objetivo.h, G.objetivo.s, G.objetivo.v);
@@ -363,7 +391,7 @@
     else if (f === 'practica') practica();
   });
   $('otra').addEventListener('click', () => { fx('bo_cinta'); nuevaPartida(); });
-  $('volver').addEventListener('click', () => { fx('bo_cinta'); App.volver(1 + App.extra); });
+  $('volver').addEventListener('click', () => { fx('bo_cinta'); if (PRACTICA) regPractica(); else if (stage.dataset.fase !== 'fin') regCerrar('abandono'); App.volver(1 + App.extra); });
 
   // for the tools (herramientas/capturas.js): see the state and jump to a moment
   window.__buenojo = { G, fase: () => stage.dataset.fase, ver, fin, armar, ronda, poner: t => { Object.assign(G.tuyo, t); pintarTuyo(); }, objetivo: o => { G.objetivo = o; } };
