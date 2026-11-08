@@ -978,6 +978,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
   const Reg = window.Registro || { anotar() {}, borrador() {} };
   let reg = null, regT0 = 0;                     // the match being logged and when it opened
   let listo = 0, pausaMs = 0, pausaDesde = 0;    // when the board was ready for the next move; time paused since then
+  let pistaVista = false;                        // the hint was showing when this move started (touching clears it)
   function regAbrir(semilla) {
     const M = window.MODES[Est.modo];
     reg = { ev: 'partida', nivel: N, modo: ZEN ? 'zen' : M.id, semilla, antes: ZEN ? 0 : Est.stars(N),
@@ -1074,7 +1075,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     const r = E.trySwap(g, a, b);
     if (r.blocked) { nudge(E.swappable(g.p[a]) ? b : a); fx('bad'); return; }
     if (!r.steps.length) return;
-    regMovida(a, b, r.valid, !!hint);
+    regMovida(a, b, r.valid, pistaVista || !!hint); pistaVista = false;
     busy = true; touch(); sel = -1;
     if (r.valid && g.mode === 'moves') { movesShown = g.moves; hud(pre); }   // only the moves go down: the score follows the combos
     await play(r.steps);
@@ -1241,6 +1242,7 @@ body:has(.sheet:not([hidden])) { background: #2c180b; }
     start();
     down = { c, x: e.clientX, y: e.clientY, id: e.pointerId, moved: false };
     try { board.setPointerCapture(e.pointerId); } catch (err) {}
+    if (hint) pistaVista = true;   // the touch clears the hint: the log keeps that it was showing
     touch(); e.preventDefault();
   });
   board.addEventListener('pointermove', e => {
