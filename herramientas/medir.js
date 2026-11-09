@@ -1,22 +1,12 @@
-// Tasa de victoria del bot (62% mejor jugada) con los movimientos y tiempos calibrados actuales.
+// Tasa de victoria del bot persona con los movimientos y tiempos calibrados actuales.
 // Sirve para ver cuánto cambia un nivel después de tocar reglas.
 // node herramientas/medir.js 16,17,18 [partidas]
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
-const E = require('../codigo/engine.js');
+const { partidaCalibrar: partida } = require('../codigo/persona.js');
 const { LEVELS, resumen, levelAt } = require('../codigo/levels.js');
 const CAL = require('../codigo/calibrated.json');
 const def = id => levelAt(id, CAL);   // Difícil, como se juega
-function play(L, seed) {
-  const g = E.createGame(L, seed); const rnd = E.rngFrom(seed * 2654435761 >>> 0); let time = 0;
-  while (!g.over) {
-    const m = E.botChoose(g, rnd, { best: 0.62, second: 0.2 }); if (!m) break;
-    const r = E.trySwap(g, m.a, m.b);
-    time += 1.7 + rnd() * 1.4; for (const s of r.steps) time += E.stepDuration(s) / 1000;
-    if (g.mode === 'time') { g.timeLeft = L.time - time; E.evaluateEnd(g, time >= L.time); } else E.evaluateEnd(g);
-  }
-  if (g.won) E.bonus(g);
-  return g.won;
-}
+const play = (L, seed) => partida(L, seed).won;
 if (isMainThread) {
   const ids = process.argv[2].split(',').map(Number), n = +process.argv[3] || 300;
   const nW = Math.min(ids.length, require('os').cpus().length), res = {}; let done = 0;

@@ -6,8 +6,9 @@ window.Estado = (() => {
   const MODES = ['Fácil', 'Normal', 'Difícil'];   // the same order as the engine's modes (codigo/levels.js)
   const ULTIMO = 30;                                // the last level made by hand; from 31 on they are generated, without end
   // v: the star system. With S-28 (stars with the thresholds in sight, 0.12.0) the levels' progress starts from zero in
-  // every difficulty; the chosen difficulty, the knob and the zen records stay
-  const V = 2;
+  // every difficulty; the same with the recalibration of 0.17.0 (v3, the persona bot: other moves and thresholds). The
+  // chosen difficulty, the knob and the zen records stay
+  const V = 3;
   const blank = () => ({ v: V, modo: 1, vista: 0, niveles: [{}, {}, {}], puntos: [{}, {}, {}], zen: { puntos: 0, tiempo: 0 } });
   let st = blank();
   try {
