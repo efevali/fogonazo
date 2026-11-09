@@ -15,7 +15,7 @@ const DATOS = __dirname + '/../dist/generados-datos.json', MEDICION = __dirname 
 
 // una partida del bot persona; moves, time y scoreAt: en qué jugada, segundo y con qué puntos completó el pedido
 function play(L, seed) {
-  const r = P.partida(L, seed);
+  const r = P.partidaCalibrar(L, seed);
   return Object.assign(r, { moves: r.usadas, time: r.segundos, scoreAt: r.pre, score: r.puntos });
 }
 const q = (arr, p) => { const a = arr.slice().sort((x, y) => x - y); if (!a.length) return NaN; const pos = Math.min(a.length - 1, Math.max(0, p * (a.length - 1))), lo = Math.floor(pos), hi = Math.ceil(pos); return a[lo] + (a[hi] - a[lo]) * (pos - lo); };

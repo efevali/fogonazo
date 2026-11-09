@@ -164,4 +164,10 @@ function partida(d, seed, M = MODELO) {
   return { won: g.won, usadas, segundos, pre, puntos: g.score };
 }
 
-module.exports = { RASGOS, rasgos, opciones, puntaje, elegir, piensa, partida };
+// para calibrar: en contrarreloj la velocidad pesa más que el criterio y el modelo copia la de un solo jugador, así que se
+// calibra pensando un 50 % más lento, para que los tiempos no queden justos para otras personas (decisión del 9/11)
+const MARGEN_RELOJ = 1.5;
+const MODELO_CALIBRAR = Object.assign({}, MODELO, { piensa: MODELO.piensa.map(ms => ms * MARGEN_RELOJ) });
+const partidaCalibrar = (d, seed) => partida(d, seed, MODELO_CALIBRAR);
+
+module.exports = { RASGOS, rasgos, opciones, puntaje, elegir, piensa, partida, partidaCalibrar };

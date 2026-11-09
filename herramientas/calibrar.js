@@ -2,7 +2,7 @@
    Primero, en cada modo, el límite: los movimientos, el tiempo o la primera meta de puntos de cada nivel, para que el bot
    gane con la tasa que busca el modo (target de levels.js en Difícil; en Normal y Fácil, tasaDe con el recorte de MODES).
    Después, en cada modo (S-28), las estrellas: en los niveles de pedido,
-   la cantidad máxima de movidas (o de segundos) para dos y para tres; en los de puntos, la segunda y la tercera meta (o las de `metas`, si el nivel las fija a mano). Se
+   la cantidad máxima de movidas (o de segundos) para dos y para tres; en los de puntos, la segunda y la tercera meta. Se
    eligen para que, de las partidas que el bot gana en ese modo, lleguen a dos estrellas o más y a tres las fracciones de
    `reparto` (MODES, en levels.js). También el fondo de escala del vúmetro de los de pedido. Al final, una verificación
    con las reglas de verdad.
@@ -11,7 +11,7 @@
              node herramientas/calibrar.js 300 todos --estrellas   (deja el límite de cada modo y rehace las estrellas) */
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const fs = require('fs');
-const { partida: play } = require('../codigo/persona.js');
+const { partidaCalibrar: play } = require('../codigo/persona.js');
 const LV = require('../codigo/levels.js');
 const { LEVELS, MODES, resumen } = LV;
 const ARCHIVO = __dirname + '/../codigo/calibrated.json';
@@ -83,7 +83,6 @@ function estrellas(id, cal, M, n) {
     const fin = [];
     for (let s = 0; s < n; s++) { const r = play(L, 50000 + s); if (r.won) fin.push(r.puntos); }
     const st = paso(quantile(fin, 0.5)), m1 = d.stars[0];
-    if (d.metas) { const s2 = roundTo(m1 * d.metas[0], st); return { estrellas: [m1, s2, Math.max(s2 + st, roundTo(m1 * d.metas[1], st))] }; }   // fijadas a mano
     const s2 = Math.max(m1 + st, roundTo(quantile(fin, 1 - r2), st));
     return { estrellas: [m1, s2, Math.max(s2 + st, roundTo(quantile(fin, 1 - r3), st))] };
   }

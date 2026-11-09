@@ -3,7 +3,7 @@
    Con semillas distintas de las de la calibración, así sirve de control.
    node herramientas/modos.js [partidas] [niveles]    Ejemplo: node herramientas/modos.js 150 1,2,3 */
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
-const { partida } = require('../codigo/persona.js');
+const { partidaCalibrar: partida } = require('../codigo/persona.js');
 const { LEVELS, MODES, applyMode, estrellasDe, levelAt, resumen } = require('../codigo/levels.js');
 const CAL = require('../codigo/calibrated.json');
 

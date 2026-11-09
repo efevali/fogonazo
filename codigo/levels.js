@@ -6,14 +6,12 @@
    'k' cinta kapton · 'q' kapton sobre pad. Un diseño con menos filas se completa con filas libres arriba.
    tip: lo que el nivel presenta por primera vez (la nota de cuaderno junto a la placa).
    target = tasa de victoria buscada para el bot de calibración.
-   tune: qué se calibra ('moves' | 'time' | 'score').
-   metas: en los de puntos, la segunda y la tercera meta como múltiplos de la primera, fijadas a mano en lugar de salir del
-   bot. Para el 1 y el 2: el bot usa los especiales desde la primera jugada y el juego recién los está presentando. */
+   tune: qué se calibra ('moves' | 'time' | 'score'). */
 (function (root) {
 const LEVELS = [
   // ---------------- 1 a 5 · lo básico
-  { colors: 5, moves: 18, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.97, tip: 'swap', metas: [2, 2.9] },
-  { colors: 5, moves: 20, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.95, tip: 'line', metas: [2, 2.9] },
+  { colors: 5, moves: 18, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.97, tip: 'swap' },
+  { colors: 5, moves: 20, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.95, tip: 'line' },
   { colors: 5, moves: 20, goals: [{ type: 'collect', color: 0, n: 40 }, { type: 'collect', color: 1, n: 40 }], tune: 'moves', target: 0.92, tip: 'antenna' },
   { colors: 5, moves: 20, goals: [{ type: 'collect', color: 2, n: 50 }], tune: 'moves', target: 0.87, tip: 'bomb' },
   { colors: 5, time: 60, goals: [{ type: 'score', n: 0 }], tune: 'score', target: 0.82, tip: 'battery' },
@@ -83,20 +81,20 @@ const GEN = {
   // movimientos medianos para terminar = colores × (base + el pedido más largo + juntos × los demás), con el costo
   // de cada pedido = costo × cantidad (piezas a juntar escaladas por colores / 6, celdas de pad por capa, golpes a
   // quemados, cintas, válvulas): los pedidos combinados avanzan a la vez. Ajustado con herramientas/generados.js.
-  costo: { base: 6.54, piezas: 0.35, pads: 0.32, golpes: 0.1, cintas: 0.76, valvulas: 3 }, juntos: 0.18, seguidas: 1.11, golpesConValvulas: 3.21,
+  costo: { base: 6.54, piezas: 0.35, pads: 0.31, golpes: 0.1, cintas: 0.76, valvulas: 3 }, juntos: 0.18, seguidas: 1.11, golpesConValvulas: 3.21,
   colores: { 5: 1, 6: 1, 7: 1.8 },
   // movimientos para una tasa t = mediana × razon(t), interpolado
-  razon: [[0.3, 0.84], [0.4, 0.92], [0.5, 1], [0.6, 1.06], [0.7, 1.17], [0.8, 1.26], [0.9, 1.42], [0.95, 1.53], [0.98, 1.75]],
-  segundosPorJugada: 2.63,
+  razon: [[0.3, 0.84], [0.4, 0.92], [0.5, 1], [0.6, 1.07], [0.7, 1.17], [0.8, 1.26], [0.9, 1.42], [0.95, 1.56], [0.98, 1.75]],
+  segundosPorJugada: 3.44,
   // la ayuda de piezas de cada modo acorta lo que cuesta juntar piezas (factor sobre costo.piezas)
-  ayudaPiezas: { facil: 0.56, normal: 0.75, dificil: 1 },
+  ayudaPiezas: { facil: 0.56, normal: 0.74, dificil: 1 },
   // puntos: por jugada, para la primera meta de los niveles de puntos (la que se gana con la tasa buscada)
-  puntosPorJugada: { 5: 630, 6: 344, 7: 234 }, razonPuntos: [[0.3, 1.23], [0.5, 1], [0.7, 0.83], [0.9, 0.62], [0.95, 0.58], [0.98, 0.49]],
+  puntosPorJugada: { 5: 630, 6: 344, 7: 219 }, razonPuntos: [[0.3, 1.23], [0.5, 1], [0.7, 0.83], [0.9, 0.62], [0.95, 0.54], [0.98, 0.49]],
   // estrellas (S-28), en cada modo. De pedido: la cantidad máxima de movidas (o de segundos) para dos y tres estrellas,
   // como fracción del límite del modo, según la tasa buscada (a + b × tasa). De puntos: la segunda y la tercera meta,
   // como múltiplos de la primera. Ajustado con herramientas/generados.js (medir y estrellas).
-  umbrales: { facil: [[0.991, -0.245], [0.757, -0.2]], normal: [[0.936, -0.199], [0.828, -0.371]], dificil: [[1.055, -0.445], [0.906, -0.532]] },
-  metas: { facil: [1.32, 1.88], normal: [1.4, 1.84], dificil: [1.4, 1.9] },
+  umbrales: { facil: [[0.976, -0.226], [0.739, -0.174]], normal: [[0.939, -0.207], [0.816, -0.352]], dificil: [[1.046, -0.432], [0.898, -0.527]] },
+  metas: { facil: [1.33, 1.88], normal: [1.42, 1.84], dificil: [1.4, 1.9] },
   // el fondo de escala del vúmetro en los de pedido: puntos por jugada del límite, según los colores
   escalaPorJugada: { 5: 1160, 6: 590, 7: 350 },
 };

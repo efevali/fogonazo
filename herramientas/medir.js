@@ -2,7 +2,7 @@
 // Sirve para ver cuánto cambia un nivel después de tocar reglas.
 // node herramientas/medir.js 16,17,18 [partidas]
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
-const { partida } = require('../codigo/persona.js');
+const { partidaCalibrar: partida } = require('../codigo/persona.js');
 const { LEVELS, resumen, levelAt } = require('../codigo/levels.js');
 const CAL = require('../codigo/calibrated.json');
 const def = id => levelAt(id, CAL);   // Difícil, como se juega
