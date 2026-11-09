@@ -2,6 +2,13 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.17.0 — 9/11/2026
+
+- Fogonazo: **recalibrado con un bot que juega como una persona.** Se ajustó con las partidas del registro: elige por lo que se ve en el tablero, sin anticipar las cascadas. Los 30 niveles y la fórmula de los generados, en los tres modos, con las mismas tasas de victoria y el mismo reparto de estrellas. Cambian las movidas, los tiempos y los umbrales de casi todos los niveles: hay más movidas en los de válvulas y piezas, y menos en los de pads y quemados.
+- **Los contrarreloj se calibran pensando un 50 % más lento** que lo medido, para que el tiempo no quede justo para otras personas.
+- **Las metas de los niveles 1 y 2** se calibran como las de los demás.
+- **El avance de los niveles arranca de cero** en las tres dificultades. La dificultad elegida, los récords del zen y el registro de partidas se conservan.
+
 ## 0.16.0 — 7/11/2026
 
 - **Registro de partidas**, para calibrar los juegos con personas y no solo con bots. Cada juego anota en el teléfono lo que se juega: en Fogonazo, cada partida con su semilla y sus movidas, cuánto se pensó cada una, cómo terminó y las estrellas; en el mahjong, cada reparto con sus pares, pistas y barajadas; en Buen ojo, cada color con la referencia y el intento; y las sesiones de la app. No se ve en ningún lado ni sale del teléfono solo: **cinco toques seguidos en la lámpara de arco de la sala** lo exportan como archivo (la lámpara parpadea y se abre el menú de compartir). El avance no cambia.
