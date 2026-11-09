@@ -1,4 +1,4 @@
-/* Los niveles generados (del 31 en adelante) con el bot: no se calibran uno por uno, sino que se ajusta la fórmula
+/* Los niveles generados (del 31 en adelante) con el bot persona (codigo/persona.js): no se calibran uno por uno, sino que se ajusta la fórmula
    GEN de codigo/levels.js sobre una muestra, y después se mide cómo quedaron.
    node herramientas/generados.js datos [desde] [hasta] [partidas]  → juega la muestra y guarda dist/generados-datos.json
    node herramientas/generados.js ajustar                           → con esos datos, propone los valores de GEN
@@ -8,27 +8,15 @@
    Ejemplo: node herramientas/generados.js datos 31 90 100 */
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const fs = require('fs');
-const E = require('../codigo/engine.js');
+const P = require('../codigo/persona.js');
 const LV = require('../codigo/levels.js');
 const { generated, features, medianMoves, calOf, levelAt, resumen, GEN } = LV;
-const SKILL = { best: 0.62, second: 0.2 };
 const DATOS = __dirname + '/../dist/generados-datos.json', MEDICION = __dirname + '/../dist/generados-medicion.json';
 
-// una partida del bot, como en calibrar.js: devuelve si ganó, en qué jugada y segundo terminó, y los puntos
+// una partida del bot persona; moves, time y scoreAt: en qué jugada, segundo y con qué puntos completó el pedido
 function play(L, seed) {
-  const g = E.createGame(L, seed), rnd = E.rngFrom(seed * 2654435761 >>> 0);
-  let time = 0, doneAt = null, doneTime = null, doneScore = null;
-  while (!g.over) {
-    const m = E.botChoose(g, rnd, SKILL);
-    if (!m) break;
-    const r = E.trySwap(g, m.a, m.b);
-    time += 1.7 + rnd() * 1.4;
-    for (const st of r.steps) time += E.stepDuration(st) / 1000;
-    if (g.mode === 'time') { g.timeLeft = L.time - time; E.evaluateEnd(g, time >= L.time); } else E.evaluateEnd(g);
-    if (g.won && doneAt === null) { doneAt = g.movesUsed; doneTime = time; doneScore = g.score; }
-  }
-  if (g.won) E.bonus(g);
-  return { won: g.won, moves: doneAt, time: doneTime, scoreAt: doneScore, score: g.score, usadas: doneAt, segundos: doneTime, puntos: g.score };
+  const r = P.partida(L, seed);
+  return Object.assign(r, { moves: r.usadas, time: r.segundos, scoreAt: r.pre, score: r.puntos });
 }
 const q = (arr, p) => { const a = arr.slice().sort((x, y) => x - y); if (!a.length) return NaN; const pos = Math.min(a.length - 1, Math.max(0, p * (a.length - 1))), lo = Math.floor(pos), hi = Math.ceil(pos); return a[lo] + (a[hi] - a[lo]) * (pos - lo); };
 
@@ -41,7 +29,9 @@ function datos(n, partidas) {
     out.scores = []; for (let s = 0; s < partidas; s++) out.scores.push(play(d, 1000 + s).score);
     return out;
   }
-  const d = Object.assign({}, L, { goals: L.goals.map(o => Object.assign({}, o)), moves: 150 }); delete d.time;
+  // sin límite a la vista; los contrarreloj siguen contra reloj, porque ahí se piensa más rápido
+  const d = Object.assign({}, L, { goals: L.goals.map(o => Object.assign({}, o)) });
+  if (L.tune === 'time') { d.time = 900; d.moves = 0; } else { d.moves = 150; delete d.time; }
   out.done = []; out.times = []; out.scoreAt = [];
   for (let s = 0; s < partidas; s++) {
     const r = play(d, 1000 + s);
@@ -146,7 +136,7 @@ if (cmd === 'ver') {
     ayuda[M.id] = +best.toFixed(2);
   }
   console.log('ayudaPiezas:', JSON.stringify(ayuda));
-  const spj = q(jug.flatMap(d => d.done.map((v, i) => v ? d.times[i] / v : null).filter(Boolean)), 0.5);
+  const spj = q(jug.filter(d => d.tune === 'time').flatMap(d => d.done.map((v, i) => v ? d.times[i] / v : null).filter(Boolean)), 0.5);
   console.log('segundosPorJugada:', spj.toFixed(2));
   const ppm = q(jug.flatMap(d => d.done.map((v, i) => v ? d.scoreAt[i] / v : null).filter(Boolean)), 0.5);
   console.log('puntosPorMovimientoGanado (al terminar, sin bonus):', ppm | 0);

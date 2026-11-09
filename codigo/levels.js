@@ -83,22 +83,22 @@ const GEN = {
   // movimientos medianos para terminar = colores × (base + el pedido más largo + juntos × los demás), con el costo
   // de cada pedido = costo × cantidad (piezas a juntar escaladas por colores / 6, celdas de pad por capa, golpes a
   // quemados, cintas, válvulas): los pedidos combinados avanzan a la vez. Ajustado con herramientas/generados.js.
-  costo: { base: 8.1, piezas: 0.27, pads: 0.32, golpes: 0.11, cintas: 0.84, valvulas: 2.16 }, juntos: 0.12, seguidas: 0.93, golpesConValvulas: 2.4,
-  colores: { 5: 1, 6: 1, 7: 1.85 },
+  costo: { base: 6.54, piezas: 0.35, pads: 0.32, golpes: 0.1, cintas: 0.76, valvulas: 3 }, juntos: 0.18, seguidas: 1.11, golpesConValvulas: 3.21,
+  colores: { 5: 1, 6: 1, 7: 1.8 },
   // movimientos para una tasa t = mediana × razon(t), interpolado
-  razon: [[0.3, 0.85], [0.4, 0.93], [0.5, 1], [0.6, 1.07], [0.7, 1.19], [0.8, 1.28], [0.9, 1.44], [0.95, 1.59], [0.98, 1.75]],
-  segundosPorJugada: 3.5,
+  razon: [[0.3, 0.84], [0.4, 0.92], [0.5, 1], [0.6, 1.06], [0.7, 1.17], [0.8, 1.26], [0.9, 1.42], [0.95, 1.53], [0.98, 1.75]],
+  segundosPorJugada: 2.63,
   // la ayuda de piezas de cada modo acorta lo que cuesta juntar piezas (factor sobre costo.piezas)
-  ayudaPiezas: { facil: 0.48, normal: 0.7, dificil: 1 },
+  ayudaPiezas: { facil: 0.56, normal: 0.75, dificil: 1 },
   // puntos: por jugada, para la primera meta de los niveles de puntos (la que se gana con la tasa buscada)
-  puntosPorJugada: { 5: 630, 6: 420, 7: 270 }, razonPuntos: [[0.3, 1.23], [0.5, 1], [0.7, 0.84], [0.9, 0.67], [0.95, 0.58], [0.98, 0.5]],
+  puntosPorJugada: { 5: 630, 6: 344, 7: 234 }, razonPuntos: [[0.3, 1.23], [0.5, 1], [0.7, 0.83], [0.9, 0.62], [0.95, 0.58], [0.98, 0.49]],
   // estrellas (S-28), en cada modo. De pedido: la cantidad máxima de movidas (o de segundos) para dos y tres estrellas,
   // como fracción del límite del modo, según la tasa buscada (a + b × tasa). De puntos: la segunda y la tercera meta,
   // como múltiplos de la primera. Ajustado con herramientas/generados.js (medir y estrellas).
-  umbrales: { facil: [[0.962, -0.239], [0.805, -0.329]], normal: [[0.981, -0.319], [0.858, -0.441]], dificil: [[1.068, -0.467], [0.977, -0.647]] },
-  metas: { facil: [1.56, 2.04], normal: [1.51, 2.07], dificil: [1.5, 2] },
+  umbrales: { facil: [[0.991, -0.245], [0.757, -0.2]], normal: [[0.936, -0.199], [0.828, -0.371]], dificil: [[1.055, -0.445], [0.906, -0.532]] },
+  metas: { facil: [1.32, 1.88], normal: [1.4, 1.84], dificil: [1.4, 1.9] },
   // el fondo de escala del vúmetro en los de pedido: puntos por jugada del límite, según los colores
-  escalaPorJugada: { 5: 1350, 6: 690, 7: 340 },
+  escalaPorJugada: { 5: 1160, 6: 590, 7: 350 },
 };
 const r01 = seed => () => { seed = (seed + 0x6D2B79F5) >>> 0; let t = seed; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const interp = (tab, x) => { if (x <= tab[0][0]) return tab[0][1]; for (let i = 1; i < tab.length; i++) if (x <= tab[i][0]) { const [a, b] = tab[i - 1], [c, d] = tab[i]; return b + (d - b) * (x - a) / (c - a); } return tab[tab.length - 1][1]; };

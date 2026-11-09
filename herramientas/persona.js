@@ -28,26 +28,29 @@ const L2 = 0.5;
 // número, ajustado para que las victorias y estrellas simuladas se parezcan a las reales (ver «comparar»)
 const TEMPLE = +process.env.TEMPLE || 2;
 
-const defDe = (id, modo) => L.applyMode(L.levelAt(id, CAL), L.MODES.find(m => m.id === modo));
+// el nivel tal como se jugó: el diseño sale del código, pero los límites y las metas, de lo que quedó anotado en la partida,
+// para que los registros viejos sigan valiendo después de una recalibración
+function defDe(p) {
+  const d = L.applyMode(L.levelAt(p.nivel, CAL), L.MODES.find(m => m.id === p.modo));
+  if (!p.def) return d;
+  if (p.def.tiempo) { d.time = p.def.tiempo; d.moves = 0; } else { d.moves = p.def.movidas; delete d.time; }
+  d.stars = p.def.estrellas.slice();
+  if (d.starsBy === 'score') d.goals[0].n = d.stars[0];
+  return d;
+}
 const leer = fs_ => fs_.flatMap(f => JSON.parse(fs.readFileSync(f, 'utf8')).registro.fogonazo).filter(p => p.modo !== 'zen' && p.movidas && p.movidas.length);
 
 // ---------------------------------------------------------------- simular una partida
 // el bot de siempre (62 % la mejor) o el persona; el reloj suma lo que se piensa y las animaciones, como en la partida
 function jugar(d, seed, quien, M) {
+  if (quien === 'persona') return L.estrellasDe(d, P.partida(d, seed, M));
   const g = E.createGame(d, seed), rnd = E.rngFrom(seed * 2654435761 >>> 0);
   let time = 0, usadas = null, segundos = null;
   while (!g.over) {
-    let m, t;
-    if (quien === 'bot') { m = E.botChoose(g, rnd, { best: 0.62, second: 0.2 }); t = 1.7 + rnd() * 1.4; }
-    else {
-      // lo que piensa, medido en las partidas reales; si pasa de lo que tarda la pista, la ve y a veces la sigue
-      t = piensa(rnd, g.mode === 'time' ? M.piensa : M.piensaMovidas);
-      m = t > (d.n >= 1 && d.n <= 3 ? 5 : 8) && rnd() < M.siguePista ? E.rankMoves(g, null)[0] : null;
-      if (!m) m = P.elegir(g, rnd, M.pesos, M.temple);
-    }
+    const m = E.botChoose(g, rnd, { best: 0.62, second: 0.2 });
     if (!m) break;
     const r = E.trySwap(g, m.a, m.b);
-    time += t;
+    time += 1.7 + rnd() * 1.4;
     for (const s of r.steps) time += E.stepDuration(s) / 1000;
     if (g.mode === 'time') { g.timeLeft = d.time - time; E.evaluateEnd(g, time >= d.time); } else E.evaluateEnd(g);
     if (g.won && usadas === null) { usadas = g.movesUsed; segundos = time; }
@@ -55,17 +58,12 @@ function jugar(d, seed, quien, M) {
   if (g.won) E.bonus(g);
   return L.estrellasDe(d, { won: g.won, usadas, segundos, puntos: g.score });
 }
-// el tiempo de pensar: un valor al azar de la distribución medida (cuantiles, interpolados)
-function piensa(rnd, q) {
-  const x = rnd() * (q.length - 1), k = Math.floor(x);
-  return (q[k] + (q[Math.min(k + 1, q.length - 1)] - q[k]) * (x - k)) / 1000;
-}
 
 // ---------------------------------------------------------------- ajuste
 function decisiones(partidas) {
   const out = [];
   partidas.forEach((p, pi) => {
-    const g = E.createGame(defDe(p.nivel, p.modo), p.semilla);
+    const g = E.createGame(defDe(p), p.semilla);
     for (const [a, b, , f] of p.movidas) {
       if (!(f & 1)) {
         const ops = P.opciones(g, !process.env.CON_BOT);
@@ -130,7 +128,7 @@ function cmdAjustar(archivos) {
   // el bot de siempre, para comparar: solo su evaluación, con su mejor temperatura
   const vb = P.RASGOS.indexOf('valorBot');
   const dataBot = []; partidas.forEach((p, pi) => {
-    const g = E.createGame(defDe(p.nivel, p.modo), p.semilla);
+    const g = E.createGame(defDe(p), p.semilla);
     for (const [x, y, , f] of p.movidas) {
       if (!(f & 1)) { const ops = P.opciones(g, false); const k = ops.findIndex(o => (o.a === x && o.b === y) || (o.a === y && o.b === x)); if (k >= 0 && ops.length > 1) dataBot.push({ pi, k, F: ops.map(o => [o.f.valorBot]) }); }
       const r = E.trySwap(g, x, y); if (!r.valid) continue; E.evaluateEnd(g); if (g.over) break;
@@ -145,7 +143,7 @@ function cmdAjustar(archivos) {
   // se reconstruye con el tiempo de pensar (hasta la 0.16.0 el registro no la marcaba bien)
   let vista = 0, seguida = 0;
   for (const p of partidas) {
-    const g = E.createGame(defDe(p.nivel, p.modo), p.semilla), demora = p.nivel <= 3 ? 5000 : 8000;
+    const g = E.createGame(defDe(p), p.semilla), demora = p.nivel <= 3 ? 5000 : 8000;
     for (const [x, y, ms, f] of p.movidas) {
       if (!(f & 1) && (ms > demora || f & 2)) { vista++; const b = E.rankMoves(g, null)[0]; if (b && ((b.a === x && b.b === y) || (b.a === y && b.b === x))) seguida++; }
       const r = E.trySwap(g, x, y); if (!r.valid) continue; E.evaluateEnd(g); if (g.over) break;
@@ -169,14 +167,15 @@ function cmdAjustar(archivos) {
 
 // ---------------------------------------------------------------- comparar
 // el bot de siempre no cambia entre corridas: sus resultados se guardan en un caché (en la carpeta temporal)
+const claveDe = p => `${p.nivel} ${p.modo} ${p.def ? p.def.movidas + ' ' + p.def.tiempo + ' ' + p.def.estrellas : ''}`;
 const CACHE = path.join(require('os').tmpdir(), 'fogonazo-bot-de-siempre.json');
 const leerCache = () => { try { return JSON.parse(fs.readFileSync(CACHE, 'utf8')); } catch (e) { return {}; } };
 if (!isMainThread) {
   const M = JSON.parse(fs.readFileSync(ARCHIVO, 'utf8'));
   if (workerData.temple) M.temple = workerData.temple;
   const cache = leerCache();
-  for (const [id, modo] of workerData.casos) {
-    const d = defDe(id, modo), k = id + ' ' + modo, ck = k + ' ' + workerData.n + ' ' + JSON.stringify(d.stars) + (d.moves || d.time);
+  for (const p of workerData.casos) {
+    const d = defDe(p), k = claveDe(p), ck = k + ' ' + workerData.n;
     const r = { bot: cache[ck] || null, persona: [0, 0, 0, 0] };
     if (!r.bot) { r.bot = [0, 0, 0, 0]; for (let s = 0; s < workerData.n; s++) r.bot[jugar(d, 70000 + s, 'bot', M)]++; }
     for (let s = 0; s < workerData.n; s++) r.persona[jugar(d, 90000 + s, 'persona', M)]++;
@@ -188,7 +187,7 @@ if (!isMainThread) {
   else if (cmd === 'comparar' && resto.length) {
     const n = /^\d+$/.test(resto[0]) ? +resto.shift() : 150;
     const partidas = leer(resto);
-    const casos = [...new Set(partidas.map(p => p.nivel + ' ' + p.modo))].map(k => { const [a, b] = k.split(' '); return [+a, b]; });
+    const casos = [...new Map(partidas.map(p => [claveDe(p), { nivel: p.nivel, modo: p.modo, def: p.def }])).values()];
     const nW = require('os').cpus().length, res = {}; let fin = 0;
     for (let w = 0; w < nW; w++) {
       const wk = new Worker(__filename, { workerData: { casos: casos.filter((_, j) => j % nW === w), n, temple: +process.env.TEMPLE || 0 } });
@@ -202,7 +201,7 @@ function informe(partidas, res, n) {
   const tasa = (h, e) => (e === 1 ? h[1] + h[2] + h[3] : e === 2 ? h[2] + h[3] : h[3]) / n;
   const pc = v => (Math.round(v * 100) + ' %').padStart(5);
   // cada intento real, con lo que esperaban de él el bot de siempre y el persona
-  const filas = partidas.map(p => ({ p, h: p.estrellas || 0, b: res[p.nivel + ' ' + p.modo].bot, q: res[p.nivel + ' ' + p.modo].persona }));
+  const filas = partidas.map(p => ({ p, h: p.estrellas || 0, b: res[claveDe(p)].bot, q: res[claveDe(p)].persona }));
   function bloque(titulo, fs_) {
     if (!fs_.length) return;
     const m = (f, e) => fs_.reduce((a, x) => a + f(x, e), 0) / fs_.length;

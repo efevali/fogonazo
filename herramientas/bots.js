@@ -1,4 +1,4 @@
-// Compara la tasa de victoria de tres bots en los 30 niveles: el de la calibración (62% la mejor jugada),
+// Compara la tasa de victoria de tres bots en los 30 niveles: el de siempre (62% la mejor jugada),
 // uno fuerte (80%) y uno perfecto (siempre la mejor).
 // node herramientas/bots.js
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');

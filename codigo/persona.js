@@ -7,10 +7,10 @@
    (modelo logit). Los pesos salen de ajustar el modelo a las movidas reales del registro de partidas
    (herramientas/persona.js) y viven en codigo/persona.json. */
 const E = require('./engine.js');
+const MODELO = require('./persona.json');
 const W = 10;
 const X = i => i % W, Y = i => (i / W) | 0;
 
-// cuánto vale cada tipo de objetivo cumplido (los mismos pesos relativos que el bot de siempre)
 // lo que falta en el tablero para los objetivos de casillas (como targetsLeft del motor, que no se exporta)
 function targetsLeft(g) {
   const t = [];
@@ -23,6 +23,7 @@ function targetsLeft(g) {
   return t;
 }
 
+// cuánto vale cada tipo de objetivo cumplido (los mismos pesos relativos que el bot de siempre)
 const GOAL_W = { collect: 30, pads: 45, burnt: 45, locks: 35, tubes: 320 };
 const SPECIAL_VALUE = [0, 35, 35, 50, 85, 0, 0, 45];
 
@@ -136,4 +137,31 @@ function elegir(g, rnd, w, temple) {
   return ops[ops.length - 1];
 }
 
-module.exports = { RASGOS, rasgos, opciones, puntaje, elegir };
+// lo que tarda en pensar: un valor al azar de la distribución medida en las partidas reales (cuantiles, interpolados), en segundos
+function piensa(rnd, q) {
+  const x = rnd() * (q.length - 1), k = Math.floor(x);
+  return (q[k] + (q[Math.min(k + 1, q.length - 1)] - q[k]) * (x - k)) / 1000;
+}
+
+// una partida entera del bot persona con el nivel d (como lo arma levelAt/applyMode, o una copia con d.n). M: persona.json;
+// el reloj suma lo que piensa y las animaciones, como en la partida. Si piensa más de lo que tarda la pista, la ve y a veces
+// la sigue. Devuelve si ganó, en qué jugada y segundo completó el pedido, los puntos antes del bonus y al final.
+function partida(d, seed, M = MODELO) {
+  const g = E.createGame(d, seed), rnd = E.rngFrom(seed * 2654435761 >>> 0), demoraPista = d.n >= 1 && d.n <= 3 ? 5 : 8;
+  let time = 0, usadas = null, segundos = null;
+  while (!g.over) {
+    const t = piensa(rnd, g.mode === 'time' ? M.piensa : M.piensaMovidas);
+    const m = (t > demoraPista && rnd() < M.siguePista ? E.rankMoves(g, null)[0] : null) || elegir(g, rnd, M.pesos, M.temple);
+    if (!m) break;
+    const r = E.trySwap(g, m.a, m.b);
+    time += t;
+    for (const s of r.steps) time += E.stepDuration(s) / 1000;
+    if (g.mode === 'time') { g.timeLeft = d.time - time; E.evaluateEnd(g, time >= d.time); } else E.evaluateEnd(g);
+    if (g.won && usadas === null) { usadas = g.movesUsed; segundos = time; }
+  }
+  const pre = g.score;
+  if (g.won) E.bonus(g);
+  return { won: g.won, usadas, segundos, pre, puntos: g.score };
+}
+
+module.exports = { RASGOS, rasgos, opciones, puntaje, elegir, piensa, partida };

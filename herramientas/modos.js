@@ -1,28 +1,14 @@
-/* Mide los modos de dificultad con el bot de calibración (62 % mejor jugada): para cada nivel y cada modo,
+/* Mide los modos de dificultad con el bot persona (codigo/persona.js): para cada nivel y cada modo,
    cuántas partidas gana, cuántas llegan a dos estrellas y cuántas a tres, con las estrellas de S-28 (calibrar.js).
    Con semillas distintas de las de la calibración, así sirve de control.
    node herramientas/modos.js [partidas] [niveles]    Ejemplo: node herramientas/modos.js 150 1,2,3 */
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
-const E = require('../codigo/engine.js');
+const { partida } = require('../codigo/persona.js');
 const { LEVELS, MODES, applyMode, estrellasDe, levelAt, resumen } = require('../codigo/levels.js');
 const CAL = require('../codigo/calibrated.json');
 
 const def = (id, M) => applyMode(levelAt(id, CAL), M);   // el nivel como se juega en un modo
-function play(L, seed) {   // devuelve las estrellas (0 a 3), como la partida
-  const g = E.createGame(L, seed), rnd = E.rngFrom(seed * 2654435761 >>> 0);
-  let time = 0, usadas = null, segundos = null;
-  while (!g.over) {
-    const m = E.botChoose(g, rnd, { best: 0.62, second: 0.2 });
-    if (!m) break;
-    const r = E.trySwap(g, m.a, m.b);
-    time += 1.7 + rnd() * 1.4;
-    for (const s of r.steps) time += E.stepDuration(s) / 1000;
-    if (g.mode === 'time') { g.timeLeft = L.time - time; E.evaluateEnd(g, time >= L.time); } else E.evaluateEnd(g);
-    if (g.won && usadas === null) { usadas = g.movesUsed; segundos = time; }
-  }
-  if (g.won) E.bonus(g);
-  return estrellasDe(L, { won: g.won, usadas, segundos, puntos: g.score });
-}
+const play = (L, seed) => estrellasDe(L, partida(L, seed));   // devuelve las estrellas (0 a 3), como la partida
 
 if (isMainThread) {
   const n = +process.argv[2] || 150;
