@@ -69,7 +69,7 @@ Cada evento lleva la hora y la versión. Si la app se cierra en medio de una par
 
 ## Lo que sigue
 
-1. **Probar Biblioteca en el teléfono** (0.19.0, con los dibujos del boceto): las puertas con llave y los objetos nuevos. Después, los pedidos de imágenes y el sonido.
+1. **Probar Biblioteca en el teléfono** (0.20.0, con los dibujos del boceto): la dificultad nueva. Después, los pedidos de imágenes y el sonido.
 2. **Segunda pasada del bot persona de Fogonazo.** La 0.17.0 recalibró los 30 niveles y la fórmula de los generados con un bot ajustado a las partidas reales de una sola persona. Con los registros que se junten desde entonces se vuelve a ajustar el bot y se corrigen sus desvíos: hoy sobrestima a Producto del 11 al 20 (incluido el 16 en Normal) y lo subestima en los generados.
 3. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
 

@@ -6,8 +6,8 @@
    objeto a un lugar libre de la capa de adelante de otro casillero. Tres iguales adelante se van; si la capa de
    adelante queda vacía (porque se fue un trío o porque se sacó lo último), avanza la de atrás. Se gana al vaciar todo.
 
-   Puertas (S-38): en Normal un casillero arranca cerrado con una puerta de vidrio, y en Difícil otro más con una
-   reja. Lo de adentro no se toca ni se le apoya nada hasta abrirla, y se abre llevándole su llave: un objeto más,
+   Puertas (S-38): en Fácil un casillero arranca cerrado con una puerta de vidrio; en Normal y Difícil, además, otro
+   con una reja. Lo de adentro no se toca ni se le apoya nada hasta abrirla, y se abre llevándole su llave: un objeto más,
    escondido unas filas atrás en otro casillero (la de bronce abre el vidrio; la de hierro, la reja). La llave ocupa
    un lugar, solo va a su puerta y, al abrirla, se va. Las llaves son los números 100 (vidrio) y 101 (reja).
 
@@ -18,12 +18,13 @@
 (function (raiz) {
   'use strict';
 
-  // los diecinueve objetos (S-37g y S-38a); Fácil usa los primeros ocho, los de silueta más distinta; Normal suma
+  // los veinte objetos (S-37g, S-38a y S-39a); Fácil usa los primeros ocho, los de silueta más distinta; Normal suma
   // seis (entre ellos la pila acostada y la enciclopedia) y Difícil, los que se parecen a otros: dos casetes más
-  // como el naranja, el trío de libros alternado, el tomo azul y el casete transparente
+  // como el naranja, el trío de libros alternado, el tomo azul, el casete transparente y la
+  // enciclopedia verde
   const OBJETOS = ['tomo', 'casete', 'eiffel', 'avion', 'globo', 'despertador', 'mamushka', 'cactus',
     'libros', 'auto', 'camara', 'radio', 'pila', 'enciclopedia',
-    'caseteBlanco', 'caseteAhumado', 'librosAlt', 'tomoAzul', 'caseteTransparente'];
+    'caseteBlanco', 'caseteAhumado', 'librosAlt', 'tomoAzul', 'caseteTransparente', 'enciclopediaVerde'];
   // las llaves: cada una abre su puerta
   const LLAVES = { vidrio: 100, reja: 101 };
   const esLlave = x => x !== null && x >= 100;
@@ -31,15 +32,23 @@
 
   /* casilleros, tipos de objeto, tríos, capas como máximo por casillero (adelante y atrás), cuánto se mezcla y las
      puertas: de qué tipo, cuántas filas atrás arranca su llave (0 es adelante; 1, la fila en sombra) y en qué punto
-     del reparto al revés se cierra (lo que se puso antes queda como el final de la partida, con la puerta abierta) */
+     del reparto al revés se cierra (lo que se puso antes queda como el final de la partida, con la puerta abierta).
+     Desde la 0.20.0, más difícil sin alargar (lo pidió quien más jugó: «la duración está ok, la dificultad tiene que
+     aumentar»): parejo (cuánto se prefieren los casilleros bajos al apilar; menos, filas más hondas), llenar (cuánto se
+     prefieren los huecos de adelante; más, menos lugares libres) y meta, lo que tiene que cumplir un reparto para
+     entregarse (ver medidas): lugares libres como máximo, pares ya armados como máximo y, como mínimo, la parte de los
+     tríos con el tercero escondido. Antes, unos 9, 13 y 13 lugares libres, 2 o 3 pares armados y el tercero
+     escondido en el 29, 50 y 59 % de los tríos. */
   const DIFICULTADES = {
-    facil: { nombre: 'Fácil', casilleros: 9, columnas: 3, tipos: 8, trios: 15, capas: 3, mezcla: 1.2, puertas: [] },
-    normal: { nombre: 'Normal', casilleros: 12, columnas: 4, tipos: 14, trios: 25, capas: 4, mezcla: 1.6,
-      puertas: [{ tipo: 'vidrio', hondo: [2, 2], cierre: 0.3 }] },
-    // Difícil: 26 tríos desde la 0.19.1 (con 33 se sentía demasiado largo) y las llaves, siempre 3 filas atrás
-    dificil: { nombre: 'Difícil', casilleros: 12, columnas: 4, tipos: 19, trios: 26, capas: 5, mezcla: 2,
-      puertas: [{ tipo: 'vidrio', hondo: [3, 3], cierre: 0.25 }, { tipo: 'reja', hondo: [3, 3], cierre: 0.4 }] },
+    facil: { nombre: 'Fácil', casilleros: 9, columnas: 3, tipos: 8, trios: 15, capas: 3, mezcla: 2.5, parejo: 0.5, llenar: 12,
+      puertas: [{ tipo: 'vidrio', hondo: [1, 1], cierre: 0.4 }], meta: { libres: 8, pares: 1, escondidos: 0.4 } },
+    normal: { nombre: 'Normal', casilleros: 12, columnas: 4, tipos: 14, trios: 25, capas: 4, mezcla: 2.5, parejo: 0.5, llenar: 12,
+      puertas: [{ tipo: 'vidrio', hondo: [2, 2], cierre: 0.25 }, { tipo: 'reja', hondo: [2, 2], cierre: 0.4 }], meta: { libres: 10, pares: 1, escondidos: 0.6 } },
+    // Difícil: 26 tríos desde la 0.19.1 (con 33 se sentía demasiado largo)
+    dificil: { nombre: 'Difícil', casilleros: 12, columnas: 4, tipos: 20, trios: 26, capas: 5, mezcla: 2.5, parejo: 0.5, llenar: 12,
+      puertas: [{ tipo: 'vidrio', hondo: [3, 4], cierre: 0.25 }, { tipo: 'reja', hondo: [3, 4], cierre: 0.4 }], meta: { libres: 9, pares: 1, escondidos: 0.65 } },
   };
+
 
   // números al azar con semilla, para poder repetir un reparto
   function azar(semilla) {
@@ -136,7 +145,7 @@
           for (const j of libres(C)) {
             const otros = C[0].filter((y, m) => m !== j && y !== null);
             if (otros.length === 2 && otros[0] === x && otros[1] === x) continue;
-            d.push({ k, j, nueva: false, peso: empujar(k) ? 12 : 3 });
+            d.push({ k, j, nueva: false, peso: empujar(k) ? 12 : (D.llenar || 3) });
           }
         }
         // una capa nueva solo delante de una llena: así las de atrás quedan siempre completas
@@ -193,7 +202,7 @@
       // llave que tiene que quedar más atrás, mucho más seguido)
       const cand = bib.map((C, k) => k).filter(k => !tapada(k) && !tope(k) && (bib[k].length < D.capas && !libres(bib[k]).length || !bib[k].length));
       if (!cand.length) return null;
-      const pesos = cand.map(k => (empujar(k) ? 30 : 1) / (1 + bib[k].length * bib[k].length));
+      const pesos = cand.map(k => (empujar(k) ? 30 : 1) / (1 + Math.pow(bib[k].length, D.parejo === undefined ? 2 : D.parejo)));
       let u = r() * pesos.reduce((s, p) => s + p, 0), b = cand[cand.length - 1];
       for (let n = 0; n < cand.length; n++) { u -= pesos[n]; if (u <= 0) { b = cand[n]; break; } }
       bib[b].unshift([x, x, x]);
@@ -217,6 +226,31 @@
     return { bib, puertas, solucion: pasos.reverse() };
   }
 
+  /* Cómo arranca un reparto: lugares libres adelante (sin contar los casilleros cerrados), pares de iguales ya
+     armados adelante esperando su tercero, qué parte de los objetos se ve (adelante o en la fila en sombra) y en qué
+     parte de los tríos el tercero arranca escondido (para cada tipo, agrupando los objetos más a mano de a tres: si
+     el tercero de un grupo está dos filas atrás o más, no se ve). */
+  function medidas(bib, puertas) {
+    let libresAdelante = 0, pares = 0, vistos = 0, total = 0, escondidos = 0, grupos = 0;
+    const filas = {};
+    bib.forEach((c, k) => {
+      if (!cerrada(puertas, k)) {
+        libresAdelante += libres(c).length;
+        const f = c.length ? c[0].filter(x => x !== null && !esLlave(x)) : [];
+        if (f.length === 2 && f[0] === f[1]) pares++;
+      }
+      // lo de un casillero cerrado cuenta como escondido hasta abrirlo
+      const extra = cerrada(puertas, k) ? 2 : 0;
+      c.forEach((capa, ci) => capa.forEach(x => {
+        if (x === null || esLlave(x)) return;
+        total++; if (ci + extra <= 1) vistos++;
+        (filas[x] = filas[x] || []).push(ci + extra);
+      }));
+    });
+    for (const x in filas) { const f = filas[x].sort((a, b) => a - b); for (let i = 2; i < f.length; i += 3) { grupos++; if (f[i] >= 2) escondidos++; } }
+    return { libres: libresAdelante, pares, vistos: vistos / total, escondidos: escondidos / grupos };
+  }
+
   // jugar la solución hacia adelante: tiene que vaciar la biblioteca y abrir todas las puertas
   function comprobar(bib, solucion, puertas) {
     const b = copiar(bib), p = copiarPuertas(puertas);
@@ -229,10 +263,14 @@
   function repartir(dif, semilla) {
     const D = DIFICULTADES[dif] || DIFICULTADES.normal;
     if (semilla === undefined) semilla = Math.floor(Math.random() * 2 ** 31);
-    for (let k = 0; k < 400; k++) {
+    const M = D.meta || {};
+    for (let k = 0; k < 6000; k++) {
       const r = azar(semilla + k * 7919);
       const x = intento(D, r);
       if (!x || x.bib.some(c => !c.length) || !hayMovida(x.bib, x.puertas)) continue;
+      // lo que pide la dificultad: pocos lugares libres, casi ningún par armado y terceros escondidos
+      const m = medidas(x.bib, x.puertas);
+      if ((M.libres && m.libres > M.libres) || (M.pares !== undefined && m.pares > M.pares) || (M.escondidos && m.escondidos < M.escondidos)) continue;
       if (!comprobar(x.bib, x.solucion, x.puertas)) continue;
       return { bib: x.bib, puertas: x.puertas, solucion: x.solucion, semilla: semilla + k * 7919 };
     }
@@ -240,6 +278,6 @@
   }
 
   const api = { OBJETOS, LLAVES, DIFICULTADES, repartir, mover, vacia, hayMovida, libres, objetos, frente, copiar, copiarPuertas, cerrada,
-    cuenta, comprobar, azar, esLlave, dibujo, dondeLlave };
+    cuenta, comprobar, azar, esLlave, dibujo, dondeLlave, medidas };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else raiz.Repartos = api;
 })(typeof window !== 'undefined' ? window : globalThis);
