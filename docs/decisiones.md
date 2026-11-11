@@ -146,3 +146,15 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **Taller, con menos presencia y más bajo en la partida** (3/11, S-36): la misma estructura con menos notas (L3: la gamba una nota por compás, el laúd dos, sin tamboril, la melodía en negras y sin adornos) y la flauta unos 3 dB más baja. En la partida, la música al 70 %, para ayudar a la concentración; en el block y la práctica, igual. *Descartados:* L1 y L2, versiones intermedias, y bajar solo un 20 % (casi no se nota).
 - **Primero el OK, después implementar y publicar** (2/11): aprobar una imagen no es aprobar su implementación; la 0.14.1 salió sin que se pidiera.
 
+## Biblioteca
+
+- **Un juego de ordenar de tres iguales, con filas detrás** (10/11, #71, S-37), parecido a los Sort It de estantes pero no igual: la biblioteca baja del living, con libros, casetes y adornos. Partidas sueltas, sin camino de niveles.
+- **La biblioteca baja como entrada** (10/11): ya estaba pintada en la sala; alcanzó con su máscara y su zona táctil.
+- **Récord por movidas y, ante un empate, por tiempo** (10/11), uno por dificultad. El tiempo no hace perder.
+- **Siempre con solución** (10/11): cada reparto se genera al revés, desde la biblioteca vacía.
+- **Sin lugares libres, «Empezar de nuevo»** (10/11), y también «Deshacer», que Producto evalúa jugando. *Descartado:* reacomodar solo.
+- **Tres dificultades** (10/11): Fácil, 9 casilleros y menos tipos; Normal, 12 y 12 tipos; Difícil, 12, los 14 tipos y más filas detrás.
+- **El título se ordena solo** (10/11, S-37h): «BIBLIOTECA» entra desordenado, con flechas rojas, y se ordena en unos 4 segundos.
+- **La entrada, sobre la biblioteca baja** (10/11, S-37d), como en la sala: la lámpara hongo, la planta, los tres libros de la dificultad, el despertador y la cámara. Primero era despojada y no emulaba la sala.
+- **Primero con los dibujos del boceto** (10/11, 0.18.0): se implementa con los dibujos hechos con código para probar la mecánica y la dificultad antes de pedir las imágenes y el sonido, como se hizo con Buen ojo.
+

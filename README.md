@@ -7,11 +7,12 @@ Una colección de minijuegos para el celular, en horizontal, que se instala desd
 | [Fogonazo](docs/fogonazo/README.md) | Juntar tres con componentes electrónicos sobre una protoboard, en el banco de la sala | Jugable dentro de la app: los 30 primeros niveles y el zen |
 | [Mahjong](docs/mahjong/README.md) | Mahjong solitario, en modo zen, sobre la mesa ratona | En la app desde la 0.7.0 |
 | [Buen ojo](docs/buenojo/README.md) | Ver un color unos segundos y armarlo de memoria con pomos de pintura, en la mesa de un pintor | En la app desde la 0.14.0 |
+| [Biblioteca](docs/biblioteca/README.md) | Ordenar la biblioteca baja del living: juntar tres objetos iguales para que se vayan | En la app desde la 0.18.0, con los dibujos del boceto |
 
 ## Estado
 
 - **Publicada** en https://efevali.github.io/fogonazo/, que se abre en Chrome y se instala desde los ajustes de la sala (el equipo de audio) o desde el menú ⋮ → «Instalar app». Funciona sin conexión. La 0.1.0 reemplazó a Fogonazo como juego único (0.6.1); qué trae cada versión está en el [registro de cambios](CHANGELOG.md).
-- **Qué tiene:** la sala con sus objetos activos; Fogonazo jugable (instrumento, mapa, los 30 niveles hechos a mano y los generados sin fin, con sus especiales y obstáculos, y el zen); el mahjong en la mesa ratona (el estuche y seis tableros, en zen); Buen ojo, desde el cuadro del arcoíris (tres dificultades y la práctica); cada juego con su música y sus efectos; los ajustes comunes (sonido, versión e instalación). Nombre e ícono son provisorios.
+- **Qué tiene:** la sala con sus objetos activos; Fogonazo jugable (instrumento, mapa, los 30 niveles hechos a mano y los generados sin fin, con sus especiales y obstáculos, y el zen); el mahjong en la mesa ratona (el estuche y seis tableros, en zen); Buen ojo, desde el cuadro del arcoíris (tres dificultades y la práctica); Biblioteca, desde la biblioteca baja (tres dificultades, todavía con dibujos de boceto y sin sonido); cada juego con su música y sus efectos; los ajustes comunes (sonido, versión e instalación). Nombre e ícono son provisorios.
 - **Lo que sigue**, en [la colección](docs/coleccion.md#lo-que-sigue).
 
 ## Dónde está cada cosa
@@ -22,7 +23,7 @@ Una colección de minijuegos para el celular, en horizontal, que se instala desd
 | Cómo se ve y cómo suena cada parte | [`docs/estilo.md`](docs/estilo.md) |
 | Cómo se piden y se montan las imágenes hechas con IA | [`docs/imagenes.md`](docs/imagenes.md) |
 | Por qué se decidió cada cosa y qué se descartó | [`docs/decisiones.md`](docs/decisiones.md) |
-| Cada parte (la sala, Fogonazo, el mahjong y Buen ojo): estado, reglas, bocetos y arte | [`docs/sala/`](docs/sala/README.md), [`docs/fogonazo/`](docs/fogonazo/README.md), [`docs/mahjong/`](docs/mahjong/README.md), [`docs/buenojo/`](docs/buenojo/README.md) |
+| Cada parte (la sala, Fogonazo, el mahjong, Buen ojo y Biblioteca): estado, reglas, bocetos y arte | [`docs/sala/`](docs/sala/README.md), [`docs/fogonazo/`](docs/fogonazo/README.md), [`docs/mahjong/`](docs/mahjong/README.md), [`docs/buenojo/`](docs/buenojo/README.md), [`docs/biblioteca/`](docs/biblioteca/README.md) |
 | El método de trabajo | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Lo publicado | [`CHANGELOG.md`](CHANGELOG.md) |
 
@@ -38,6 +39,7 @@ La app no se arma: lo que está en el repositorio es lo que publica GitHub Pages
 | `fogonazo/` | Fogonazo: la pantalla-instrumento, el mapa, la partida, el avance (`estado.js`), las escenas, los fondos de la partida y las piezas recortadas. |
 | `mahjong/` | El mahjong: el estuche, la partida, las fichas (`fichas.js`), los tableros (`tableros.js`), el avance (`estado.js`) y el fondo. |
 | `buenojo/` | Buen ojo: el block, la partida y la práctica, las cuentas del color (`color.js`), el avance (`estado.js`) y la mesa (`mesa.css`). |
+| `biblioteca/` | Biblioteca: la entrada, la partida, las reglas y los repartos (`repartos.js`), los objetos dibujados con código (`objetos.js`), el avance (`estado.js`) y lo común a sus pantallas (`mueble.css`). |
 | `codigo/` | El motor de Fogonazo (`engine.js`), los niveles (`levels.js`: los 30 hechos a mano y el generador del 31 en adelante) y la calibración de los hechos a mano (`calibrated.json`), que usa la partida. Corren igual en el navegador y en Node. |
 | `manifest.webmanifest`, `sw.js`, `iconos/` | La ficha de instalación (Minijuegos, en horizontal, a pantalla completa), el *service worker* que guarda la app en el teléfono para que ande sin conexión, y los íconos provisorios. |
 | `docs/` | La documentación, los bocetos y el arte vigente. Lo que está en `docs/` también se publica, pero no forma parte de la app. |
@@ -54,6 +56,7 @@ Hace falta Node 18 o más nuevo; para las capturas, `npm install` y, la primera 
 - `herramientas/version.js`: sube la versión (`parche`, `menor` o `mayor`) en `sw.js`, con la fecha, y rehace la lista de archivos que el *service worker* guarda. Sin argumento, solo rehace la lista: hace falta cada vez que se suma o se quita un archivo de la app.
 - `herramientas/mahjong/probar.js`: verifica los tableros del mahjong y juega cada reparto al azar, para dar una idea de la dificultad. `herramientas/mahjong/boceto-mahjong.html` y `composicion-p006.html`: los bocetos S-19 y S-20 y la composición del P-006.
 - `herramientas/buenojo/probar.js`: verifica las cuentas de Buen ojo (CIEDE2000 contra los pares de referencia, el puntaje, las frases, la ayuda y el sorteo de colores).
+- `herramientas/biblioteca/probar.js`: verifica que cada reparto de Biblioteca tenga solución (la anotada al generarlo) y hace jugar a un bot simple en las tres dificultades.
 - `herramientas/iconos.py`: los íconos provisorios, desde la imagen del P-007, la ventana con la lámpara (Python con Pillow).
 - `herramientas/probar.js`: juega 180 partidas con el bot y 6 partidas zen de 300 jugadas, y verifica que la placa quede siempre consistente. Se corre después de tocar el motor de Fogonazo.
 - `herramientas/calibrar.js`: recalibra la dificultad de Fogonazo (`node herramientas/calibrar.js 400 16,17,18`: 400 partidas por nivel, con el bot persona, que elige y piensa como una persona): el límite de Difícil y las estrellas de los tres modos. Sin lista de niveles (o con `todos`), recalibra los 30; con `--estrellas`, deja el límite y rehace solo las estrellas.

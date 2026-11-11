@@ -8,8 +8,8 @@
 
    El sitio, efevali.github.io, es el mismo de Kasa: lo guardado lleva el prefijo «coleccion-» y solo se borra lo
    propio, más lo que guardaba el Fogonazo publicado («fogonazo-»), al que esta versión reemplaza. */
-const VERSION = '0.17.0';
-const FECHA = '9/11/2026';
+const VERSION = '0.18.0';
+const FECHA = '10/11/2026';
 const CACHE = 'coleccion-v' + VERSION;
 const ARCHIVOS = [
   './',
@@ -38,6 +38,7 @@ const ARCHIVOS = [
   'sala/index.html',
   'sala/mask-audio.png',
   'sala/mask-bench.png',
+  'sala/mask-biblioteca.png',
   'sala/mask-cuadro.png',
   'sala/mask-rain.png',
   'sala/mask-table.png',
@@ -79,6 +80,12 @@ const ARCHIVOS = [
   'buenojo/index.html',
   'buenojo/mesa.css',
   'buenojo/partida.html',
+  'biblioteca/estado.js',
+  'biblioteca/index.html',
+  'biblioteca/mueble.css',
+  'biblioteca/objetos.js',
+  'biblioteca/partida.html',
+  'biblioteca/repartos.js',
   'iconos/apple-touch-icon.png',
   'iconos/icono-192.png',
   'iconos/icono-512.png',

@@ -6,7 +6,8 @@
    2400 × 1080 píxeles, como el teléfono de referencia) y verifica el camino y el «atrás» de Android:
    sala → ajustes (LEDs y versión) → Fogonazo → sonido → manual → mapa → partida → pausa → mapa → … → sala. Después abre partidas
    puntuales (la nota, el contrarreloj, los obstáculos, los especiales, el fin de nivel y el zen) con un tablero fijo
-   (?semilla=…). Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas. Al final prueba que la
+   (?semilla=…). Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
+   movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final, Difícil y la ficha de sin lugar. Al final prueba que la
    app abra sin conexión. Si algo no da lo esperado, lo dice y termina con error. */
 const fs = require('fs');
 const path = require('path');
@@ -16,7 +17,7 @@ const { abrir } = require('./navegador');
 const RAIZ = path.join(__dirname, '..');
 const SALIDA = path.resolve(process.argv[2] || path.join(RAIZ, 'dist', 'capturas'));
 const TIPOS = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
+  '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 
 function servidor() {
   const srv = http.createServer((req, res) => {
@@ -230,6 +231,42 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   await atras(); await listo(); ok(ruta().startsWith('sala/'), 'desde el estuche, «atrás» vuelve a la sala');
   const enSala = await page.evaluate(() => history.state && history.state.i);
   ok(enSala === 0, 'en la sala no quedan pasos del mahjong en el historial');
+
+  console.log('Biblioteca');
+  const bb = async () => { await listo(); await pantalla().waitForFunction(() => window.__biblioteca && (!window.__biblioteca.state || document.querySelectorAll('.casillero').length > 0), null, { timeout: 8000 }); await espera(300); };
+  const bbEstado = () => pantalla().evaluate(() => window.__biblioteca.state());
+  await tocar('#hitBiblioteca'); await bb();
+  ok(ruta() === 'biblioteca/index.html', 'la biblioteca baja lleva a la entrada de Biblioteca');
+  await espera(4200); await foto('30-biblioteca-entrada');
+  await tocar('.libro[data-id="facil"]');
+  ok(await pantalla().evaluate(() => window.__biblioteca.dificultad()) === 'facil', 'un libro elige la dificultad');
+  await tocar('#jugar'); await bb();
+  ok(ruta() === 'biblioteca/partida.html' && (await bbEstado()).objetos === 45 && await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 9, 'Fácil abre una partida de 9 casilleros y 45 objetos');
+  await foto('31-biblioteca-facil');
+  // una movida arrastrando: el primer objeto de adelante, al primer casillero con lugar
+  const mov = await pantalla().evaluate(() => { const B = window.__biblioteca.G.bib, R = window.Repartos; const a = B.findIndex(c => R.objetos(c).length), i = R.objetos(B[a])[0]; return { a, i, b: B.findIndex((c, k) => k !== a && R.libres(c).length) }; });
+  const de = await pantalla().locator(`.obj.frente[data-k="${mov.a}"][data-i="${mov.i}"]`).boundingBox(), a = await pantalla().locator(`.casillero[data-k="${mov.b}"]`).boundingBox();
+  await page.mouse.move(de.x + de.width / 2, de.y + de.height / 2); await page.mouse.down();
+  await page.mouse.move(de.x + 30, de.y, { steps: 4 }); await page.mouse.move(a.x + a.width / 2, a.y + a.height * .7, { steps: 8 }); await page.mouse.up(); await espera(900);
+  ok((await bbEstado()).movidas === 1, 'arrastrar un objeto a un lugar libre es una movida');
+  await tocar('#deshacer'); ok(await pantalla().evaluate(() => JSON.stringify(window.__biblioteca.G.bib) === JSON.stringify(window.__biblioteca.G.inicial)), '«Deshacer» vuelve atrás la movida');
+  await atras(); ok(await abierto('#menu') && ruta() === 'biblioteca/partida.html', 'en la partida, «atrás» abre la pausa'); await foto('32-biblioteca-pausa');
+  await tocar('#menu [data-act="denuevo"]'); ok(!(await bbEstado()).abierta && (await bbEstado()).movidas === 0, '«Empezar de nuevo» repite el reparto desde cero');
+  // la solución anotada, entera: la biblioteca queda vacía y aparece la ficha del final
+  while (await pantalla().evaluate(() => window.__biblioteca.paso())) await espera(760);
+  await espera(800);
+  ok(await abierto('#fin') && (await bbEstado()).objetos === 0, 'la solución anotada vacía la biblioteca y muestra el final'); await foto('33-biblioteca-fin');
+  await tocar('#fin [data-act="otra"]'); ok(!(await bbEstado()).abierta && (await bbEstado()).objetos === 45, '«Otra partida» reparte otra');
+  await tocar('#volver'); await listo(); ok(ruta() === 'biblioteca/index.html', 'en la partida, «Volver» va a la entrada');
+  await tocar('.libro[data-id="dificil"]'); await tocar('#jugar'); await bb();
+  ok(await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 12 && (await bbEstado()).objetos === 99, 'Difícil: 12 casilleros y 99 objetos'); await foto('34-biblioteca-dificil');
+  // sin lugar: se llenan los lugares libres a mano (sin trío) para ver la ficha
+  await pantalla().evaluate(() => { const G = window.__biblioteca.G; G.bib.forEach(c => { c[0] = c[0].map((x, i) => x === null ? (i + 3) % 14 : x); }); window.__biblioteca.repintar(); });
+  ok((await bbEstado()).abierta === 'trabada', 'sin lugares libres, aparece «No queda lugar»'); await foto('35-biblioteca-sin-lugar');
+  await tocar('#trabada [data-act="denuevo"]'); ok(!(await bbEstado()).abierta && (await bbEstado()).hayMovida, '«Empezar de nuevo» lo deja como al principio');
+  await tocar('#volver'); await listo(); await atras(); await listo();
+  ok(ruta().startsWith('sala/'), 'desde la entrada, «atrás» vuelve a la sala');
+  ok(await page.evaluate(() => history.state && history.state.i) === 0, 'en la sala no quedan pasos de Biblioteca en el historial');
 
   console.log('Sonido');
   const volFog = await pantalla().evaluate(() => App.sonido.volumen('musica'));
