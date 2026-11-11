@@ -5,23 +5,35 @@
    Para cada dificultad: reparte con semillas distintas, comprueba que la solución anotada vacíe la biblioteca, y hace
    jugar a un bot que mira solo lo que se ve (adelante y la fila de atrás, en sombra), sin deshacer: junta un trío si
    puede, si no arma un par donde convenga, y si no mueve algo que libere lugar. Informa cuántas ganó, en cuántas
-   movidas, y cuántas veces se trabó (sin lugar). Termina con error si algún reparto no tiene solución. */
+   movidas, y cuántas veces se trabó (sin lugar). Con puertas, comprueba también que estén y que cada llave arranque
+   tan atrás como pide la dificultad, en otro casillero; el bot lleva cada llave a su puerta apenas la ve adelante.
+   Termina con error si algún reparto no tiene solución. */
 const R = require('../../biblioteca/repartos.js');
 const N = Number(process.argv[2]) || 300;
 
 // el bot: puntúa cada movida posible con lo que se ve y elige la mejor (con un poco de azar para desempatar)
-function jugar(bib, r, tope = 600) {
+function jugar(bib, puertas, r, tope = 600) {
   let movidas = 0;
   const ultima = [], vistos = new Set();
   while (!R.vacia(bib)) {
-    if (!R.hayMovida(bib) || movidas >= tope) return { gano: false, movidas, trabada: !R.hayMovida(bib) };
+    if (!R.hayMovida(bib, puertas) || movidas >= tope) return { gano: false, movidas, trabada: !R.hayMovida(bib, puertas) };
     let mejor = null, mp = -Infinity;
+    // una llave adelante va derecho a su puerta
     bib.forEach((A, a) => {
+      if (mejor || R.cerrada(puertas, a)) return;
+      for (const i of R.objetos(A)) if (R.esLlave(A[0][i])) {
+        const p = puertas.find(q => !q.abierta && R.LLAVES[q.tipo] === A[0][i]);
+        if (p) { mejor = [a, i, p.k, -1, A[0][i]]; mp = Infinity; }
+      }
+    });
+    if (!mejor) bib.forEach((A, a) => {
+      if (R.cerrada(puertas, a)) return;
       for (const i of R.objetos(A)) {
         const x = A[0][i];
+        if (R.esLlave(x)) continue;
         const quedanA = A[0].filter((y, k) => k !== i && y !== null);
         bib.forEach((B, b) => {
-          if (a === b) return;
+          if (a === b || R.cerrada(puertas, b)) return;
           for (const j of R.libres(B)) {
             const enB = B.length ? B[0].filter(y => y !== null) : [];
             const iguales = enB.filter(y => y === x).length;
@@ -38,7 +50,7 @@ function jugar(bib, r, tope = 600) {
             if (B[1] && B[1].includes(x)) p += 3;
             if (ultima.some(u => u[0] === b && u[1] === a && u[2] === x)) p -= 40; // no ir y volver
             // no volver a una biblioteca que ya tuvo
-            const prueba = R.copiar(bib); R.mover(prueba, a, i, b, j);
+            const prueba = R.copiar(bib); R.mover(prueba, a, i, b, j, R.copiarPuertas(puertas));
             if (vistos.has(JSON.stringify(prueba))) p -= 60;
             p += r() * 3;
             if (p > mp) { mp = p; mejor = [a, i, b, j, x]; }
@@ -46,7 +58,7 @@ function jugar(bib, r, tope = 600) {
         });
       }
     });
-    R.mover(bib, mejor[0], mejor[1], mejor[2], mejor[3]);
+    R.mover(bib, mejor[0], mejor[1], mejor[2], mejor[3], puertas);
     ultima.push([mejor[0], mejor[2], mejor[4]]); if (ultima.length > 4) ultima.shift();
     vistos.add(JSON.stringify(bib));
     movidas++;
@@ -57,19 +69,26 @@ function jugar(bib, r, tope = 600) {
 let fallas = 0;
 for (const dif of Object.keys(R.DIFICULTADES)) {
   const D = R.DIFICULTADES[dif];
-  let ganadas = 0, trabadas = 0, mov = [], sol = [], libresIni = [], capas = [], t0 = Date.now();
+  let ganadas = 0, trabadas = 0, mov = [], sol = [], libresIni = [], capas = [], hondos = {}, t0 = Date.now();
   for (let s = 1; s <= N; s++) {
     const x = R.repartir(dif, s * 104729);
-    if (!R.comprobar(x.bib, x.solucion)) { fallas++; console.log(`  ✗ ${dif}, semilla ${x.semilla}: la solución no vacía la biblioteca`); }
+    if (!R.comprobar(x.bib, x.solucion, x.puertas)) { fallas++; console.log(`  ✗ ${dif}, semilla ${x.semilla}: la solución no vacía la biblioteca`); }
+    if (x.puertas.length !== D.puertas.length) { fallas++; console.log(`  ✗ ${dif}: faltan puertas`); }
+    for (const p of x.puertas) {
+      const l = R.dondeLlave(x.bib, R.LLAVES[p.tipo]), q = D.puertas.find(y => y.tipo === p.tipo);
+      if (!l || l.k === p.k || l.capa < q.hondo[0] || l.capa > q.hondo[1]) { fallas++; console.log(`  ✗ ${dif}: la llave de ${p.tipo} no está donde debe`); }
+      else hondos[l.capa] = (hondos[l.capa] || 0) + 1;
+    }
     if (R.cuenta(x.bib) !== D.trios * 3) { fallas++; console.log(`  ✗ ${dif}: faltan objetos`); }
     sol.push(x.solucion.length);
     libresIni.push(x.bib.reduce((t, c) => t + R.libres(c).length, 0));
     capas.push(Math.max(...x.bib.map(c => c.length)));
-    const j = jugar(R.copiar(x.bib), R.azar(s));
+    const j = jugar(R.copiar(x.bib), R.copiarPuertas(x.puertas), R.azar(s));
     if (j.gano) { ganadas++; mov.push(j.movidas); } else if (j.trabada) trabadas++;
   }
   const prom = l => l.length ? (l.reduce((a, b) => a + b, 0) / l.length).toFixed(1) : '—';
-  console.log(`${D.nombre}: ${D.casilleros} casilleros, ${D.tipos} tipos, ${D.trios} tríos (${D.trios * 3} objetos), hasta ${D.capas} capas`);
+  console.log(`${D.nombre}: ${D.casilleros} casilleros, ${D.tipos} tipos, ${D.trios} tríos (${D.trios * 3} objetos), hasta ${D.capas} capas` +
+    (D.puertas.length ? `, ${D.puertas.map(p => p.tipo).join(' y ')} (llaves a ${Object.entries(hondos).map(([k, v]) => `${k} filas: ${v}`).join(', ')})` : ', sin puertas'));
   console.log(`  el bot gana ${(100 * ganadas / N).toFixed(0)} % (se traba en ${(100 * trabadas / N).toFixed(0)} %), en ${prom(mov)} movidas; la solución anotada, ${prom(sol)}`);
   console.log(`  lugares libres al empezar: ${prom(libresIni)} · capas como máximo: ${prom(capas)} · ${((Date.now() - t0) / N).toFixed(1)} ms por reparto y partida`);
 }

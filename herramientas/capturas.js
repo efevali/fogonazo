@@ -7,7 +7,8 @@
    sala → ajustes (LEDs y versión) → Fogonazo → sonido → manual → mapa → partida → pausa → mapa → … → sala. Después abre partidas
    puntuales (la nota, el contrarreloj, los obstáculos, los especiales, el fin de nivel y el zen) con un tablero fijo
    (?semilla=…). Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
-   movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final, Difícil y la ficha de sin lugar. Al final prueba que la
+   movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final (Fácil y Normal, con su puerta), Difícil con
+   sus dos puertas y la ficha de sin lugar. Al final prueba que la
    app abra sin conexión. Si algo no da lo esperado, lo dice y termina con error. */
 const fs = require('fs');
 const path = require('path');
@@ -258,8 +259,16 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   ok(await abierto('#fin') && (await bbEstado()).objetos === 0, 'la solución anotada vacía la biblioteca y muestra el final'); await foto('33-biblioteca-fin');
   await tocar('#fin [data-act="otra"]'); ok(!(await bbEstado()).abierta && (await bbEstado()).objetos === 45, '«Otra partida» reparte otra');
   await tocar('#volver'); await listo(); ok(ruta() === 'biblioteca/index.html', 'en la partida, «Volver» va a la entrada');
+  // Normal: una puerta de vidrio; la solución anotada trae su llave, la abre y vacía la biblioteca
+  await tocar('.libro[data-id="normal"]'); await tocar('#jugar'); await bb();
+  ok((await bbEstado()).objetos === 75 && (await bbEstado()).puertas === 1 && await pantalla().evaluate(() => !!document.querySelector('.casillero .puerta')), 'Normal: 75 objetos y una puerta de vidrio cerrada');
+  ok(await pantalla().evaluate(() => { const G = window.__biblioteca.G, k = G.puertas[0].k; return !window.Repartos.mover(window.Repartos.copiar(G.bib), k, window.Repartos.objetos(G.bib[k])[0], (k + 1) % 12, 0, window.Repartos.copiarPuertas(G.puertas)); }), 'lo que está detrás de la puerta no se puede sacar');
+  while (await pantalla().evaluate(() => window.__biblioteca.paso())) await espera(760);
+  await espera(800);
+  ok(await abierto('#fin') && (await bbEstado()).puertas === 0, 'Normal: la solución abre la puerta con su llave y termina');
+  await tocar('#fin [data-act="salir"]'); await listo();
   await tocar('.libro[data-id="dificil"]'); await tocar('#jugar'); await bb();
-  ok(await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 12 && (await bbEstado()).objetos === 99, 'Difícil: 12 casilleros y 99 objetos'); await foto('34-biblioteca-dificil');
+  ok(await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 12 && (await bbEstado()).objetos === 99 && (await bbEstado()).puertas === 2 && await pantalla().evaluate(() => !!document.querySelector('.casillero .reja')), 'Difícil: 12 casilleros, 99 objetos, la puerta de vidrio y la reja'); await foto('34-biblioteca-dificil');
   // sin lugar: se llenan los lugares libres a mano (sin trío) para ver la ficha
   await pantalla().evaluate(() => { const G = window.__biblioteca.G; G.bib.forEach(c => { c[0] = c[0].map((x, i) => x === null ? (i + 3) % 14 : x); }); window.__biblioteca.repintar(); });
   ok((await bbEstado()).abierta === 'trabada', 'sin lugares libres, aparece «No queda lugar»'); await foto('35-biblioteca-sin-lugar');

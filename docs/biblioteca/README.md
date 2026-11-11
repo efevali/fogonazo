@@ -2,7 +2,7 @@
 
 Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos iguales en un casillero para que se vayan y avance lo que hay detrás. Parecido, aunque no igual, a los Sort It de mercadería en estantes. Se entra por la biblioteca baja de la sala, la de la lámpara hongo.
 
-**Estado:** boceto S-37 aprobado (10/11). **Implementado en la 0.18.0** con los dibujos del boceto hechos con código, para probar la mecánica y la dificultad en el teléfono antes de pedir las imágenes y el sonido (como Buen ojo). Idea original en el issue [#71](https://github.com/efevali/fogonazo/issues/71).
+**Estado:** boceto S-37 aprobado (10/11). **Implementado en la 0.18.0** con los dibujos del boceto hechos con código, para probar la mecánica y la dificultad en el teléfono antes de pedir las imágenes y el sonido (como Buen ojo). Producto lo probó (11/11): la experiencia es muy buena; pidió más libros, otro casete, la Eiffel más clara y algo que complique Difícil. Boceto S-38 aprobado (11/11): **en la 0.19.0**, cinco objetos nuevos, la Eiffel gris y las **puertas con llave**. Idea original en el issue [#71](https://github.com/efevali/fogonazo/issues/71).
 
 ## Cómo se juega
 
@@ -13,7 +13,8 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 - **Deshacer** sin límite, también un trío ya retirado. **Pausa**, siempre.
 - **Partidas sueltas**, sin camino de niveles. **El tiempo no hace perder:** solo se mide, desde la primera movida.
 - **Récord por dificultad:** primero las movidas; ante un empate, el tiempo. Se muestran las dos cosas.
-- **Dificultad elegible:** Fácil, 9 casilleros y menos tipos de objeto; Normal, 12 casilleros y 12 tipos; Difícil, 12 casilleros, los 14 tipos y más filas detrás.
+- **Dificultad elegible:** Fácil, 9 casilleros y menos tipos de objeto; Normal, 12 casilleros, 14 tipos y una puerta; Difícil, 12 casilleros, los 19 tipos (entre ellos los que se parecen a otros), más filas detrás y dos puertas.
+- **Puertas con llave** (S-38): en Normal un casillero arranca cerrado con una puerta de vidrio de marco de bronce y cerradura; en Difícil, además, otro con una reja de tijera de ascensor viejo y candado. Lo de adentro se ve, un poco apagado, pero no se puede sacar ni apoyar nada ahí, y hace falta para ganar. Su llave está escondida en otro casillero, unas filas atrás (en Normal, 2; en Difícil, 3 o 4), sin que se sepa en cuál: aparece al ir vaciando, primero oscura en la fila en sombra. La de bronce, con cinta roja, abre el vidrio; la de hierro, con ojo de trébol y cinta verde, la reja. La llave ocupa un lugar (en esa fila no se arma un trío hasta sacarla) y solo va a su puerta: se la arrastra, o se la toca y después la puerta, y la cerradura se ilumina; soltada en otro lado o en la otra puerta, vuelve. Al abrir, el vidrio gira sobre su bisagra y la reja se pliega contra el costado, y la llave se va. Cuenta como una movida; «Deshacer» la vuelve atrás.
 
 ## Cómo se ve
 
@@ -23,28 +24,30 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 - **La partida** (S-37b y c): el mueble de frente, de madera, con sus casilleros; a la izquierda, una ficha clavada con las movidas, el tiempo y el récord, y la dificultad; a la derecha, «Deshacer» y «Pausa»; «◀ Volver» en Dymo, como en toda la colección.
 - **El final** (S-37e): una ficha de préstamo con las movidas y el tiempo; el récord, con un sello rojo. «Otra partida» y «Salir».
 - **La pausa:** sin boceto; una ficha como la del final, con «Seguir», «Empezar de nuevo» y «Salir».
-- **Los objetos** (S-37g), catorce: el tomo, tres libros parados (fino y alto, medio, bajo, sin que se vean las hojas), tres casetes (naranja con carcasa negra, blanco con etiqueta celeste, ahumado con etiqueta roja), la torre Eiffel, el avión, el auto, el globo terráqueo, el despertador, la mamushka, el cactus, la cámara y la radio. Cada uno, de silueta propia, para distinguirlo de un vistazo en el teléfono.
-- **Las imágenes:** el fondo de la partida, el de la entrada y los objetos, en láminas de varios, los pinta la IA (pedidos por armar). Los dibujos del boceto son de ejemplo.
+- **Los objetos** (S-37g y S-38a), diecinueve: el tomo, tres libros parados (fino y alto, medio, bajo, sin que se vean las hojas), tres casetes (naranja con carcasa negra, blanco con etiqueta celeste, ahumado con etiqueta roja), la torre Eiffel (gris claro desde S-38a, para que se despegue del fondo; era de bronce), el avión, el auto, el globo terráqueo, el despertador, la mamushka, el cactus, la cámara y la radio; y desde S-38a, dos libros muy distintos (una pila de tres acostados y una enciclopedia de cuatro tomos finos numerados) y tres que se parecen a propósito, para Difícil (los tres libros con la misma forma en verde, bordó, verde; el tomo en azul; un casete transparente azulado de etiqueta amarilla, el C de S-38a). Cada uno, de silueta propia, salvo los parecidos.
+- **Las puertas y las llaves** (S-38b a g): la puerta de vidrio, la reja y las dos llaves, como se describen arriba.
+- **Las imágenes:** el fondo de la partida, el de la entrada, los objetos, las puertas y las llaves, en láminas de varios, los pinta la IA (pedidos por armar). **Se piden los seis casetes de S-38a** (los tres de ahora, el C y también el A, negro con etiqueta verde, y el B, rojo con etiqueta crema), aunque A y B no entren todavía en el juego, para tenerlos si hacen falta. Los dibujos del boceto son de ejemplo.
 
-## En la app (0.18.0)
+## En la app (0.18.0 y 0.19.0)
 
-- **Archivos:** [`biblioteca/`](../../biblioteca/): la entrada (`index.html`), la partida (`partida.html`), las reglas y los repartos (`repartos.js`, que corre igual en Node), los catorce objetos dibujados con código (`objetos.js`), el avance (`estado.js`) y lo común a las dos pantallas (`mueble.css`). En la sala, la máscara de la biblioteca baja (`sala/mask-biblioteca.png`).
-- **Los repartos:** Fácil, 15 tríos de 8 tipos en 9 casilleros de hasta 3 capas; Normal, 25 tríos de 12 tipos en 12 casilleros de hasta 4 capas; Difícil, 33 tríos de los 14 tipos en 12 casilleros de hasta 5 capas. Las capas de atrás siempre están completas; los huecos, solo adelante (unos 9 en Fácil y 13 o 14 en Normal y Difícil). Fácil usa los ocho objetos de silueta más distinta; Normal suma los tres libros, el auto, la cámara y la radio; Difícil, el casete blanco y el ahumado, que se parecen al naranja. `node herramientas/biblioteca/probar.js` verifica que cada reparto tenga solución y hace jugar a un bot simple.
+- **Archivos:** [`biblioteca/`](../../biblioteca/): la entrada (`index.html`), la partida (`partida.html`), las reglas y los repartos (`repartos.js`, que corre igual en Node), los objetos y las llaves dibujados con código (`objetos.js`), el avance (`estado.js`) y lo común a las dos pantallas (`mueble.css`). En la sala, la máscara de la biblioteca baja (`sala/mask-biblioteca.png`).
+- **Los repartos (0.19.0):** Fácil, 15 tríos de 8 tipos en 9 casilleros de hasta 3 capas, sin puertas; Normal, 25 tríos de 14 tipos en 12 casilleros de hasta 4 capas, con la puerta de vidrio y su llave 2 filas atrás; Difícil, 33 tríos de los 19 tipos en 12 casilleros de hasta 5 capas, con las dos puertas y sus llaves 3 o 4 filas atrás. Las capas de atrás siempre están completas; los huecos, solo adelante (unos 9 en Fácil y 13 en Normal y Difícil). Fácil usa los ocho objetos de silueta más distinta; Normal suma los tres libros, el auto, la cámara, la radio, la pila y la enciclopedia; Difícil, los cinco que se parecen a otros. Al generar al revés, en un punto se cierra cada puerta (lo que hay en ese casillero queda adentro) y su llave vuelve a otro casillero; después queda tapada por lo que se pone delante, hasta la fila que pide la dificultad. `node herramientas/biblioteca/probar.js` verifica que cada reparto tenga solución, sus puertas y sus llaves donde deben, y hace jugar a un bot simple.
+- **Lo que mostró el primer registro** (11/11, 5 partidas, todas ganadas sin deshacer): nunca cerca de trabarse (en Difícil, 6 lugares libres como mínimo), una movida cada 1,8 s y entre 1,6 y 2 movidas por trío en Normal y Difícil. De ahí las puertas y los objetos parecidos de la 0.19.0.
 - **Se ve adelante y la fila de atrás, en sombra;** «+2» dice cuántas filas quedan más atrás, sin mostrarlas.
 - **Sin sonido** por ahora (ni música ni efectos), hasta definirlo.
-- **Registro de partidas:** cada partida con su reparto (la semilla), cada movida, los deshacer, las pausas y cómo terminó (ver [la colección](../coleccion.md#registro-de-partidas)).
+- **Registro de partidas:** cada partida con su reparto (la semilla y la versión de los repartos: 2 desde la 0.19.0), cada movida (las de las llaves, con el lugar de destino en -1), los deshacer, las pausas y cómo terminó (ver [la colección](../coleccion.md#registro-de-partidas)).
 
 ### Decisiones de implementación, a revisar jugando
 
 - **«Deshacer» no descuenta la movida:** la movida deshecha sigue contando, igual que la que la corrige. Si descontara, se podría usar para espiar las filas de atrás sin costo y el récord por movidas perdería sentido.
 - **«Empezar de nuevo» repite el mismo reparto**, desde cero (en «No queda lugar» y en la pausa); «Otra partida», al final, reparte uno nuevo.
 - **La pausa** es una ficha como la del final, con «Seguir», «Empezar de nuevo» y «Salir». «Atrás» la abre, como en el mahjong; con la ficha abierta, «atrás» vuelve a la entrada.
-- **La dificultad de los repartos** (tríos, capas y cuánto se mezclan) es una primera aproximación: se ajusta con lo que Producto juegue y con el registro.
+- **La dificultad de los repartos** (tríos, capas, cuánto se mezclan, dónde se cierran las puertas y qué tan atrás van las llaves) es una aproximación: se ajusta con lo que Producto juegue y con el registro.
 
 ## Lo que falta
 
-- **Probarlo en el teléfono:** la mecánica, el tamaño de los objetos y la dificultad de cada modo.
-- **Los pedidos de imágenes** (fondos y láminas de objetos).
+- **Probar la 0.19.0 en el teléfono:** las puertas, las llaves y los objetos nuevos.
+- **Los pedidos de imágenes** (fondos, láminas de objetos con los seis casetes, las puertas y las llaves).
 - **El sonido:** un primo de Taller con otra instrumentación (¿algo de los 70, piano eléctrico o vibráfono?) y efectos del rubro (el libro que se apoya, el clic del casete, el trío que se va). Se aprueba escuchándolo.
 - **El nombre:** «Biblioteca» por ahora.
 
@@ -60,3 +63,10 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 | S-37f | Sin lugares libres | Aprobado (10/11) |
 | S-37g | Los catorce objetos | Aprobado (10/11); los dibujos son de ejemplo |
 | S-37h | El título animado | Aprobado (10/11) |
+| S-38a | Objetos nuevos: cuatro libros, tres casetes para elegir (A, B, C) y la Eiffel gris | Aprobado (11/11): los cuatro libros, el casete C y la Eiffel gris; A y B solo para los pedidos de imágenes |
+| S-38b | Un casillero cerrado con puerta de vidrio | Aprobado (11/11) |
+| S-38c | Aparece la llave, entre dos objetos | Aprobado (11/11) |
+| S-38d | La llave, arrastrada a su puerta | Aprobado (11/11) |
+| S-38e | La puerta, abierta | Aprobado (11/11) |
+| S-38f | Difícil con dos puertas: vidrio y reja, y sus dos llaves | Aprobado (11/11), con la llave de hierro más clara |
+| S-38g | La reja, plegada al abrirse | Aprobado (11/11) |

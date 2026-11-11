@@ -156,5 +156,8 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **Tres dificultades** (10/11): Fácil, 9 casilleros y menos tipos; Normal, 12 y 12 tipos; Difícil, 12, los 14 tipos y más filas detrás.
 - **El título se ordena solo** (10/11, S-37h): «BIBLIOTECA» entra desordenado, con flechas rojas, y se ordena en unos 4 segundos.
 - **La entrada, sobre la biblioteca baja** (10/11, S-37d), como en la sala: la lámpara hongo, la planta, los tres libros de la dificultad, el despertador y la cámara. Primero era despojada y no emulaba la sala.
+- **Más objetos, y parecidos en Difícil** (11/11, S-38a): cuatro libros (pila acostada y enciclopedia, muy distintos, en Normal; el trío alternado y el tomo azul, muy parecidos, en Difícil) y un casete más, el transparente (C). *Para más adelante:* los casetes A y B se piden igual a la IA, para tenerlos.
+- **La torre Eiffel, gris claro** (11/11): la de bronce se confundía con el fondo.
+- **Puertas con llave** (11/11, S-38): un casillero cerrado (vidrio en Normal; vidrio y reja de ascensor viejo en Difícil) que se abre con su llave, escondida unas filas atrás en otro casillero sin que se sepa en cuál. La llave solo va a su puerta, cuenta como una movida y se deshace. Fácil, sin puertas. *Descartado:* un objeto fijo que ocupe un lugar para siempre y menos lugares libres sin mecánica nueva.
 - **Primero con los dibujos del boceto** (10/11, 0.18.0): se implementa con los dibujos hechos con código para probar la mecánica y la dificultad antes de pedir las imágenes y el sonido, como se hizo con Buen ojo.
 
