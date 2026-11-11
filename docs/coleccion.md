@@ -1,10 +1,10 @@
 # La colección
 
-Qué es la colección de minijuegos y lo que vale para todos sus juegos. Lo propio de cada uno está en su carpeta ([sala](sala/README.md), [Fogonazo](fogonazo/README.md), [mahjong](mahjong/README.md), [Buen ojo](buenojo/README.md)); cómo se ve y cómo suena, en la [guía de estilo](estilo.md); por qué se decidió cada cosa, en el [registro de decisiones](decisiones.md).
+Qué es la colección de minijuegos y lo que vale para todos sus juegos. Lo propio de cada uno está en su carpeta ([sala](sala/README.md), [Fogonazo](fogonazo/README.md), [mahjong](mahjong/README.md), [Buen ojo](buenojo/README.md), [Biblioteca](biblioteca/README.md)); cómo se ve y cómo suena, en la [guía de estilo](estilo.md); por qué se decidió cada cosa, en el [registro de decisiones](decisiones.md).
 
 ## Qué es
 
-Una colección de juegos simples, divertidos y visualmente atractivos para el celular. Es una sola app, que se instala desde Chrome, y se entra por **la sala**: un living de los 70 ilustrado, al atardecer con lluvia, donde algunos objetos, los **objetos activos**, llevan a los juegos. Hoy son tres, Fogonazo, el mahjong y Buen ojo, y se van a sumar más.
+Una colección de juegos simples, divertidos y visualmente atractivos para el celular. Es una sola app, que se instala desde Chrome, y se entra por **la sala**: un living de los 70 ilustrado, al atardecer con lluvia, donde algunos objetos, los **objetos activos**, llevan a los juegos. Hoy son cuatro, Fogonazo, el mahjong, Buen ojo y Biblioteca, y se van a sumar más.
 
 La colección y Fogonazo todavía no tienen nombre definitivo, y el repositorio conserva el de `fogonazo` hasta entonces.
 
@@ -23,6 +23,7 @@ Sala ── banco de electrónica ──► Fogonazo
      ── mesa ratona con el mahjong ──► Mahjong
      ── equipo de audio ──► Sonido
      ── cuadro del arcoíris ──► Buen ojo
+     ── biblioteca baja con la lámpara hongo ──► Biblioteca
 ```
 
 - **Los objetos activos** no llevan carteles, círculos ni marcas: brillan apenas, de a uno por turno.
@@ -52,9 +53,10 @@ Desde la 0.16.0, cada juego anota en el teléfono lo que se juega, para calibrar
 - **Fogonazo**, por partida: nivel, modo, la semilla y cada movida (las dos casillas, cuánto se pensó sin contar las pausas, si no armó línea y volvió, y si la pista estaba a la vista), las movidas o el tiempo y las estrellas vigentes, las estrellas que ya tenía, el resultado (ganó, perdió, abandonó, o en el zen terminó o salió), en qué movida completó el pedido, los puntos con y sin el bonus, las estrellas, la duración y las pausas. Con la semilla y las movidas, la partida se vuelve a jugar entera en el motor.
 - **Mahjong**, por reparto: tablero, cuándo salió cada par, deshacer, pistas, barajadas a mano y solas, pausas, tiempo, puntos, cuántas fichas quedaron y el resultado (limpio, abandonado o sin salida).
 - **Buen ojo**, por partida: dificultad y, por color, la referencia, dónde arrancaron los pomos, el intento, el ΔE, el puntaje y cuánto se tardó en armarlo; en la práctica, cada color al pasar al siguiente o salir, si se movieron los pomos.
+- **Biblioteca**, por partida: dificultad, el reparto (su semilla), cada movida (de qué casillero y lugar a cuál, si juntó un trío y en qué segundo), cuántas veces deshizo, se trabó o pausó, las movidas, el tiempo y el resultado (ganada, reinicio o abandono). Las ganadas sin deshacer se vuelven a jugar enteras sobre su reparto.
 - **La app:** cada apertura y cada pantalla que se abre, y cuándo la app queda escondida o vuelve, para medir las sesiones.
 
-Cada evento lleva la hora y la versión. Si la app se cierra en medio de una partida, queda anotada como «interrumpida» la próxima vez que se abre. Cada lista tiene un tope (2500 partidas de Fogonazo, 600 del mahjong, 600 de Buen ojo, 1500 eventos de la app): al pasarlo se van las más viejas. Una partida de Fogonazo ocupa unos cientos de bytes.
+Cada evento lleva la hora y la versión. Si la app se cierra en medio de una partida, queda anotada como «interrumpida» la próxima vez que se abre. Cada lista tiene un tope (2500 partidas de Fogonazo, 600 del mahjong, 600 de Buen ojo, 600 de Biblioteca, 1500 eventos de la app): al pasarlo se van las más viejas. Una partida de Fogonazo ocupa unos cientos de bytes.
 
 ## Publicación
 
@@ -67,7 +69,8 @@ Cada evento lleva la hora y la versión. Si la app se cierra en medio de una par
 
 ## Lo que sigue
 
-1. **Segunda pasada del bot persona de Fogonazo.** La 0.17.0 recalibró los 30 niveles y la fórmula de los generados con un bot ajustado a las partidas reales de una sola persona. Con los registros que se junten desde entonces se vuelve a ajustar el bot y se corrigen sus desvíos: hoy sobrestima a Producto del 11 al 20 (incluido el 16 en Normal) y lo subestima en los generados.
-2. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
+1. **Probar Biblioteca en el teléfono** (0.18.0, con los dibujos del boceto): la mecánica y la dificultad. Después, los pedidos de imágenes y el sonido.
+2. **Segunda pasada del bot persona de Fogonazo.** La 0.17.0 recalibró los 30 niveles y la fórmula de los generados con un bot ajustado a las partidas reales de una sola persona. Con los registros que se junten desde entonces se vuelve a ajustar el bot y se corrigen sus desvíos: hoy sobrestima a Producto del 11 al 20 (incluido el 16 en Normal) y lo subestima en los generados.
+3. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
 
-Las ideas sueltas están en los [issues abiertos](https://github.com/efevali/fogonazo/issues). Entre ellas, dos juegos nuevos: una carrera de gotas de lluvia sobre el vidrio ([#70](https://github.com/efevali/fogonazo/issues/70)) y un juego de ordenar en la biblioteca baja ([#71](https://github.com/efevali/fogonazo/issues/71)), ya bocetado (ver [Biblioteca](biblioteca/README.md)). Y una, a evaluar en una charla aparte: un gato que duerme en el sofá de la sala.
+Las ideas sueltas están en los [issues abiertos](https://github.com/efevali/fogonazo/issues). Entre ellas, un juego nuevo: una carrera de gotas de lluvia sobre el vidrio ([#70](https://github.com/efevali/fogonazo/issues/70)). Y una, a evaluar en una charla aparte: un gato que duerme en el sofá de la sala.

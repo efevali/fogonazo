@@ -14,7 +14,7 @@
 window.Registro = (() => {
   'use strict';
   const PRE = 'coleccion.registro.', BOR = PRE + 'borrador.';
-  const TOPE = { fogonazo: 2500, mahjong: 600, buenojo: 600, app: 1500 };
+  const TOPE = { fogonazo: 2500, mahjong: 600, buenojo: 600, biblioteca: 600, app: 1500 };
   const JUEGOS = Object.keys(TOPE);
 
   // la versión instalada: la dice el service worker, a través de la contenedora (sin ella, queda en null)

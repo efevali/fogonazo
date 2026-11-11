@@ -1,0 +1,50 @@
+/* Biblioteca: lo común a sus dos pantallas (S-37). La pared de madera machihembrada del living, con la luz cálida de la
+   lámpara hongo desde la derecha; fichas de préstamo clavadas, botones de cartulina y «◀ Volver» en Dymo. Todo dibujado
+   con código, de ejemplo: los fondos los pinta la IA más adelante. Espacio de diseño: 915 × 412, como Buen ojo. */
+@font-face { font-family: Barlow; font-weight: 500; src: url(../comun/fuentes/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: Barlow; font-weight: 600; src: url(../comun/fuentes/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: Barlow; font-weight: 700; src: url(../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: Caveat; font-weight: 600; src: url(../comun/fuentes/caveat-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: Fraunces; font-weight: 100 900; src: url(../comun/fuentes/fraunces-latin-soft-normal.woff2) format('woff2'); }
+@font-face { font-family: "Special Elite"; font-weight: 400; src: url(../comun/fuentes/special-elite-latin-400-normal.woff2) format('woff2'); }
+:root { --rojo: #9c2a1f; --birome: #2b3c7c; --papel: #f3e8c8; --ambar: #e0a43a; }
+html, body { margin: 0; height: 100%; background: #6e5238; overflow: hidden; }
+body { font-family: Barlow, "Arial Narrow", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; margin: 0; cursor: pointer; }
+button:focus { outline: none; }
+#stage { position: fixed; left: 0; top: 0; font-size: 1px; width: 915em; height: 412em; overflow: clip; }
+#stage > * { position: absolute; }
+
+/* la pared: tablas verticales de madera clara, más oscuras abajo y a la izquierda, con la luz de la lámpara a la derecha */
+#pared { left: 0; top: 0; width: 915rem; height: 412rem; pointer-events: none;
+  background:
+    radial-gradient(ellipse 420rem 340rem at 92% 30%, rgba(255, 170, 80, .38), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(60, 35, 15, .16) 0 1.2rem, transparent 1.2rem 2rem, transparent 2rem 57rem),
+    linear-gradient(90deg, rgba(40, 22, 10, .28), transparent 35%, transparent 70%, rgba(40, 22, 10, .1)),
+    linear-gradient(#d9c39c, #b99a70 80%, #a6845c); }
+
+/* una ficha de préstamo de cartulina, clavada con una chinche roja */
+.ficha { background: linear-gradient(#f6edd2, #efe2bf); box-shadow: 0 4rem 10rem rgba(40, 20, 5, .35), 0 1rem 2rem rgba(40, 20, 5, .25); }
+.ficha > * { position: absolute; }
+.chinche { width: 11rem; height: 11rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f08a78, #c8392a 55%, #8a2016);
+  box-shadow: 1rem 2rem 2rem rgba(0, 0, 0, .35); }
+.rotulo { font: 700 10rem Barlow; letter-spacing: .16em; color: var(--rojo); }
+.maquina { font-family: "Special Elite", "Courier New", monospace; color: #2a2420; }
+.birome { font-family: Caveat, cursive; font-weight: 600; color: var(--birome); }
+.renglon { height: 1.2rem; background: rgba(90, 100, 130, .45); }
+
+/* botones: de cartulina, con volumen; el principal, rojo ladrillo */
+.boton { display: flex; align-items: center; justify-content: center; gap: 6rem; font: 600 15rem Barlow; letter-spacing: .02em; color: #2a2420;
+  background: linear-gradient(#f4ead0, #e2d3ac); box-shadow: inset 0 1.5rem 0 rgba(255, 255, 255, .55), inset 0 -2rem 0 rgba(0, 0, 0, .1), 0 2rem 0 rgba(90, 60, 30, .35), 0 4rem 6rem rgba(40, 20, 5, .3);
+  border-radius: 2rem; transition: transform .08s, box-shadow .08s; }
+.boton.principal { background: linear-gradient(#c74a3a, #a8352a); color: #fff6ec; text-shadow: 0 -1rem 0 rgba(0, 0, 0, .25);
+  box-shadow: inset 0 1.5rem 0 rgba(255, 255, 255, .25), inset 0 -2rem 0 rgba(0, 0, 0, .15), 0 2rem 0 rgba(90, 30, 20, .45), 0 4rem 6rem rgba(40, 20, 5, .3); }
+.boton:active { transform: translateY(2rem); box-shadow: inset 0 1rem 0 rgba(255, 255, 255, .4), 0 1rem 0 rgba(90, 60, 30, .35), 0 2rem 3rem rgba(40, 20, 5, .3); }
+.boton:disabled { opacity: .55; cursor: default; }
+
+#volver { left: 777rem; top: 368rem; width: 124rem; height: 30rem; z-index: 6; }
+#volver svg { width: 100%; height: 100%; display: block; transform: rotate(-1.5deg); }
+#rotate { position: fixed; inset: 0; display: none; place-items: center; background: rgba(20, 10, 4, .82); color: #f3e6d0;
+  font: 600 18px/1.4 Barlow, sans-serif; text-align: center; padding: 24px; z-index: 9; }
+@media (orientation: portrait) { #rotate { display: grid; } }

@@ -9,10 +9,11 @@ La pantalla de inicio de la colección: un living de los 70 ilustrado donde algu
 
 ## Qué hace la sala
 
-- **Cuatro objetos activos**, que brillan apenas por turno:
+- **Cinco objetos activos**, que brillan apenas por turno:
   - **El banco de electrónica** lleva a Fogonazo, a la pantalla-instrumento, que vuelve con «◀ Volver».
   - **La mesa ratona con el mahjong** lleva al mahjong, al estuche abierto, que vuelve con «◀ Volver».
   - **El cuadro del arcoíris**, sobre el equipo de audio, lleva a Buen ojo, al block, que vuelve con «◀ Volver».
+  - **La biblioteca baja con la lámpara hongo**, a la derecha, lleva a Biblioteca, a la entrada, que vuelve con «◀ Volver» (desde la 0.18.0, S-37a).
   - **El equipo de audio** abre los ajustes de la colección (S-14), un rack de audio: sonido (música, efectos y lluvia, de 0 a 10, en medidores de LEDs), sistema (la versión y un botón que busca la nueva y, si la hay, pasa a «Actualizar») y, en el navegador sin instalar, «Instalar»; en Samsung Internet, que no deja instalarla, ofrece «Abrir en Chrome».
 - **El ambiente animado** de la [guía de estilo](../estilo.md#la-sala).
 - **«Salir ▶»**, abajo a la derecha, cierra la app. Si Chrome no la deja cerrarse sola, avisa cómo salir con el gesto del teléfono.
@@ -25,7 +26,7 @@ La pantalla de inicio de la colección: un living de los 70 ilustrado donde algu
 |---|---|
 | [`arte/`](arte/) | La imagen base vigente, en la resolución original. |
 | [`bocetos/`](bocetos/) | Los bocetos de la sala y de lo común de la colección (ver abajo). |
-| [`sala/`](../../sala/) (en la app) | La página, la imagen base para la web, una copia aclarada para el brillo de los objetos activos y las máscaras de cada objeto activo (el cuadro, `mask-cuadro.png`, desde la 0.14.0) y de la ventana. |
+| [`sala/`](../../sala/) (en la app) | La página, la imagen base para la web, una copia aclarada para el brillo de los objetos activos y las máscaras de cada objeto activo (el cuadro, `mask-cuadro.png`, desde la 0.14.0; la biblioteca baja, `mask-biblioteca.png`, desde la 0.18.0) y de la ventana. |
 
 ### Bocetos
 

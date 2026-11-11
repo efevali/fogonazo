@@ -3,14 +3,14 @@
    node herramientas/version.js parche|menor|mayor   sube el número y pone la fecha de hoy
    node herramientas/version.js                      solo rehace la lista (después de sumar o quitar archivos)
 
-   La lista sale de las carpetas de la app (codigo/, comun/, sala/, fogonazo/, mahjong/, buenojo/, iconos/) más la página y la ficha de
+   La lista sale de las carpetas de la app (codigo/, comun/, sala/, fogonazo/, mahjong/, buenojo/, biblioteca/, iconos/) más la página y la ficha de
    instalación: todo lo que la app necesita para andar sin conexión. Cualquier cambio en sw.js es lo que le avisa al
    teléfono que hay una versión nueva. */
 const fs = require('fs');
 const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const SW = path.join(RAIZ, 'sw.js');
-const CARPETAS = ['codigo', 'comun', 'sala', 'fogonazo', 'mahjong', 'buenojo', 'iconos'];
+const CARPETAS = ['codigo', 'comun', 'sala', 'fogonazo', 'mahjong', 'buenojo', 'biblioteca', 'iconos'];
 const SUELTOS = ['./', 'index.html', 'manifest.webmanifest'];
 const FUERA = /\.(txt|md)$/;   // licencias y notas: van en el repositorio, no hacen falta en el teléfono
 

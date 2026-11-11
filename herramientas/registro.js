@@ -48,7 +48,7 @@ const mediana = v => { if (!v.length) return null; const s = v.slice().sort((x, 
 
 const archivos = process.argv.slice(2);
 if (!archivos.length) { console.log('Uso: node herramientas/registro.js registro.json [otro.json…]'); process.exit(1); }
-const todo = { fogonazo: [], mahjong: [], buenojo: [], app: [] };
+const todo = { fogonazo: [], mahjong: [], buenojo: [], biblioteca: [], app: [] };
 for (const f of archivos) {
   const j = JSON.parse(fs.readFileSync(f, 'utf8'));
   console.log(`${f}: versión ${j.version || '?'}, exportado ${j.exportado}`);
@@ -103,6 +103,22 @@ for (const dif of [...new Set(BP.map(p => p.dificultad))]) {
   const ps = BP.filter(p => p.dificultad === dif && p.resultado === 'terminada'), cs = ps.flatMap(p => p.colores);
   const dh = cs.map(c => Math.abs(((c.tuyo.h - c.objetivo.h + 540) % 360) - 180)), ds = cs.map(c => Math.abs(c.tuyo.s - c.objetivo.s)), dv = cs.map(c => Math.abs(c.tuyo.v - c.objetivo.v));
   console.log(`  ${dif.padEnd(8)} ${ps.length} terminadas, total mediano ${mediana(ps.map(p => p.total)) ?? '—'}, ΔE mediano ${mediana(cs.map(c => c.dE)) ?? '—'} · desvío mediano: tono ${mediana(dh) ?? '—'}°, saturación ${mediana(ds) ?? '—'}, brillo ${mediana(dv) ?? '—'}`);
+}
+
+// ---------- Biblioteca: cada partida, con su reparto (la semilla), que se rearma y se vuelve a jugar para verificarla
+const BB = todo.biblioteca, Rep = require('../biblioteca/repartos.js');
+console.log(`\nBIBLIOTECA · ${BB.length} partidas`);
+for (const dif of [...new Set(BB.map(p => p.dificultad))]) {
+  const ps = BB.filter(p => p.dificultad === dif), g = ps.filter(p => p.resultado === 'ganada');
+  let bien = 0, mal = 0;
+  for (const p of g) {
+    let b; try { b = Rep.repartir(dif, p.semilla).bib; } catch (e) { mal++; continue; }
+    const ok = p.deshacer ? null : p.jugadas.every(([a, i, c, j]) => Rep.mover(b, a, i, c, j)) && Rep.vacia(b);
+    if (ok === true) bien++; else if (ok === false) mal++;
+  }
+  const res = {}; ps.forEach(p => { res[p.resultado] = (res[p.resultado] || 0) + 1; });
+  console.log(`  ${dif.padEnd(8)} ${ps.length} partidas (${Object.entries(res).map(([k, v]) => `${k} ${v}`).join(', ')}) · ganadas: movidas medianas ${mediana(g.map(p => p.movidas)) ?? '—'}, tiempo mediano ${mediana(g.map(p => p.tiempo)) ?? '—'} s, deshacer ${g.reduce((a, p) => a + p.deshacer, 0)}, trabadas ${ps.reduce((a, p) => a + (p.trabadas || 0), 0)}` +
+    (bien + mal ? ` · reproducidas sin deshacer: ${bien} bien${mal ? `, ${mal} distintas (¿otra versión de los repartos?)` : ''}` : ''));
 }
 
 // ---------- La app

@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6e5238">
+<title>Biblioteca · la partida</title>
+<link rel="stylesheet" href="mueble.css">
+<style>
+/* A game of Biblioteca (S-37b, c, e, f). The low bookcase seen from the front, with its cubbies of three places and
+   more rows behind, in shadow; «+2» says how many rows are further back. An object is dragged (or touched, and then
+   its place) to a free place of another cubby; three equal ones glow and go, and the row behind comes forward.
+   On the left, a loan card pinned to the wall with the moves, the time and the record, and the difficulty on a tape;
+   on the right, «Deshacer» and «Pausa». */
+#mueble { top: 8rem; height: 378rem; border-radius: 3rem; z-index: 1; touch-action: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .1), transparent 8%, transparent 92%, rgba(0, 0, 0, .12)), linear-gradient(#d7a364, #c18a4c 60%, #b07a40);
+  box-shadow: inset 0 1.5rem 0 rgba(255, 235, 200, .45), inset 0 -2rem 0 rgba(0, 0, 0, .18), 0 6rem 14rem rgba(40, 20, 5, .4); }
+.casillero { position: absolute; width: 144rem; height: 114rem; border-radius: 1.5rem; overflow: hidden;
+  background: linear-gradient(#24160d, #3a2617 55%, #4a311d); box-shadow: inset 0 6rem 10rem rgba(0, 0, 0, .55), inset 0 -1rem 0 rgba(255, 220, 170, .08); }
+.casillero > * { position: absolute; }
+.mas { right: 7rem; top: 4rem; font: 600 9.5rem Barlow; color: rgba(255, 236, 210, .5); letter-spacing: .04em; }
+.obj { width: 44rem; height: 58.7rem; }
+.obj svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.obj.frente { top: 51rem; filter: drop-shadow(0 2rem 2rem rgba(0, 0, 0, .45)); transition: transform .12s, opacity .12s; cursor: grab; }
+.obj.atras { top: 51rem; transform: translate(4rem, -19rem) scale(.88); transform-origin: 50% 100%; filter: brightness(.36) saturate(.65); pointer-events: none; }
+.obj.frente.elegido { transform: translateY(-6rem); filter: drop-shadow(0 0 3rem var(--ambar)) drop-shadow(0 0 2rem var(--ambar)) drop-shadow(0 6rem 3rem rgba(0, 0, 0, .4)); }
+.obj.frente.levantado { opacity: .18; }
+.obj.frente.brilla { filter: drop-shadow(0 0 4rem #ffd77a) drop-shadow(0 0 6rem #ffc04a); animation: brilla .42s ease-in-out; }
+@keyframes brilla { 0% { transform: none; } 40% { transform: translateY(-3rem) scale(1.06); } 100% { transform: none; } }
+.obj.frente.seVa { animation: seVa .26s ease-in forwards; }
+@keyframes seVa { to { opacity: 0; transform: translateY(-10rem) scale(.7); } }
+/* the row behind comes forward: from its place in the shadow to the front */
+.obj.frente.avanza { animation: avanza .34s ease-out; }
+@keyframes avanza { from { transform: translate(4rem, -19rem) scale(.88); filter: brightness(.36) saturate(.65); } to { transform: none; } }
+.obj.atras.avanza { animation: aparece .34s ease-out; }
+@keyframes aparece { from { opacity: 0; } }
+/* where it would go: a dashed place */
+.hueco { top: 51rem; width: 40rem; height: 56rem; margin-left: 2rem; box-sizing: border-box; border: 2rem dashed rgba(255, 196, 90, .85); border-radius: 3rem; display: none; }
+.hueco.on { display: block; }
+#arrastre { z-index: 5; width: 50rem; height: 66.7rem; margin: -50rem 0 0 -25rem; pointer-events: none; transform: rotate(-6deg);
+  filter: drop-shadow(0 8rem 6rem rgba(0, 0, 0, .45)); }
+#arrastre svg { width: 100%; height: 100%; display: block; }
+
+/* the loan card on the left */
+#tarjeta { left: 7rem; top: 21rem; width: 130rem; height: 151rem; transform: rotate(-1deg); z-index: 2; }
+#tarjeta .chinche { left: 63rem; top: -3rem; }
+#tarjeta .rotulo { left: 12rem; }
+#movidas { left: 12rem; top: 24rem; font-size: 27rem; line-height: 30rem; }
+#reloj { left: 12rem; top: 81rem; font-size: 24rem; line-height: 28rem; }
+#tRecord { left: 12rem; top: 125rem; font-size: 14.5rem; white-space: nowrap; }
+#dif { left: 14rem; top: 192rem; width: 116rem; height: 30rem; font: 700 11rem Barlow; letter-spacing: .2em; color: #2a2420; transform: rotate(.5deg); z-index: 2;
+  display: flex; align-items: center; justify-content: center; background: linear-gradient(#f1e7c9, #ddcfa8); box-shadow: 0 2rem 4rem rgba(40, 20, 5, .3); }
+#deshacer { left: 783rem; top: 29rem; width: 120rem; height: 35rem; transform: rotate(.6deg); z-index: 2; }
+#pausa { left: 783rem; top: 75rem; width: 120rem; height: 35rem; transform: rotate(-.4deg); z-index: 2; }
+.ic { font-size: 16rem; font-weight: 700; }
+.ic.pausa { letter-spacing: 2rem; font-size: 13rem; }
+
+/* the cards over the bookcase: the end, no room left, the pause */
+#velo { left: 0; top: 0; width: 915rem; height: 412rem; z-index: 7; background: rgba(25, 12, 4, .42); display: none; }
+#velo.on { display: block; }
+.carta { left: 291rem; top: 70rem; width: 330rem; height: 258rem; z-index: 8; transform: rotate(-.4deg); }
+.carta .titulo { left: 26rem; top: 24rem; font: 700 15rem Barlow; letter-spacing: .1em; color: var(--rojo); }
+.carta .rotulo { left: 26rem; }
+.carta .num { left: 26rem; font-size: 28rem; line-height: 32rem; }
+.carta .renglon { left: 26rem; width: 278rem; }
+.carta .boton { top: 206rem; height: 34rem; }
+#sello { left: 200rem; top: 70rem; transform: rotate(-8deg); border: 2.5rem solid #c0392b; border-radius: 4rem; padding: 2rem 10rem;
+  font: 700 17rem Barlow; letter-spacing: .1em; color: #c0392b; opacity: .9; }
+#fRecord { left: 26rem; top: 170rem; font-size: 15rem; }
+.dicho { left: 26rem; top: 66rem; width: 280rem; font-size: 21rem; line-height: 27rem; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="pared" aria-hidden="true"></div>
+
+  <div id="tarjeta" class="ficha" aria-live="polite">
+    <span class="chinche"></span>
+    <div class="rotulo" style="top:12rem">MOVIDAS</div><div id="movidas" class="maquina">0</div>
+    <div class="renglon" style="left:12rem;top:62rem;width:104rem"></div>
+    <div class="rotulo" style="top:70rem">TIEMPO</div><div id="reloj" class="maquina">00:00</div>
+    <div class="renglon" style="left:12rem;top:117rem;width:104rem"></div>
+    <div id="tRecord" class="birome"></div>
+  </div>
+  <div id="dif"></div>
+
+  <div id="mueble" role="application" aria-label="La biblioteca"></div>
+
+  <button id="deshacer" class="boton" type="button"><span class="ic">↶</span>Deshacer</button>
+  <button id="pausa" class="boton" type="button"><span class="ic pausa">❙❙</span>Pausa</button>
+  <button id="volver" type="button" aria-label="Volver a la entrada"><svg viewBox="0 0 132 34" aria-hidden="true"><path d="M2,4 h126 l-4,13 l4,13 h-126 l4,-13 z" fill="#1c1c1c"/><text x="66" y="23" text-anchor="middle" font-family="Barlow" font-weight="700" font-size="14" letter-spacing="2.2" fill="#f4f1ea">◀ VOLVER</text></svg></button>
+
+  <div id="velo"></div>
+  <!-- the end (S-37e) -->
+  <div id="fin" class="ficha carta" hidden role="dialog" aria-label="Biblioteca ordenada">
+    <div class="titulo">BIBLIOTECA ORDENADA</div>
+    <div class="rotulo" style="top:58rem">MOVIDAS</div><div id="fMovidas" class="maquina num" style="top:70rem"></div>
+    <div class="renglon" style="top:106rem"></div>
+    <div class="rotulo" style="top:116rem">TIEMPO</div><div id="fReloj" class="maquina num" style="top:128rem"></div>
+    <div class="renglon" style="top:164rem"></div>
+    <div id="sello" hidden>RÉCORD</div>
+    <div id="fRecord" class="birome"></div>
+    <button class="boton principal" data-act="otra" type="button" style="left:26rem;width:122rem">Otra partida</button>
+    <button class="boton" data-act="salir" type="button" style="left:184rem;width:120rem">Salir</button>
+  </div>
+  <!-- no room left (S-37f) -->
+  <div id="trabada" class="ficha carta" hidden role="dialog" aria-label="No queda lugar">
+    <div class="titulo">NO QUEDA LUGAR</div>
+    <div class="birome dicho">No hay dónde apoyar nada: la biblioteca quedó trabada.</div>
+    <button class="boton principal" data-act="denuevo" type="button" style="left:26rem;width:150rem">Empezar de nuevo</button>
+    <button class="boton" data-act="deshacer" type="button" style="left:194rem;width:110rem"><span class="ic">↶</span>Deshacer</button>
+  </div>
+  <!-- the pause: a card like the end's -->
+  <div id="menu" class="ficha carta" hidden role="dialog" aria-label="Pausa">
+    <div class="titulo">PAUSA</div>
+    <div id="pResumen" class="birome dicho"></div>
+    <button class="boton principal" data-act="seguir" type="button" style="left:26rem;width:88rem">Seguir</button>
+    <button class="boton" data-act="denuevo" type="button" style="left:122rem;width:110rem;font-size:13.5rem">Empezar de nuevo</button>
+    <button class="boton" data-act="salir" type="button" style="left:240rem;width:64rem">Salir</button>
+  </div>
+</div>
+<div id="rotate">Girá el teléfono para verlo en horizontal</div>
+
+<script src="../comun/pantalla.js"></script>
+<script src="repartos.js"></script>
+<script src="objetos.js"></script>
+<script src="estado.js"></script>
+<script src="../comun/registro.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const R = window.Repartos, Est = window.Estado, O = window.Objetos;
+  O.instalar();
+
+  const stage = $('stage');
+  let escala = 1, origen = { x: 0, y: 0 };
+  function fit() {
+    const vv = window.visualViewport;
+    const w = document.documentElement.clientWidth || innerWidth, h = (vv && vv.height) || innerHeight;
+    escala = Math.min(w / 915, h / 412);
+    stage.style.fontSize = escala + 'px'; document.documentElement.style.fontSize = escala + 'px';
+    origen = { x: (w - 915 * escala) / 2, y: (h - 412 * escala) / 2 };
+    stage.style.left = origen.x + 'px'; stage.style.top = origen.y + 'px';
+  }
+  addEventListener('resize', fit); if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+  fit();
+
+  const q = new URLSearchParams(location.search);
+  const DIF = R.DIFICULTADES[q.get('d')] ? q.get('d') : Est.dificultad;
+  const D = R.DIFICULTADES[DIF];
+  const SEMILLA = q.has('semilla') ? Number(q.get('semilla')) : undefined;   // para las pruebas: un reparto fijo
+
+  // ------------------------------------------------------------ the bookcase
+  const CW = 144, CH = 114, GAP = 8, PAD = 10, SLOT = 44, SX = 6;
+  const filas = Math.ceil(D.casilleros / D.columnas);
+  const anchoMueble = PAD * 2 + D.columnas * CW + (D.columnas - 1) * GAP;
+  const mueble = $('mueble');
+  mueble.style.width = anchoMueble + 'rem';
+  mueble.style.left = (458 - anchoMueble / 2) + 'rem';
+  const celdas = [];
+  for (let k = 0; k < D.casilleros; k++) {
+    const c = document.createElement('div');
+    c.className = 'casillero'; c.dataset.k = k;
+    c.style.left = (PAD + (k % D.columnas) * (CW + GAP)) + 'rem';
+    c.style.top = (PAD + Math.floor(k / D.columnas) * (CH + GAP)) + 'rem';
+    mueble.appendChild(c); celdas.push(c);
+  }
+  $('dif').textContent = D.nombre.toUpperCase();
+
+  // the state of the game
+  const G = { bib: null, inicial: null, solucion: null, semilla: 0, movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null };
+  let pausado = false;
+
+  // a cubby: the row in front, the row behind in shadow, and how many more there are; anim: which rows arrive
+  function pintar(k, anim = {}) {
+    const C = G.bib[k], fr = C[0] || [null, null, null], at = C[1] || null, mas = Math.max(0, C.length - 2);
+    let h = '';
+    if (at) at.forEach((x, i) => { if (x !== null) h += `<div class="obj atras${anim.atras ? ' avanza' : ''}" style="left:${SX + i * SLOT}rem">${O.svg(R.OBJETOS[x])}</div>`; });
+    fr.forEach((x, i) => {
+      if (x === null) h += `<div class="hueco" data-i="${i}" style="left:${SX + i * SLOT}rem"></div>`;
+      else {
+        const el = G.sel && G.sel.k === k && G.sel.i === i ? ' elegido' : '';
+        const br = anim.brilla ? ' brilla' : '';
+        h += `<div class="obj frente${el}${br}${anim.frente ? ' avanza' : ''}" data-k="${k}" data-i="${i}" style="left:${SX + i * SLOT}rem" aria-label="${O.NOMBRES[R.OBJETOS[x]]}">${O.svg(R.OBJETOS[x])}</div>`;
+      }
+    });
+    if (mas) h += `<div class="mas">+${mas}</div>`;
+    celdas[k].innerHTML = h;
+  }
+  const pintarTodo = () => G.bib.forEach((_, k) => pintar(k));
+
+  function hud() {
+    $('movidas').textContent = G.movidas;
+    const r = Est.record(DIF);
+    $('tRecord').textContent = r ? `récord: ${r.movidas} · ${Est.reloj(r.tiempo)}` : 'sin récord todavía';
+    $('deshacer').disabled = !G.deshacer.length || G.fin;
+  }
+  let ultimoTic = performance.now();
+  setInterval(() => {
+    const now = performance.now();
+    if (G.empezado && !G.fin && !pausado && !document.hidden) G.t += (now - ultimoTic) / 1000;
+    ultimoTic = now;
+    $('reloj').textContent = Est.reloj(G.t);
+  }, 250);
+
+  // ------------------------------------------------------------ the play log (comun/registro.js)
+  // each game: the deal (its seed), every move ([from, place, to, place, trio, seconds]), undos, pauses and how it ended
+  const Reg = window.Registro || { anotar() {}, borrador() {} };
+  let reg = null;
+  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, semilla: G.semilla, objetos: D.trios * 3, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
+  function regCerrar(resultado) {
+    if (!reg) return;
+    if (!reg.jugadas.length && resultado !== 'ganada') { reg = null; return; }   // abierta y sin tocar: no cuenta
+    Object.assign(reg, { resultado, movidas: G.movidas, tiempo: Math.round(G.t * 10) / 10 });
+    Reg.anotar('biblioteca', reg); reg = null;
+  }
+  addEventListener('pagehide', () => { if (!G.fin) regCerrar('abandono'); });
+
+  // ------------------------------------------------------------ a game
+  function nueva(mismo) {
+    const x = mismo ? { bib: G.inicial, solucion: G.solucion, semilla: G.semilla } : R.repartir(DIF, SEMILLA);
+    G.inicial = R.copiar(x.bib); G.solucion = x.solucion; G.semilla = x.semilla;
+    G.bib = R.copiar(x.bib);
+    Object.assign(G, { movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null });
+    regAbrir();
+    pintarTodo(); hud(); $('reloj').textContent = Est.reloj(0);
+  }
+
+  function jugar(a, i, b, j) {
+    if (G.ocupado || G.fin || pausado) return;
+    const antes = R.copiar(G.bib), x = G.bib[a][0][i];
+    const res = R.mover(G.bib, a, i, b, j);
+    if (!res) return;
+    G.deshacer.push(antes); G.sel = null;
+    if (!G.empezado) { G.empezado = true; pedirPantalla(); }
+    G.movidas++;
+    if (reg) { reg.jugadas.push([a, i, b, j, res.trio !== null ? 1 : 0, Math.round(G.t * 10) / 10]); Reg.borrador('biblioteca', reg); }
+    pintar(a, { frente: res.avanzaA, atras: res.avanzaA });
+    if (res.trio === null) { pintar(b); despues(); return; }
+    // the trio: first the three together and glowing, then they go and the row behind comes forward
+    G.ocupado = true;
+    const vista = antes[b].map(c => c.slice()); if (!vista.length) vista.push([null, null, null]); vista[0][j] = x;
+    const real = G.bib[b]; G.bib[b] = vista; pintar(b, { brilla: true }); G.bib[b] = real;
+    setTimeout(() => {
+      celdas[b].querySelectorAll('.obj.frente').forEach(e => e.classList.add('seVa'));
+      setTimeout(() => { pintar(b, { frente: res.avanzaB, atras: res.avanzaB }); G.ocupado = false; despues(); }, 260);
+    }, 430);
+  }
+  // after each move: the end, or no room left
+  function despues() {
+    hud();
+    if (R.vacia(G.bib)) { setTimeout(terminar, 250); return; }
+    if (!R.hayMovida(G.bib)) { if (reg) reg.trabadas++; mostrar('trabada'); }
+  }
+  function terminar() {
+    G.fin = true; soltarPantalla();
+    G.t = Math.max(1, Math.round(G.t));   // the clock, the card and the record show the same second
+    const r = Est.terminada(DIF, G.movidas, G.t);
+    regCerrar('ganada');
+    $('fMovidas').textContent = G.movidas; $('fReloj').textContent = Est.reloj(G.t); $('reloj').textContent = Est.reloj(G.t);
+    $('sello').hidden = !r.record;
+    $('fRecord').textContent = r.record ? (r.antes ? `antes: ${r.antes.movidas} · ${Est.reloj(r.antes.tiempo)}` : '') : `récord: ${r.antes.movidas} · ${Est.reloj(r.antes.tiempo)}`;
+    hud(); mostrar('fin');
+  }
+  function deshacer() {
+    if (G.ocupado || G.fin || !G.deshacer.length) return;
+    G.bib = G.deshacer.pop(); G.sel = null;
+    if (reg) reg.deshacer++;
+    pintarTodo(); hud();
+  }
+
+  // ------------------------------------------------------------ the cards
+  const cartas = ['fin', 'trabada', 'menu'];
+  function mostrar(id) { cartas.forEach(c => { $(c).hidden = c !== id; }); $('velo').classList.add('on'); }
+  function ocultar() { cartas.forEach(c => { $(c).hidden = true; }); $('velo').classList.remove('on'); }
+  const abierta = () => cartas.some(c => !$(c).hidden);
+
+  // «Atrás» in a game: the first one opens the pause (the game keeps one step of history for it); from a card, the
+  // next one goes back to the entrance. As in the mahjong.
+  let pausaGastada = false;
+  function pausar(gastada) {
+    if (G.fin || abierta()) return;
+    pausado = true; pausaGastada = gastada; G.sel = null; pintarTodo();
+    if (reg && G.empezado) reg.pausas++;
+    $('pResumen').textContent = `${G.movidas} ${G.movidas === 1 ? 'movida' : 'movidas'} · ${Est.reloj(G.t)}. La biblioteca te espera.`;
+    mostrar('menu');
+  }
+  function seguir() { ocultar(); pausado = false; ultimoTic = performance.now(); if (pausaGastada) App.abrir(); pausaGastada = false; }
+  window.Pantalla.atras = () => {
+    if (abierta()) { App.volver(); return; }
+    pausar(true);
+  };
+  $('pausa').addEventListener('click', () => { if (G.fin || abierta()) return; if (App.extra > 0) App.volver(); else pausar(false); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && G.empezado && !G.fin && !abierta()) pausar(false); });
+  $('deshacer').addEventListener('click', deshacer);
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'seguir') seguir();
+    if (act === 'deshacer') { ocultar(); deshacer(); }
+    if (act === 'denuevo' || act === 'otra') {
+      if (!G.fin) regCerrar('reinicio');
+      const devolver = !$('menu').hidden && pausaGastada;
+      ocultar(); pausado = false; pausaGastada = false;
+      if (devolver) App.abrir();
+      nueva(act === 'denuevo');
+    }
+    if (act === 'salir') { if (!G.fin) regCerrar('abandono'); App.volver(App.extra + 1); }
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('menu').hidden) seguir(); });
+  $('volver').addEventListener('click', () => { if (!G.fin) regCerrar('abandono'); App.volver(App.extra + 1); });
+
+  // ------------------------------------------------------------ dragging and touching
+  // An object is dragged to a free place of another cubby (the nearest one to where it is dropped); or touched (it
+  // lifts, with an amber edge) and then the cubby where it goes.
+  const enStage = (cx, cy) => ({ x: (cx - origen.x) / escala, y: (cy - origen.y) / escala });
+  let toque = null, flotante = null, destino = null;
+  // the free place of cubby k nearest to the point (cx, cy) of the screen, or null
+  function lugarEn(k, cx) {
+    const libres = R.libres(G.bib[k]); if (!libres.length) return null;
+    const r = celdas[k].getBoundingClientRect(), x = (cx - r.left) / escala;
+    return libres.reduce((m, i) => Math.abs(SX + i * SLOT + SLOT / 2 - x) < Math.abs(SX + m * SLOT + SLOT / 2 - x) ? i : m, libres[0]);
+  }
+  function celdaBajo(cx, cy) {
+    const el = document.elementFromPoint(cx, cy), c = el && el.closest('.casillero');
+    return c ? Number(c.dataset.k) : null;
+  }
+  function marcar(d) {
+    if (destino && (!d || d.k !== destino.k || d.j !== destino.j)) { const h = celdas[destino.k].querySelector(`.hueco[data-i="${destino.j}"]`); if (h) h.classList.remove('on'); }
+    destino = d;
+    if (d) { const h = celdas[d.k].querySelector(`.hueco[data-i="${d.j}"]`); if (h) h.classList.add('on'); }
+  }
+  mueble.addEventListener('pointerdown', e => {
+    if (G.ocupado || G.fin || pausado || abierta() || toque) return;
+    const o = e.target.closest('.obj.frente'), c = e.target.closest('.casillero');
+    toque = { id: e.pointerId, x: e.clientX, y: e.clientY, obj: o ? { k: Number(o.dataset.k), i: Number(o.dataset.i) } : null, k: c ? Number(c.dataset.k) : null, el: o };
+    if (o) e.preventDefault();
+  });
+  addEventListener('pointermove', e => {
+    if (!toque || e.pointerId !== toque.id || !toque.obj) return;
+    if (!flotante && Math.hypot(e.clientX - toque.x, e.clientY - toque.y) < 7) return;
+    if (!flotante) {
+      G.sel = null; celdas.forEach(c => c.querySelectorAll('.elegido').forEach(x => x.classList.remove('elegido')));
+      flotante = document.createElement('div'); flotante.id = 'arrastre';
+      flotante.innerHTML = O.svg(R.OBJETOS[G.bib[toque.obj.k][0][toque.obj.i]]);
+      stage.appendChild(flotante); toque.el.classList.add('levantado');
+    }
+    const p = enStage(e.clientX, e.clientY);
+    flotante.style.left = p.x + 'rem'; flotante.style.top = p.y + 'rem';
+    const k = celdaBajo(e.clientX, e.clientY);
+    marcar(k !== null && k !== toque.obj.k && lugarEn(k, e.clientX) !== null ? { k, j: lugarEn(k, e.clientX) } : null);
+  });
+  function soltar(e) {
+    if (!toque || e.pointerId !== toque.id) return;
+    const t = toque; toque = null;
+    if (flotante) {
+      flotante.remove(); flotante = null;
+      const d = destino; marcar(null);
+      if (d) jugar(t.obj.k, t.obj.i, d.k, d.j); else if (t.el) t.el.classList.remove('levantado');
+      return;
+    }
+    if (e.type === 'pointercancel') return;
+    // a touch: with something lifted, the touched cubby is where it goes; if not, lift what was touched
+    if (G.sel && t.k !== null && t.k !== G.sel.k && lugarEn(t.k, e.clientX) !== null) { jugar(G.sel.k, G.sel.i, t.k, lugarEn(t.k, e.clientX)); return; }
+    const antes = G.sel;
+    G.sel = t.obj && !(antes && antes.k === t.obj.k && antes.i === t.obj.i) ? t.obj : null;
+    if (antes) pintar(antes.k);
+    if (G.sel && (!antes || antes.k !== G.sel.k)) pintar(G.sel.k);
+  }
+  addEventListener('pointerup', soltar); addEventListener('pointercancel', soltar);
+
+  // the screen stays on while playing
+  let wake = null;
+  async function pedirPantalla() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; } }
+  function soltarPantalla() { try { wake && wake.release(); } catch (e) {} wake = null; }
+  addEventListener('pagehide', soltarPantalla);
+
+  // for the tools (herramientas/capturas.js): the state, play the next move of the noted solution (only from a deal
+  // that has not been touched), and get stuck or finish
+  let paso = 0;
+  window.__biblioteca = {
+    G, state: () => ({ dif: DIF, movidas: G.movidas, objetos: R.cuenta(G.bib), fin: G.fin, pausado, abierta: cartas.find(c => !$(c).hidden) || null, hayMovida: R.hayMovida(G.bib) }),
+    paso() { const m = G.solucion[paso++]; if (m) jugar(...m); return !!m; },
+    jugar, repintar: () => { pintarTodo(); despues(); },
+  };
+  nueva(false);
+})();
+</script>
+</body>
+</html>
