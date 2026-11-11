@@ -194,8 +194,10 @@
   $('dif').textContent = D.nombre.toUpperCase();
 
   // the state of the game
-  const G = { bib: null, puertas: [], inicial: null, inicialPuertas: [], solucion: null, semilla: 0, movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null };
+  const G = { bib: null, puertas: [], inicial: null, inicialPuertas: [], solucion: null, semilla: 0, movidas: 0, t: 0, empezado: false, fin: false, deshacer: [], sel: null };
   let pausado = false;
+  // the cubbies being animated (a trio going, a door opening): only those wait; the rest can be played meanwhile
+  const animando = new Set();
 
   // the gate of an old lift: vertical bars and scissors in X, with its padlock
   function reja() {
@@ -255,8 +257,9 @@
   // each game: the deal (its seed), every move ([from, place, to, place, trio, seconds]), undos, pauses and how it ended
   const Reg = window.Registro || { anotar() {}, borrador() {} };
   let reg = null;
-  // repartos: 2 desde la 0.19.0 (objetos nuevos y puertas); una semilla de antes rearma otro reparto
-  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, repartos: 2, semilla: G.semilla, objetos: D.trios * 3, puertas: G.puertas.length, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
+  // repartos: 2 desde la 0.19.0 (objetos nuevos y puertas), 3 desde la 0.19.1 (Difícil más corto); una semilla
+  // de otra versión rearma otro reparto
+  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, repartos: 3, semilla: G.semilla, objetos: D.trios * 3, puertas: G.puertas.length, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
   function regCerrar(resultado) {
     if (!reg) return;
     if (!reg.jugadas.length && resultado !== 'ganada') { reg = null; return; }   // abierta y sin tocar: no cuenta
@@ -270,13 +273,13 @@
     const x = mismo ? { bib: G.inicial, puertas: G.inicialPuertas, solucion: G.solucion, semilla: G.semilla } : R.repartir(DIF, SEMILLA);
     G.inicial = R.copiar(x.bib); G.inicialPuertas = R.copiarPuertas(x.puertas); G.solucion = x.solucion; G.semilla = x.semilla;
     G.bib = R.copiar(x.bib); G.puertas = R.copiarPuertas(x.puertas);
-    Object.assign(G, { movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null });
+    Object.assign(G, { movidas: 0, t: 0, empezado: false, fin: false, deshacer: [], sel: null }); animando.clear();
     regAbrir();
     pintarTodo(); hud(); $('reloj').textContent = Est.reloj(0);
   }
 
   function jugar(a, i, b, j) {
-    if (G.ocupado || G.fin || pausado) return;
+    if (animando.has(a) || animando.has(b) || G.fin || pausado) return;
     const antes = R.copiar(G.bib), antesPuertas = R.copiarPuertas(G.puertas), x = G.bib[a][0][i];
     const res = R.mover(G.bib, a, i, b, j, G.puertas);
     if (!res) return;
@@ -287,20 +290,20 @@
     pintar(a, { frente: res.avanzaA, atras: res.avanzaA });
     // the key: the door opens (the glass one swings, the gate folds) and goes
     if (res.puerta) {
-      G.ocupado = true;
+      animando.add(b);
       const el = celdas[b].querySelector('.puerta, .reja');
       if (el) { el.classList.remove('destino'); el.classList.add('abre'); }
-      setTimeout(() => { pintar(b, { destello: true }); G.ocupado = false; despues(); }, 460);
+      setTimeout(() => { animando.delete(b); pintar(b, { destello: true }); despues(); }, 460);
       return;
     }
     if (res.trio === null) { pintar(b); despues(); return; }
     // the trio: first the three together and glowing, then they go and the row behind comes forward
-    G.ocupado = true;
+    animando.add(b);
     const vista = antes[b].map(c => c.slice()); if (!vista.length) vista.push([null, null, null]); vista[0][j] = x;
     const real = G.bib[b]; G.bib[b] = vista; pintar(b, { brilla: true }); G.bib[b] = real;
     setTimeout(() => {
       celdas[b].querySelectorAll('.obj.frente').forEach(e => e.classList.add('seVa'));
-      setTimeout(() => { pintar(b, { frente: res.avanzaB, atras: res.avanzaB }); G.ocupado = false; despues(); }, 260);
+      setTimeout(() => { animando.delete(b); pintar(b, { frente: res.avanzaB, atras: res.avanzaB }); despues(); }, 260);
     }, 430);
   }
   // after each move: the end, or no room left
@@ -320,7 +323,7 @@
     hud(); mostrar('fin');
   }
   function deshacer() {
-    if (G.ocupado || G.fin || !G.deshacer.length) return;
+    if (animando.size || G.fin || !G.deshacer.length) return;
     const d = G.deshacer.pop(); G.bib = d.bib; G.puertas = d.puertas; G.sel = null;
     if (reg) reg.deshacer++;
     pintarTodo(); hud();
@@ -402,9 +405,15 @@
     if (d) { const h = marca(d); if (h) h.classList.add(d.j < 0 ? 'destino' : 'on'); }
   }
   mueble.addEventListener('pointerdown', e => {
-    if (G.ocupado || G.fin || pausado || abierta() || toque) return;
+    if (G.fin || pausado || abierta() || toque) return;
     let o = e.target.closest('.obj.frente'); const c = e.target.closest('.casillero');
-    if (o && R.cerrada(G.puertas, Number(o.dataset.k))) o = null;   // behind a closed door: it is not touched
+    // the whole column of a cubby takes the object in front of it (twice the area of the object alone, without
+    // overlapping the neighbours)
+    if (!o && c) {
+      const r = c.getBoundingClientRect(), i = Math.max(0, Math.min(2, Math.floor(((e.clientX - r.left) / escala - SX) / SLOT)));
+      o = c.querySelector(`.obj.frente[data-i="${i}"]`);
+    }
+    if (o && (R.cerrada(G.puertas, Number(o.dataset.k)) || animando.has(Number(o.dataset.k)))) o = null;   // behind a closed door, or on its way: not touched
     toque = { id: e.pointerId, x: e.clientX, y: e.clientY, obj: o ? { k: Number(o.dataset.k), i: Number(o.dataset.i) } : null, k: c ? Number(c.dataset.k) : null, el: o };
     if (o) e.preventDefault();
   });

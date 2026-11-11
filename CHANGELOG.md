@@ -2,6 +2,12 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.19.1 — 11/11/2026
+
+- **Biblioteca: más fácil agarrar.** Toda la columna de un casillero agarra el objeto de adelante (antes solo el recuadro del objeto), y mientras un trío se va o una puerta se abre ya no se pierden los toques en el resto de la biblioteca.
+- **Difícil, más corto:** 26 tríos (antes 33) y las llaves, 3 filas atrás.
+- La herramienta del registro separa las partidas por versión de los repartos.
+
 ## 0.19.0 — 11/11/2026
 
 - **Biblioteca: puertas con llave** (S-38). En Normal un casillero arranca cerrado con una puerta de vidrio; en Difícil, además, otro con una reja de ascensor viejo. Lo de adentro se ve pero no se toca hasta llevarle su llave, escondida unas filas atrás en otro casillero: la de bronce abre el vidrio; la de hierro, la reja. Los repartos siguen teniendo siempre solución.

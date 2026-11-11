@@ -36,8 +36,9 @@
     facil: { nombre: 'Fácil', casilleros: 9, columnas: 3, tipos: 8, trios: 15, capas: 3, mezcla: 1.2, puertas: [] },
     normal: { nombre: 'Normal', casilleros: 12, columnas: 4, tipos: 14, trios: 25, capas: 4, mezcla: 1.6,
       puertas: [{ tipo: 'vidrio', hondo: [2, 2], cierre: 0.3 }] },
-    dificil: { nombre: 'Difícil', casilleros: 12, columnas: 4, tipos: 19, trios: 33, capas: 5, mezcla: 2,
-      puertas: [{ tipo: 'vidrio', hondo: [3, 4], cierre: 0.25 }, { tipo: 'reja', hondo: [3, 4], cierre: 0.4 }] },
+    // Difícil: 26 tríos desde la 0.19.1 (con 33 se sentía demasiado largo) y las llaves, siempre 3 filas atrás
+    dificil: { nombre: 'Difícil', casilleros: 12, columnas: 4, tipos: 19, trios: 26, capas: 5, mezcla: 2,
+      puertas: [{ tipo: 'vidrio', hondo: [3, 3], cierre: 0.25 }, { tipo: 'reja', hondo: [3, 3], cierre: 0.4 }] },
   };
 
   // números al azar con semilla, para poder repetir un reparto

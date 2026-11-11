@@ -251,6 +251,13 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   await page.mouse.move(de.x + 30, de.y, { steps: 4 }); await page.mouse.move(a.x + a.width / 2, a.y + a.height * .7, { steps: 8 }); await page.mouse.up(); await espera(900);
   ok((await bbEstado()).movidas === 1, 'arrastrar un objeto a un lugar libre es una movida');
   await tocar('#deshacer'); ok(await pantalla().evaluate(() => JSON.stringify(window.__biblioteca.G.bib) === JSON.stringify(window.__biblioteca.G.inicial)), '«Deshacer» vuelve atrás la movida');
+  // tocar arriba del objeto, en la parte de la fila en sombra, también lo agarra; después, tocar otro casillero lo lleva
+  const col = await pantalla().locator(`.obj.frente[data-k="${mov.a}"][data-i="${mov.i}"]`).boundingBox(), cas = await pantalla().locator(`.casillero[data-k="${mov.a}"]`).boundingBox();
+  await page.mouse.click(col.x + col.width / 2, cas.y + 8); await espera(150);
+  ok(await pantalla().evaluate(() => !!document.querySelector('.obj.frente.elegido')), 'toda la columna del casillero agarra el objeto de adelante');
+  await page.mouse.click(a.x + a.width / 2, a.y + a.height * .7); await espera(600);
+  ok((await bbEstado()).movidas === 2, 'y tocar otro casillero lo lleva ahí');
+  await tocar('#deshacer');
   await atras(); ok(await abierto('#menu') && ruta() === 'biblioteca/partida.html', 'en la partida, «atrás» abre la pausa'); await foto('32-biblioteca-pausa');
   await tocar('#menu [data-act="denuevo"]'); ok(!(await bbEstado()).abierta && (await bbEstado()).movidas === 0, '«Empezar de nuevo» repite el reparto desde cero');
   // la solución anotada, entera: la biblioteca queda vacía y aparece la ficha del final
@@ -268,7 +275,7 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   ok(await abierto('#fin') && (await bbEstado()).puertas === 0, 'Normal: la solución abre la puerta con su llave y termina');
   await tocar('#fin [data-act="salir"]'); await listo();
   await tocar('.libro[data-id="dificil"]'); await tocar('#jugar'); await bb();
-  ok(await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 12 && (await bbEstado()).objetos === 99 && (await bbEstado()).puertas === 2 && await pantalla().evaluate(() => !!document.querySelector('.casillero .reja')), 'Difícil: 12 casilleros, 99 objetos, la puerta de vidrio y la reja'); await foto('34-biblioteca-dificil');
+  ok(await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 12 && (await bbEstado()).objetos === 78 && (await bbEstado()).puertas === 2 && await pantalla().evaluate(() => !!document.querySelector('.casillero .reja')), 'Difícil: 12 casilleros, 78 objetos, la puerta de vidrio y la reja'); await foto('34-biblioteca-dificil');
   // sin lugar: se llenan los lugares libres a mano (sin trío) para ver la ficha
   await pantalla().evaluate(() => { const G = window.__biblioteca.G; G.bib.forEach(c => { c[0] = c[0].map((x, i) => x === null ? (i + 3) % 14 : x); }); window.__biblioteca.repintar(); });
   ok((await bbEstado()).abierta === 'trabada', 'sin lugares libres, aparece «No queda lugar»'); await foto('35-biblioteca-sin-lugar');
