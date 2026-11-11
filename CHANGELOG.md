@@ -2,7 +2,7 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
-## 0.20.0 — sin publicar
+## 0.20.0 — 11/11/2026
 
 - **Biblioteca, más difícil sin alargar.** Menos lugares libres al empezar, repartos sin pares de iguales ya armados y, en más tríos, el tercero escondido dos filas atrás o detrás de una puerta. Fácil suma la puerta de vidrio (con la llave a la vista en la sombra) y Normal, también la reja; en Difícil las llaves van 3 o 4 filas atrás y **la fila de atrás se ve en silueta** (S-39b).
 - **Otra enciclopedia**, verde y más baja, en Difícil (S-39a).
