@@ -23,6 +23,10 @@
 .obj { width: 44rem; height: 58.7rem; }
 .obj svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .obj.frente { top: 51rem; filter: drop-shadow(0 2rem 2rem rgba(0, 0, 0, .45)); transition: transform .12s, opacity .12s; cursor: grab; }
+/* Difícil (S-39b): the row behind, in black silhouette; the shape is guessed, not the colour */
+.silueta .obj.atras { filter: brightness(0); opacity: .62; }
+.silueta .obj.frente.avanza { animation-name: avanzaSilueta; }
+@keyframes avanzaSilueta { from { transform: translate(4rem, -19rem) scale(.88); filter: brightness(0); opacity: .62; } to { transform: none; } }
 .obj.atras { top: 51rem; transform: translate(4rem, -19rem) scale(.88); transform-origin: 50% 100%; filter: brightness(.36) saturate(.65); pointer-events: none; }
 .obj.frente.elegido { transform: translateY(-6rem); filter: drop-shadow(0 0 3rem var(--ambar)) drop-shadow(0 0 2rem var(--ambar)) drop-shadow(0 6rem 3rem rgba(0, 0, 0, .4)); }
 .obj.frente.levantado { opacity: .18; }
@@ -192,6 +196,7 @@
     mueble.appendChild(c); celdas.push(c);
   }
   $('dif').textContent = D.nombre.toUpperCase();
+  mueble.classList.toggle('silueta', DIF === 'dificil');
 
   // the state of the game
   const G = { bib: null, puertas: [], inicial: null, inicialPuertas: [], solucion: null, semilla: 0, movidas: 0, t: 0, empezado: false, fin: false, deshacer: [], sel: null };
@@ -257,9 +262,10 @@
   // each game: the deal (its seed), every move ([from, place, to, place, trio, seconds]), undos, pauses and how it ended
   const Reg = window.Registro || { anotar() {}, borrador() {} };
   let reg = null;
-  // repartos: 2 desde la 0.19.0 (objetos nuevos y puertas), 3 desde la 0.19.1 (Difícil más corto); una semilla
+  // repartos: 2 desde la 0.19.0 (objetos nuevos y puertas), 3 desde la 0.19.1 (Difícil más corto), 4 desde la
+  // 0.20.0 (más difícil); una semilla
   // de otra versión rearma otro reparto
-  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, repartos: 3, semilla: G.semilla, objetos: D.trios * 3, puertas: G.puertas.length, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
+  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, repartos: 4, semilla: G.semilla, objetos: D.trios * 3, puertas: G.puertas.length, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
   function regCerrar(resultado) {
     if (!reg) return;
     if (!reg.jugadas.length && resultado !== 'ganada') { reg = null; return; }   // abierta y sin tocar: no cuenta

@@ -1,10 +1,10 @@
-/* Biblioteca: los diecinueve objetos y las dos llaves, dibujados con código como en los bocetos S-37g y S-38a (son de
+/* Biblioteca: los veinte objetos y las dos llaves, dibujados con código como en los bocetos S-37g, S-38a y S-39a (son de
    ejemplo: los definitivos los pinta la IA). Cada uno en un recuadro de 60 × 80, apoyado abajo, con silueta propia
    para reconocerlo de un vistazo, salvo los que en Difícil se parecen a propósito.
 
    Objetos.instalar() pone los dibujos en la página (como símbolos de SVG); Objetos.svg(tipo) devuelve uno listo para
    usar. El orden de la lista es el de Repartos.OBJETOS: Fácil usa los primeros ocho, Normal catorce y Difícil los
-   diecinueve. */
+   veinte. */
 window.Objetos = (() => {
   'use strict';
   const D = {
@@ -86,6 +86,10 @@ window.Objetos = (() => {
     caseteTransparente: `<rect x="3" y="46" width="54" height="32" rx="3" fill="#9fb8c8"/><rect x="7" y="50" width="46" height="14" rx="1.5" fill="#f2c335"/>
       <rect x="7" y="50" width="46" height="3" fill="#fbf4dc"/><rect x="17" y="55.5" width="26" height="7" rx="3.5" fill="#1d1a19"/>
       <circle cx="22" cy="59" r="2.4" fill="#efe2c8"/><circle cx="38" cy="59" r="2.4" fill="#efe2c8"/><path d="M16 78 L19 69 H41 L44 78 Z" fill="#7c96a8"/>`,
+    // otra enciclopedia: cuatro tomos iguales, verde botella, más bajos y con números plateados (S-39a; Difícil)
+    enciclopediaVerde: [0, 1, 2, 3].map(k => `<rect x="${7 + k * 11.8}" y="30" width="10.6" height="48" rx="1" fill="#1f5a3c"/>
+      <rect x="${7 + k * 11.8}" y="35" width="10.6" height="1.8" fill="#c9ccd2"/><rect x="${7 + k * 11.8}" y="71" width="10.6" height="1.8" fill="#c9ccd2"/>
+      <text x="${12.3 + k * 11.8}" y="47" text-anchor="middle" font-family="Georgia,serif" font-size="6.5" font-weight="700" fill="#d9dce1">${['I', 'II', 'III', 'IV'][k]}</text>`).join(''),
     // la llave de la puerta de vidrio: de bronce, parada, ojo redondo y cinta roja (S-38c)
     llave: `<circle cx="30" cy="22" r="10" fill="none" stroke="#c99a3a" stroke-width="5"/><circle cx="30" cy="22" r="10" fill="none" stroke="#f0cf78" stroke-width="1.4" stroke-dasharray="10 40"/>
       <rect x="27.5" y="31" width="5" height="44" rx="1.5" fill="#c99a3a"/><rect x="28.5" y="31" width="1.6" height="44" fill="#f0cf78" opacity=".7"/>
@@ -104,7 +108,7 @@ window.Objetos = (() => {
   };
   const NOMBRES = { tomo: 'tomo', casete: 'casete naranja', eiffel: 'torre Eiffel', avion: 'avión', globo: 'globo terráqueo', despertador: 'despertador',
     mamushka: 'mamushka', cactus: 'cactus', libros: 'tres libros', auto: 'auto', camara: 'cámara', radio: 'radio', caseteBlanco: 'casete blanco', caseteAhumado: 'casete ahumado',
-    pila: 'pila de libros', enciclopedia: 'enciclopedia', librosAlt: 'tres libros alternados', tomoAzul: 'tomo azul', caseteTransparente: 'casete transparente',
+    pila: 'pila de libros', enciclopedia: 'enciclopedia', librosAlt: 'tres libros alternados', tomoAzul: 'tomo azul', caseteTransparente: 'casete transparente', enciclopediaVerde: 'enciclopedia verde',
     llave: 'llave de bronce', llaveReja: 'llave de hierro' };
   function instalar() {
     if (document.getElementById('objetos-biblioteca')) return;

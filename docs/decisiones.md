@@ -159,5 +159,7 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **Más objetos, y parecidos en Difícil** (11/11, S-38a): cuatro libros (pila acostada y enciclopedia, muy distintos, en Normal; el trío alternado y el tomo azul, muy parecidos, en Difícil) y un casete más, el transparente (C). *Para más adelante:* los casetes A y B se piden igual a la IA, para tenerlos.
 - **La torre Eiffel, gris claro** (11/11): la de bronce se confundía con el fondo.
 - **Puertas con llave** (11/11, S-38): un casillero cerrado (vidrio en Normal; vidrio y reja de ascensor viejo en Difícil) que se abre con su llave, escondida unas filas atrás en otro casillero sin que se sepa en cuál. La llave solo va a su puerta, cuenta como una movida y se deshace. Fácil, sin puertas. *Descartado:* un objeto fijo que ocupe un lugar para siempre y menos lugares libres sin mecánica nueva.
+- **Más difícil sin alargar** (11/11, 0.20.0): menos lugares libres, repartos sin pares regalados, el tercero de más tríos escondido (la sensación de «tener siempre todo a mano»), una puerta en Fácil y dos en Normal, la fila de atrás en silueta en Difícil (S-39b) y otra enciclopedia parecida (S-39a). *Descartado:* límite de movidas o de tiempo (rompe la calma de la colección) y más tríos (alarga).
+- **Difícil de 26 tríos** (11/11, 0.19.1): con 33 se sentía demasiado largo.
 - **Primero con los dibujos del boceto** (10/11, 0.18.0): se implementa con los dibujos hechos con código para probar la mecánica y la dificultad antes de pedir las imágenes y el sonido, como se hizo con Buen ojo.
 
