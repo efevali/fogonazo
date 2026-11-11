@@ -112,13 +112,16 @@ for (const dif of [...new Set(BB.map(p => p.dificultad))]) {
   const ps = BB.filter(p => p.dificultad === dif), g = ps.filter(p => p.resultado === 'ganada');
   let bien = 0, mal = 0;
   for (const p of g) {
-    let b; try { b = Rep.repartir(dif, p.semilla).bib; } catch (e) { mal++; continue; }
-    const ok = p.deshacer ? null : p.jugadas.every(([a, i, c, j]) => Rep.mover(b, a, i, c, j)) && Rep.vacia(b);
+    if ((p.repartos || 1) !== 2) continue;   // repartos de antes de la 0.19.0: otros objetos, sin puertas
+    let x; try { x = Rep.repartir(dif, p.semilla); } catch (e) { mal++; continue; }
+    const b = x.bib, pu = Rep.copiarPuertas(x.puertas);
+    const ok = p.deshacer ? null : p.jugadas.every(([a, i, c, j]) => Rep.mover(b, a, i, c, j, pu)) && Rep.vacia(b);
     if (ok === true) bien++; else if (ok === false) mal++;
   }
   const res = {}; ps.forEach(p => { res[p.resultado] = (res[p.resultado] || 0) + 1; });
   console.log(`  ${dif.padEnd(8)} ${ps.length} partidas (${Object.entries(res).map(([k, v]) => `${k} ${v}`).join(', ')}) · ganadas: movidas medianas ${mediana(g.map(p => p.movidas)) ?? '—'}, tiempo mediano ${mediana(g.map(p => p.tiempo)) ?? '—'} s, deshacer ${g.reduce((a, p) => a + p.deshacer, 0)}, trabadas ${ps.reduce((a, p) => a + (p.trabadas || 0), 0)}` +
-    (bien + mal ? ` · reproducidas sin deshacer: ${bien} bien${mal ? `, ${mal} distintas (¿otra versión de los repartos?)` : ''}` : ''));
+    (bien + mal ? ` · reproducidas sin deshacer: ${bien} bien${mal ? `, ${mal} distintas (¿otra versión de los repartos?)` : ''}` : '') +
+    (g.some(p => p.puertas) ? ` · llaves: ${g.reduce((a, p) => a + p.jugadas.filter(m => m[3] < 0).length, 0)} puertas abiertas` : ''));
 }
 
 // ---------- La app

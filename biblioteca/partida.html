@@ -11,7 +11,8 @@
    more rows behind, in shadow; «+2» says how many rows are further back. An object is dragged (or touched, and then
    its place) to a free place of another cubby; three equal ones glow and go, and the row behind comes forward.
    On the left, a loan card pinned to the wall with the moves, the time and the record, and the difficulty on a tape;
-   on the right, «Deshacer» and «Pausa». */
+   on the right, «Deshacer» and «Pausa». In Normal one cubby starts behind a glass door, and in Difícil another one
+   behind a gate (S-38): its key is hidden a few rows back in another cubby, and is taken to its door to open it. */
 #mueble { top: 8rem; height: 378rem; border-radius: 3rem; z-index: 1; touch-action: none;
   background: linear-gradient(90deg, rgba(0, 0, 0, .1), transparent 8%, transparent 92%, rgba(0, 0, 0, .12)), linear-gradient(#d7a364, #c18a4c 60%, #b07a40);
   box-shadow: inset 0 1.5rem 0 rgba(255, 235, 200, .45), inset 0 -2rem 0 rgba(0, 0, 0, .18), 0 6rem 14rem rgba(40, 20, 5, .4); }
@@ -37,6 +38,30 @@
 /* where it would go: a dashed place */
 .hueco { top: 51rem; width: 40rem; height: 56rem; margin-left: 2rem; box-sizing: border-box; border: 2rem dashed rgba(255, 196, 90, .85); border-radius: 3rem; display: none; }
 .hueco.on { display: block; }
+/* the doors (S-38): glass with a brass frame and lock (Normal and Difícil) and an old lift's scissor gate with its
+   padlock (Difícil). What is inside shows through, a little dimmed; it opens with its key: the glass one swings on its
+   hinge and the gate folds against the left side, and they go */
+.puerta { position: absolute; left: 0; top: 0; width: 144rem; height: 114rem; box-sizing: border-box; z-index: 3; border-radius: 1.5rem; pointer-events: none;
+  border: 4rem solid #b8893a; box-shadow: inset 0 0 0 1rem rgba(255, 232, 170, .55), inset 0 0 14rem rgba(170, 210, 230, .25), 0 0 0 1rem rgba(60, 35, 10, .5);
+  background: linear-gradient(115deg, rgba(190, 220, 235, .22), rgba(150, 185, 205, .1) 38%, rgba(235, 248, 255, .34) 44%, rgba(150, 185, 205, .08) 50%, rgba(235, 248, 255, .22) 56%, rgba(160, 195, 215, .14) 60%, rgba(180, 210, 225, .2));
+  transform-origin: 0 50%; transition: transform .45s ease-in, opacity .45s ease-in; }
+.puerta::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 2rem; margin-left: -1rem; background: #b8893a; box-shadow: 0 0 0 .6rem rgba(255, 232, 170, .45); }
+.cerradura { position: absolute; right: 6rem; top: 44rem; width: 12rem; height: 22rem; border-radius: 2.5rem; background: linear-gradient(90deg, #a87a2c, #e6c070 50%, #a87a2c); box-shadow: 0 1rem 2rem rgba(0, 0, 0, .5); }
+.cerradura::before { content: ''; position: absolute; left: 4rem; top: 5rem; width: 4rem; height: 4rem; border-radius: 50%; background: #2a1a0a; }
+.cerradura::after { content: ''; position: absolute; left: 5rem; top: 8rem; width: 2rem; height: 7rem; background: #2a1a0a; }
+.puerta.destino { box-shadow: inset 0 0 0 1rem rgba(255, 232, 170, .55), 0 0 0 2rem rgba(255, 196, 90, .85), 0 0 14rem rgba(255, 196, 90, .6); }
+.puerta.destino .cerradura { box-shadow: 0 0 0 2.5rem rgba(255, 196, 90, .95), 0 0 10rem 4rem rgba(255, 196, 90, .7); }
+.puerta.abre { transform: perspective(260rem) rotateY(-80deg); opacity: 0; }
+.reja { position: absolute; left: 0; top: 0; width: 144rem; height: 114rem; z-index: 3; pointer-events: none; transform-origin: 0 50%; transition: transform .45s ease-in, opacity .45s ease-in; }
+.reja svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.reja.destino .candado { filter: drop-shadow(0 0 3rem rgba(255, 196, 90, .95)) drop-shadow(0 0 6rem rgba(255, 196, 90, .7)); }
+.reja.destino svg { filter: drop-shadow(0 0 4rem rgba(255, 196, 90, .7)); }
+.reja.abre { transform: scaleX(.2); opacity: 0; }
+.cerrado .obj { filter: brightness(.68) saturate(.75); cursor: default; }
+.enrejado .obj { filter: brightness(.82) saturate(.85); cursor: default; }
+.destello { position: absolute; left: 0; top: 0; width: 144rem; height: 114rem; z-index: 2; pointer-events: none; border-radius: 1.5rem;
+  box-shadow: inset 0 0 22rem 6rem rgba(255, 210, 120, .5); animation: destello .7s ease-out forwards; }
+@keyframes destello { to { opacity: 0; } }
 #arrastre { z-index: 5; width: 50rem; height: 66.7rem; margin: -50rem 0 0 -25rem; pointer-events: none; transform: rotate(-6deg);
   filter: drop-shadow(0 8rem 6rem rgba(0, 0, 0, .45)); }
 #arrastre svg { width: 100%; height: 100%; display: block; }
@@ -169,23 +194,45 @@
   $('dif').textContent = D.nombre.toUpperCase();
 
   // the state of the game
-  const G = { bib: null, inicial: null, solucion: null, semilla: 0, movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null };
+  const G = { bib: null, puertas: [], inicial: null, inicialPuertas: [], solucion: null, semilla: 0, movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null };
   let pausado = false;
 
-  // a cubby: the row in front, the row behind in shadow, and how many more there are; anim: which rows arrive
+  // the gate of an old lift: vertical bars and scissors in X, with its padlock
+  function reja() {
+    const n = 7, paso = 144 / (n - 1);
+    let b = '';
+    for (let i = 0; i < n; i++) b += `<rect x="${i * paso - 1.6}" y="2" width="3.2" height="110" fill="#2d2f33"/><rect x="${i * paso - .6}" y="2" width="1" height="110" fill="#7c8088"/>`;
+    for (let i = 0; i < n - 1; i++) for (let r = 0; r < 4; r++) {
+      const x1 = i * paso, x2 = (i + 1) * paso, y1 = 6 + r * 26, y2 = y1 + 26;
+      b += `<path d="M${x1} ${y1} L${x2} ${y2} M${x2} ${y1} L${x1} ${y2}" stroke="#2d2f33" stroke-width="2.2"/><circle cx="${(x1 + x2) / 2}" cy="${(y1 + y2) / 2}" r="1.8" fill="#6a6e75"/>`;
+    }
+    b += `<rect x="0" y="0" width="144" height="4" fill="#2d2f33"/><rect x="0" y="110" width="144" height="4" fill="#2d2f33"/>`;
+    b += `<g class="candado"><path d="M116 52 V45 C116 38 128 38 128 45 V52" fill="none" stroke="#5d6067" stroke-width="3.2"/><rect x="112" y="51" width="20" height="17" rx="2.5" fill="#5d6067"/>
+      <rect x="113" y="52" width="18" height="3" fill="#8a8e95"/><circle cx="122" cy="59" r="2.2" fill="#15161a"/><rect x="121" y="60" width="2" height="5" fill="#15161a"/></g>`;
+    return `<svg viewBox="0 0 144 114" aria-hidden="true">${b}</svg>`;
+  }
+  const svgDe = x => O.svg(R.dibujo(x));
+
+  // a cubby: the row in front, the row behind in shadow, and how many more there are; its door, if it is closed;
+  // anim: which rows arrive
   function pintar(k, anim = {}) {
     const C = G.bib[k], fr = C[0] || [null, null, null], at = C[1] || null, mas = Math.max(0, C.length - 2);
+    const p = R.cerrada(G.puertas, k);
+    celdas[k].classList.toggle('cerrado', !!p && p.tipo === 'vidrio');
+    celdas[k].classList.toggle('enrejado', !!p && p.tipo === 'reja');
     let h = '';
-    if (at) at.forEach((x, i) => { if (x !== null) h += `<div class="obj atras${anim.atras ? ' avanza' : ''}" style="left:${SX + i * SLOT}rem">${O.svg(R.OBJETOS[x])}</div>`; });
+    if (at) at.forEach((x, i) => { if (x !== null) h += `<div class="obj atras${anim.atras ? ' avanza' : ''}" style="left:${SX + i * SLOT}rem">${svgDe(x)}</div>`; });
     fr.forEach((x, i) => {
       if (x === null) h += `<div class="hueco" data-i="${i}" style="left:${SX + i * SLOT}rem"></div>`;
       else {
         const el = G.sel && G.sel.k === k && G.sel.i === i ? ' elegido' : '';
         const br = anim.brilla ? ' brilla' : '';
-        h += `<div class="obj frente${el}${br}${anim.frente ? ' avanza' : ''}" data-k="${k}" data-i="${i}" style="left:${SX + i * SLOT}rem" aria-label="${O.NOMBRES[R.OBJETOS[x]]}">${O.svg(R.OBJETOS[x])}</div>`;
+        h += `<div class="obj frente${el}${br}${anim.frente ? ' avanza' : ''}" data-k="${k}" data-i="${i}" style="left:${SX + i * SLOT}rem" aria-label="${O.NOMBRES[R.dibujo(x)]}">${svgDe(x)}</div>`;
       }
     });
     if (mas) h += `<div class="mas">+${mas}</div>`;
+    if (p) h += p.tipo === 'vidrio' ? '<div class="puerta" aria-label="Puerta de vidrio con cerradura"><div class="cerradura"></div></div>' : `<div class="reja" aria-label="Reja con candado">${reja()}</div>`;
+    if (anim.destello) h += '<div class="destello"></div>';
     celdas[k].innerHTML = h;
   }
   const pintarTodo = () => G.bib.forEach((_, k) => pintar(k));
@@ -208,7 +255,8 @@
   // each game: the deal (its seed), every move ([from, place, to, place, trio, seconds]), undos, pauses and how it ended
   const Reg = window.Registro || { anotar() {}, borrador() {} };
   let reg = null;
-  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, semilla: G.semilla, objetos: D.trios * 3, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
+  // repartos: 2 desde la 0.19.0 (objetos nuevos y puertas); una semilla de antes rearma otro reparto
+  function regAbrir() { reg = { ev: 'partida', dificultad: DIF, repartos: 2, semilla: G.semilla, objetos: D.trios * 3, puertas: G.puertas.length, jugadas: [], deshacer: 0, trabadas: 0, pausas: 0 }; }
   function regCerrar(resultado) {
     if (!reg) return;
     if (!reg.jugadas.length && resultado !== 'ganada') { reg = null; return; }   // abierta y sin tocar: no cuenta
@@ -219,9 +267,9 @@
 
   // ------------------------------------------------------------ a game
   function nueva(mismo) {
-    const x = mismo ? { bib: G.inicial, solucion: G.solucion, semilla: G.semilla } : R.repartir(DIF, SEMILLA);
-    G.inicial = R.copiar(x.bib); G.solucion = x.solucion; G.semilla = x.semilla;
-    G.bib = R.copiar(x.bib);
+    const x = mismo ? { bib: G.inicial, puertas: G.inicialPuertas, solucion: G.solucion, semilla: G.semilla } : R.repartir(DIF, SEMILLA);
+    G.inicial = R.copiar(x.bib); G.inicialPuertas = R.copiarPuertas(x.puertas); G.solucion = x.solucion; G.semilla = x.semilla;
+    G.bib = R.copiar(x.bib); G.puertas = R.copiarPuertas(x.puertas);
     Object.assign(G, { movidas: 0, t: 0, empezado: false, fin: false, ocupado: false, deshacer: [], sel: null });
     regAbrir();
     pintarTodo(); hud(); $('reloj').textContent = Est.reloj(0);
@@ -229,14 +277,22 @@
 
   function jugar(a, i, b, j) {
     if (G.ocupado || G.fin || pausado) return;
-    const antes = R.copiar(G.bib), x = G.bib[a][0][i];
-    const res = R.mover(G.bib, a, i, b, j);
+    const antes = R.copiar(G.bib), antesPuertas = R.copiarPuertas(G.puertas), x = G.bib[a][0][i];
+    const res = R.mover(G.bib, a, i, b, j, G.puertas);
     if (!res) return;
-    G.deshacer.push(antes); G.sel = null;
+    G.deshacer.push({ bib: antes, puertas: antesPuertas }); G.sel = null;
     if (!G.empezado) { G.empezado = true; pedirPantalla(); }
     G.movidas++;
     if (reg) { reg.jugadas.push([a, i, b, j, res.trio !== null ? 1 : 0, Math.round(G.t * 10) / 10]); Reg.borrador('biblioteca', reg); }
     pintar(a, { frente: res.avanzaA, atras: res.avanzaA });
+    // the key: the door opens (the glass one swings, the gate folds) and goes
+    if (res.puerta) {
+      G.ocupado = true;
+      const el = celdas[b].querySelector('.puerta, .reja');
+      if (el) { el.classList.remove('destino'); el.classList.add('abre'); }
+      setTimeout(() => { pintar(b, { destello: true }); G.ocupado = false; despues(); }, 460);
+      return;
+    }
     if (res.trio === null) { pintar(b); despues(); return; }
     // the trio: first the three together and glowing, then they go and the row behind comes forward
     G.ocupado = true;
@@ -251,7 +307,7 @@
   function despues() {
     hud();
     if (R.vacia(G.bib)) { setTimeout(terminar, 250); return; }
-    if (!R.hayMovida(G.bib)) { if (reg) reg.trabadas++; mostrar('trabada'); }
+    if (!R.hayMovida(G.bib, G.puertas)) { if (reg) reg.trabadas++; mostrar('trabada'); }
   }
   function terminar() {
     G.fin = true; soltarPantalla();
@@ -265,7 +321,7 @@
   }
   function deshacer() {
     if (G.ocupado || G.fin || !G.deshacer.length) return;
-    G.bib = G.deshacer.pop(); G.sel = null;
+    const d = G.deshacer.pop(); G.bib = d.bib; G.puertas = d.puertas; G.sel = null;
     if (reg) reg.deshacer++;
     pintarTodo(); hud();
   }
@@ -316,8 +372,9 @@
   // lifts, with an amber edge) and then the cubby where it goes.
   const enStage = (cx, cy) => ({ x: (cx - origen.x) / escala, y: (cy - origen.y) / escala });
   let toque = null, flotante = null, destino = null;
-  // the free place of cubby k nearest to the point (cx, cy) of the screen, or null
+  // the free place of cubby k nearest to the point (cx, cy) of the screen, or null (none behind a closed door)
   function lugarEn(k, cx) {
+    if (R.cerrada(G.puertas, k)) return null;
     const libres = R.libres(G.bib[k]); if (!libres.length) return null;
     const r = celdas[k].getBoundingClientRect(), x = (cx - r.left) / escala;
     return libres.reduce((m, i) => Math.abs(SX + i * SLOT + SLOT / 2 - x) < Math.abs(SX + m * SLOT + SLOT / 2 - x) ? i : m, libres[0]);
@@ -326,14 +383,28 @@
     const el = document.elementFromPoint(cx, cy), c = el && el.closest('.casillero');
     return c ? Number(c.dataset.k) : null;
   }
+  // where the lifted object can go: a free place; for a key, only the closed door it opens
+  const esLlaveEn = o => o && R.esLlave(G.bib[o.k][0][o.i]);
+  function puertaPara(o, k) {
+    const p = k === null ? null : R.cerrada(G.puertas, k);
+    return p && R.LLAVES[p.tipo] === G.bib[o.k][0][o.i] ? { k, j: -1 } : null;
+  }
+  function destinoPara(o, k, cx) {
+    if (k === null || k === o.k) return null;
+    if (esLlaveEn(o)) return puertaPara(o, k);
+    const j = lugarEn(k, cx);
+    return j === null ? null : { k, j };
+  }
+  const marca = d => d.j < 0 ? celdas[d.k].querySelector('.puerta, .reja') : celdas[d.k].querySelector(`.hueco[data-i="${d.j}"]`);
   function marcar(d) {
-    if (destino && (!d || d.k !== destino.k || d.j !== destino.j)) { const h = celdas[destino.k].querySelector(`.hueco[data-i="${destino.j}"]`); if (h) h.classList.remove('on'); }
+    if (destino && (!d || d.k !== destino.k || d.j !== destino.j)) { const h = marca(destino); if (h) h.classList.remove('on', 'destino'); }
     destino = d;
-    if (d) { const h = celdas[d.k].querySelector(`.hueco[data-i="${d.j}"]`); if (h) h.classList.add('on'); }
+    if (d) { const h = marca(d); if (h) h.classList.add(d.j < 0 ? 'destino' : 'on'); }
   }
   mueble.addEventListener('pointerdown', e => {
     if (G.ocupado || G.fin || pausado || abierta() || toque) return;
-    const o = e.target.closest('.obj.frente'), c = e.target.closest('.casillero');
+    let o = e.target.closest('.obj.frente'); const c = e.target.closest('.casillero');
+    if (o && R.cerrada(G.puertas, Number(o.dataset.k))) o = null;   // behind a closed door: it is not touched
     toque = { id: e.pointerId, x: e.clientX, y: e.clientY, obj: o ? { k: Number(o.dataset.k), i: Number(o.dataset.i) } : null, k: c ? Number(c.dataset.k) : null, el: o };
     if (o) e.preventDefault();
   });
@@ -343,13 +414,12 @@
     if (!flotante) {
       G.sel = null; celdas.forEach(c => c.querySelectorAll('.elegido').forEach(x => x.classList.remove('elegido')));
       flotante = document.createElement('div'); flotante.id = 'arrastre';
-      flotante.innerHTML = O.svg(R.OBJETOS[G.bib[toque.obj.k][0][toque.obj.i]]);
+      flotante.innerHTML = svgDe(G.bib[toque.obj.k][0][toque.obj.i]);
       stage.appendChild(flotante); toque.el.classList.add('levantado');
     }
     const p = enStage(e.clientX, e.clientY);
     flotante.style.left = p.x + 'rem'; flotante.style.top = p.y + 'rem';
-    const k = celdaBajo(e.clientX, e.clientY);
-    marcar(k !== null && k !== toque.obj.k && lugarEn(k, e.clientX) !== null ? { k, j: lugarEn(k, e.clientX) } : null);
+    marcar(destinoPara(toque.obj, celdaBajo(e.clientX, e.clientY), e.clientX));
   });
   function soltar(e) {
     if (!toque || e.pointerId !== toque.id) return;
@@ -362,7 +432,8 @@
     }
     if (e.type === 'pointercancel') return;
     // a touch: with something lifted, the touched cubby is where it goes; if not, lift what was touched
-    if (G.sel && t.k !== null && t.k !== G.sel.k && lugarEn(t.k, e.clientX) !== null) { jugar(G.sel.k, G.sel.i, t.k, lugarEn(t.k, e.clientX)); return; }
+    const d = G.sel ? destinoPara(G.sel, t.k, e.clientX) : null;
+    if (d) { jugar(G.sel.k, G.sel.i, d.k, d.j); return; }
     const antes = G.sel;
     G.sel = t.obj && !(antes && antes.k === t.obj.k && antes.i === t.obj.i) ? t.obj : null;
     if (antes) pintar(antes.k);
@@ -380,7 +451,7 @@
   // that has not been touched), and get stuck or finish
   let paso = 0;
   window.__biblioteca = {
-    G, state: () => ({ dif: DIF, movidas: G.movidas, objetos: R.cuenta(G.bib), fin: G.fin, pausado, abierta: cartas.find(c => !$(c).hidden) || null, hayMovida: R.hayMovida(G.bib) }),
+    G, state: () => ({ dif: DIF, movidas: G.movidas, objetos: R.cuenta(G.bib), puertas: G.puertas.filter(p => !p.abierta).length, fin: G.fin, pausado, abierta: cartas.find(c => !$(c).hidden) || null, hayMovida: R.hayMovida(G.bib, G.puertas) }),
     paso() { const m = G.solucion[paso++]; if (m) jugar(...m); return !!m; },
     jugar, repintar: () => { pintarTodo(); despues(); },
   };

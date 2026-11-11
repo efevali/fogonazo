@@ -2,6 +2,12 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.19.0 — 11/11/2026
+
+- **Biblioteca: puertas con llave** (S-38). En Normal un casillero arranca cerrado con una puerta de vidrio; en Difícil, además, otro con una reja de ascensor viejo. Lo de adentro se ve pero no se toca hasta llevarle su llave, escondida unas filas atrás en otro casillero: la de bronce abre el vidrio; la de hierro, la reja. Los repartos siguen teniendo siempre solución.
+- **Cinco objetos nuevos**: la pila de libros acostados y la enciclopedia (Normal), y tres que se parecen a otros (Difícil): los tres libros alternados, el tomo azul y el casete transparente. **La torre Eiffel, gris claro**, para que se despegue del fondo.
+- El registro de partidas anota la versión de los repartos y las llaves; las capturas recorren las puertas.
+
 ## 0.18.0 — 10/11/2026
 
 - **Biblioteca, un juego nuevo** (#71, S-37): ordenar la biblioteca baja del living. Se arrastra un objeto (o se lo toca y después su casillero) a un lugar libre de otro casillero; tres iguales se van y avanza la fila de atrás, que se ve en sombra. Se gana al vaciarla. Cada reparto tiene solución. Tres dificultades (Fácil, Normal y Difícil), récord por movidas y luego tiempo, «Deshacer» sin límite, pausa y, si no queda lugar, «Empezar de nuevo» o «Deshacer». Se entra tocando **la biblioteca baja de la sala**, con la lámpara hongo, que pasa a brillar como los otros objetos activos. Por ahora con los dibujos del boceto y sin sonido.

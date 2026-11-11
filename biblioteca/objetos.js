@@ -1,9 +1,10 @@
-/* Biblioteca: los catorce objetos, dibujados con código como en el boceto S-37g (son de ejemplo: los definitivos los
-   pinta la IA). Cada uno en un recuadro de 60 × 80, apoyado abajo, con silueta propia para reconocerlo de un vistazo.
+/* Biblioteca: los diecinueve objetos y las dos llaves, dibujados con código como en los bocetos S-37g y S-38a (son de
+   ejemplo: los definitivos los pinta la IA). Cada uno en un recuadro de 60 × 80, apoyado abajo, con silueta propia
+   para reconocerlo de un vistazo, salvo los que en Difícil se parecen a propósito.
 
    Objetos.instalar() pone los dibujos en la página (como símbolos de SVG); Objetos.svg(tipo) devuelve uno listo para
-   usar. El orden de la lista es el de Repartos.OBJETOS: Fácil usa los primeros ocho, Normal doce, Difícil los catorce
-   (los dos casetes que se parecen al naranja quedan para Difícil). */
+   usar. El orden de la lista es el de Repartos.OBJETOS: Fácil usa los primeros ocho, Normal catorce y Difícil los
+   diecinueve. */
 window.Objetos = (() => {
   'use strict';
   const D = {
@@ -15,10 +16,10 @@ window.Objetos = (() => {
     casete: `<rect x="3" y="46" width="54" height="32" rx="3" fill="#1d1a19"/><rect x="7" y="50" width="46" height="14" rx="1.5" fill="#ef8a2b"/>
       <rect x="7" y="50" width="46" height="3" fill="#f6efe0"/><rect x="17" y="55.5" width="26" height="7" rx="3.5" fill="#1d1a19"/>
       <circle cx="22" cy="59" r="2.4" fill="#efe2c8"/><circle cx="38" cy="59" r="2.4" fill="#efe2c8"/><path d="M16 78 L19 69 H41 L44 78 Z" fill="#3a3533"/>`,
-    // la torre Eiffel, de bronce
-    eiffel: `<path d="M30 4 L31.6 20 L34 34 L37 48 L41.5 62 L47 78 H40 C38 70 35 66 30 66 C25 66 22 70 20 78 H13 L18.5 62 L23 48 L26 34 L28.4 20 Z" fill="#6b5236"/>
-      <rect x="25" y="32" width="10" height="3" fill="#4a3824"/><rect x="21" y="47" width="18" height="3.4" fill="#4a3824"/><rect x="16.5" y="61" width="27" height="3.6" fill="#4a3824"/>
-      <path d="M30 4 L31 20 H29 Z" fill="#8a6c48"/>`,
+    // la torre Eiffel, gris claro con brillo metálico, para que se despegue del fondo (S-38a; antes era de bronce)
+    eiffel: `<path d="M30 4 L31.6 20 L34 34 L37 48 L41.5 62 L47 78 H40 C38 70 35 66 30 66 C25 66 22 70 20 78 H13 L18.5 62 L23 48 L26 34 L28.4 20 Z" fill="#a9adb3"/>
+      <path d="M30 4 L31.6 20 L34 34 L37 48 L41.5 62 L47 78 H44 L38.5 62 L34 48 L31.5 34 L30 20 Z" fill="#d6d9dd"/>
+      <rect x="25" y="32" width="10" height="3" fill="#7d8188"/><rect x="21" y="47" width="18" height="3.4" fill="#7d8188"/><rect x="16.5" y="61" width="27" height="3.6" fill="#7d8188"/>`,
     // un avión de maqueta sobre su pie
     avion: `<ellipse cx="30" cy="77" rx="10" ry="2.4" fill="#4a3428"/><rect x="29" y="44" width="2.4" height="33" fill="#b8bcc2"/>
       <path d="M45 25 L51 13 H55 L52 31 Z" fill="#d23c2c"/><path d="M26 34 L44 34 L34 47 L28 47 Z" fill="#c9ccd2"/>
@@ -65,13 +66,46 @@ window.Objetos = (() => {
     caseteBlanco: `<rect x="3" y="46" width="54" height="32" rx="3" fill="#ebe7dc"/><rect x="7" y="50" width="46" height="14" rx="1.5" fill="#4aa3d6"/>
       <rect x="7" y="50" width="46" height="3" fill="#fbf8f0"/><rect x="17" y="55.5" width="26" height="7" rx="3.5" fill="#1d1a19"/>
       <circle cx="22" cy="59" r="2.4" fill="#efe2c8"/><circle cx="38" cy="59" r="2.4" fill="#efe2c8"/><path d="M16 78 L19 69 H41 L44 78 Z" fill="#c4bfb2"/>`,
+    // una pila de tres libros acostados (S-38a)
+    pila: `<rect x="5" y="64" width="50" height="14" rx="1.5" fill="#6b3f22"/><rect x="5" y="69" width="50" height="2.2" fill="#d8b04a"/>
+      <rect x="10" y="51" width="41" height="13" rx="1.5" fill="#2a7a7a"/><rect x="38" y="54" width="9" height="7" fill="#efe2c2"/>
+      <rect x="14" y="42" width="34" height="9" rx="1.5" fill="#d8a23a"/><rect x="14" y="45.5" width="34" height="1.8" fill="#8a2a22"/>`,
+    // una enciclopedia: cuatro tomos finos e iguales, numerados
+    enciclopedia: [0, 1, 2, 3].map(k => `<rect x="${7 + k * 11.8}" y="14" width="10.6" height="64" rx="1" fill="#24345e"/>
+      <rect x="${7 + k * 11.8}" y="20" width="10.6" height="2" fill="#d8b04a"/><rect x="${7 + k * 11.8}" y="70" width="10.6" height="2" fill="#d8b04a"/>
+      <text x="${12.3 + k * 11.8}" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#d8b04a">${['I', 'II', 'III', 'IV'][k]}</text>`).join(''),
+    // los tres libros con la forma de los otros, pero en dos colores alternados: verde, bordó, verde (Difícil)
+    librosAlt: `<rect x="8" y="10" width="11" height="68" rx="1" fill="#2f6b4a"/><rect x="8" y="17" width="11" height="2.5" fill="#d8b04a"/><rect x="8" y="68" width="11" height="2.5" fill="#d8b04a"/>
+      <rect x="20" y="22" width="17" height="56" rx="1" fill="#7c1f2c"/><rect x="20" y="28" width="17" height="2.5" fill="#d8b04a"/><rect x="24.5" y="36" width="8" height="11" fill="#efe2c2"/>
+      <rect x="38" y="34" width="14" height="44" rx="1" fill="#2f6b4a"/><rect x="38" y="70" width="14" height="2.5" fill="#d8b04a"/><rect x="38" y="40" width="14" height="2" fill="#d8b04a"/>`,
+    // el tomo, gemelo del bordó, en azul (Difícil)
+    tomoAzul: `<rect x="16" y="14" width="28" height="64" rx="2" fill="#1f3f7a"/><rect x="16" y="14" width="5" height="64" fill="#162e5a"/>
+      <rect x="16" y="22" width="28" height="4" fill="#d8b04a"/><rect x="16" y="66" width="28" height="4" fill="#d8b04a"/>
+      <rect x="24" y="33" width="15" height="17" fill="#efe2c2"/><rect x="26.5" y="35.5" width="10" height="12" fill="none" stroke="#1f3f7a" stroke-width=".8"/>`,
+    // un casete transparente azulado de etiqueta amarilla (el C de S-38a; Difícil)
+    caseteTransparente: `<rect x="3" y="46" width="54" height="32" rx="3" fill="#9fb8c8"/><rect x="7" y="50" width="46" height="14" rx="1.5" fill="#f2c335"/>
+      <rect x="7" y="50" width="46" height="3" fill="#fbf4dc"/><rect x="17" y="55.5" width="26" height="7" rx="3.5" fill="#1d1a19"/>
+      <circle cx="22" cy="59" r="2.4" fill="#efe2c8"/><circle cx="38" cy="59" r="2.4" fill="#efe2c8"/><path d="M16 78 L19 69 H41 L44 78 Z" fill="#7c96a8"/>`,
+    // la llave de la puerta de vidrio: de bronce, parada, ojo redondo y cinta roja (S-38c)
+    llave: `<circle cx="30" cy="22" r="10" fill="none" stroke="#c99a3a" stroke-width="5"/><circle cx="30" cy="22" r="10" fill="none" stroke="#f0cf78" stroke-width="1.4" stroke-dasharray="10 40"/>
+      <rect x="27.5" y="31" width="5" height="44" rx="1.5" fill="#c99a3a"/><rect x="28.5" y="31" width="1.6" height="44" fill="#f0cf78" opacity=".7"/>
+      <path d="M32 60 H41 V65 H37 V70 H41 V75 H32 Z" fill="#c99a3a"/>
+      <path d="M22 14 C14 6 8 10 12 18 C14 22 20 18 22 14 Z" fill="#c8392a"/><path d="M23 15 C18 24 14 30 10 33 M23 15 C24 24 22 32 20 36" stroke="#c8392a" stroke-width="2.6" stroke-linecap="round" fill="none"/>`,
+    // la llave de la reja: de hierro claro, ojo de trébol y cinta verde (S-38f; aclarada para que se despegue del fondo)
+    llaveReja: `<g fill="#b4b8bf"><circle cx="30" cy="13" r="6.5"/><circle cx="23" cy="24" r="6.5"/><circle cx="37" cy="24" r="6.5"/></g>
+      <circle cx="30" cy="13" r="2.6" fill="#2a1a10"/><circle cx="23" cy="24" r="2.6" fill="#2a1a10"/><circle cx="37" cy="24" r="2.6" fill="#2a1a10"/>
+      <rect x="27.5" y="27" width="5" height="48" rx="1.5" fill="#b4b8bf"/><rect x="28.4" y="27" width="1.4" height="48" fill="#eef0f3"/>
+      <path d="M32 58 H42 V63 H38 V66 H42 V75 H32 Z" fill="#b4b8bf"/><rect x="25" y="30" width="10" height="3" rx="1" fill="#d6d9de"/>
+      <path d="M17 20 C9 13 5 18 9 25 C11 28 16 25 17 20 Z" fill="#4fa65a"/><path d="M18 22 C13 31 10 36 6 39 M18 22 C18 31 16 38 14 42" stroke="#4fa65a" stroke-width="2.6" stroke-linecap="round" fill="none"/>`,
     // un casete ahumado de etiqueta roja
     caseteAhumado: `<rect x="3" y="46" width="54" height="32" rx="3" fill="#5c4f48"/><rect x="7" y="50" width="46" height="14" rx="1.5" fill="#cf2e2e"/>
       <rect x="7" y="50" width="46" height="3" fill="#f6efe0"/><rect x="17" y="55.5" width="26" height="7" rx="3.5" fill="#1d1a19"/>
       <circle cx="22" cy="59" r="2.4" fill="#efe2c8"/><circle cx="38" cy="59" r="2.4" fill="#efe2c8"/><path d="M16 78 L19 69 H41 L44 78 Z" fill="#3e3430"/>`,
   };
   const NOMBRES = { tomo: 'tomo', casete: 'casete naranja', eiffel: 'torre Eiffel', avion: 'avión', globo: 'globo terráqueo', despertador: 'despertador',
-    mamushka: 'mamushka', cactus: 'cactus', libros: 'tres libros', auto: 'auto', camara: 'cámara', radio: 'radio', caseteBlanco: 'casete blanco', caseteAhumado: 'casete ahumado' };
+    mamushka: 'mamushka', cactus: 'cactus', libros: 'tres libros', auto: 'auto', camara: 'cámara', radio: 'radio', caseteBlanco: 'casete blanco', caseteAhumado: 'casete ahumado',
+    pila: 'pila de libros', enciclopedia: 'enciclopedia', librosAlt: 'tres libros alternados', tomoAzul: 'tomo azul', caseteTransparente: 'casete transparente',
+    llave: 'llave de bronce', llaveReja: 'llave de hierro' };
   function instalar() {
     if (document.getElementById('objetos-biblioteca')) return;
     const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
