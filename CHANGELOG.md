@@ -2,7 +2,7 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
-## 0.18.0 — sin publicar
+## 0.18.0 — 10/11/2026
 
 - **Biblioteca, un juego nuevo** (#71, S-37): ordenar la biblioteca baja del living. Se arrastra un objeto (o se lo toca y después su casillero) a un lugar libre de otro casillero; tres iguales se van y avanza la fila de atrás, que se ve en sombra. Se gana al vaciarla. Cada reparto tiene solución. Tres dificultades (Fácil, Normal y Difícil), récord por movidas y luego tiempo, «Deshacer» sin límite, pausa y, si no queda lugar, «Empezar de nuevo» o «Deshacer». Se entra tocando **la biblioteca baja de la sala**, con la lámpara hongo, que pasa a brillar como los otros objetos activos. Por ahora con los dibujos del boceto y sin sonido.
 - **El registro de partidas suma Biblioteca**, con el reparto y cada movida.
