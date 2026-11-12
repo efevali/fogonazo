@@ -12,6 +12,8 @@
           melodía, bongós en los contratiempos y un barrido de vibráfono al final de la vuelta sin melodía.
        B2, B con brillo (12/11): más ataque en el piano eléctrico y el bajo, un brillo arriba en el vibráfono, shaker
           en corcheas, pandereta en el 2 y el 4 y un glockenspiel suave que dobla la melodía una octava arriba.
+       La melodía de la B2 (12/11, elegida a 116 con swing): el vibráfono casi no se oía; más presente, o con otro
+          instrumento: trompeta con sordina, silbido o sintetizador.
      El tempo se elige (92, el de Taller, a 126) para todas.
      El swing corre las corcheas de contratiempo hacia atrás (el ritmo de shuffle de los dibujitos).
      Todo sintetizado, sin archivos de audio. En el juego el tema arranca con una vuelta sin melodía; acá arranca con
@@ -67,10 +69,14 @@ const OPCIONES = [
   ['B2', 'B2 · Dibujito de los 70, con brillo', 'B con más ataque y aire: shaker, pandereta y un glockenspiel que dobla la melodía'],
 ];
 const TEMPOS = [[92, 'como Taller'], [104, 'como Placa'], [116, 'más ágil'], [126, 'bien movida']];
-let BPM = 92;
+let BPM = 116;
+// B2's melody: who plays it (12/11: the vibraphone was barely heard)
+const MELODIAS = [['vibra', 'Vibráfono, más presente', 'el de antes, más fuerte y más parejo'], ['trompeta', 'Trompeta con sordina', 'la de los dibujitos, con un quejido al entrar'],
+  ['silbido', 'Silbido', 'alguien que silba mientras ordena'], ['moog', 'Sintetizador', 'un Moog de los 70, redondo']];
+let MEL = 'vibra', SOLO = null;   // SOLO, for the tools: 'melodia' or 'resto', to measure the balance
 // how much each version is turned up or down to sound as loud as the original (measured offline, see __render)
-const TRIM = { original: 1, A: 0.345, B: 0.49, B2: 0.49 };
-let SWING = false;
+const TRIM = { original: 1, A: 0.345, B: 0.49, B2: 0.42 };
+let SWING = true;
 const SWING_K = 0.6;   // how late the off-beat eighth falls, in sixteenths (0.67 would be a full triplet)
 
 // ------------------------------------------------------------------ the engine (works on a live or an offline context)
@@ -243,6 +249,49 @@ function Motor(ctx) {
     bajoE(m, t, d, vol, dest);
     ruido(t, 0.015, vol * 0.3, 'bandpass', 1800, 2, dest);
   }
+  // the vibraphone, up front: less tremolo, a longer ring and its brightness
+  function vibraP(m, t, d, vol, dest, pan) {
+    const f = mtof(m), L = Math.max(0.7, d * 1.3), g = ctx.createGain(), trem = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+    l.frequency.value = 5.5; lg.gain.value = 0.12; trem.gain.value = 0.88; l.connect(lg); lg.connect(trem.gain);
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(); o.frequency.value = f; o2.frequency.value = f * 4; g2.gain.setValueAtTime(0.3, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(vol * 0.7, t + 0.25); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(trem); trem.connect(salida(dest, pan));
+    seno(t, f * 10, 0, 0.05, vol * 0.15, dest, pan); ruido(t, 0.01, vol * 0.3, 'bandpass', 3000, 1.2, dest, pan);
+    for (const x of [o, o2, l]) { x.start(t); x.stop(t + L + 0.05); }
+  }
+  // trompeta con sordina (Harmon): a nasal, buzzing saw through a narrow band, a scoop up into the note and a late vibrato
+  function trompeta(m, t, d, vol, dest, pan) {
+    const f = mtof(m), o = ctx.createOscillator(), bp = ctx.createBiquadFilter(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 0.94, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.05);
+    const v = vibrato(o.frequency, f, t, 0.006, 5.5, 0.18);
+    bp.type = 'bandpass'; bp.Q.value = 2.2; bp.frequency.setValueAtTime(1100, t); bp.frequency.exponentialRampToValueAtTime(1700, t + 0.06);
+    hp.type = 'highpass'; hp.frequency.value = 500;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.03); g.gain.setValueAtTime(vol * 0.85, t + Math.max(0.05, d - 0.04)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.05);
+    o.connect(hp); hp.connect(bp); bp.connect(g); g.connect(salida(dest, pan));
+    o.start(t); o.stop(t + d + 0.1); v.stop(t + d + 0.1);
+  }
+  // silbido: almost a pure sine, a little scoop, breath and a quick vibrato
+  function silbido(m, t, d, vol, dest, pan) {
+    const f = mtof(m) * 2, o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(f * 0.97, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.04);
+    const v = vibrato(o.frequency, f, t, 0.008, 6.2, 0.12);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.025); g.gain.setValueAtTime(vol * 0.9, t + Math.max(0.04, d - 0.04)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.04);
+    o.connect(g); g.connect(salida(dest, pan));
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 6;
+    const ng = ctx.createGain(); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(vol * 0.6, t + 0.02); ng.gain.exponentialRampToValueAtTime(vol * 0.15, t + 0.08); ng.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.04);
+    s.connect(bp); bp.connect(ng); ng.connect(salida(dest, pan));
+    o.start(t); s.start(t, Math.random() * 0.5); o.stop(t + d + 0.08); s.stop(t + d + 0.08); v.stop(t + d + 0.08);
+  }
+  // sintetizador: two slightly detuned saws through a low-pass that opens and closes, round and warm
+  function moog(m, t, d, vol, dest, pan) {
+    const f = mtof(m), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    const os = [-6, 6].map(c => { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 1.03, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.035); o.detune.value = c; o.connect(lp); return o; });
+    lp.type = 'lowpass'; lp.Q.value = 4; lp.frequency.setValueAtTime(700, t); lp.frequency.exponentialRampToValueAtTime(3200, t + 0.03); lp.frequency.exponentialRampToValueAtTime(1300, t + 0.25);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.setValueAtTime(vol * 0.8, t + Math.max(0.03, d - 0.04)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.06);
+    lp.connect(g); g.connect(salida(dest, pan));
+    os.forEach(o => { o.start(t); o.stop(t + d + 0.1); });
+  }
+  const MEL_VOZ = { vibra: [vibraP, 0.11], trompeta: [trompeta, 0.205], silbido: [silbido, 0.066], moog: [moog, 0.064] };   // the melody about 4 dB under the rest (in the original, 7)
   // bongós: macho (high) and hembra (low)
   function bongo(t, alto, vol, dest) {
     const f = alto ? 420 : 310, pan = alto ? 0.3 : -0.3;
@@ -264,8 +313,10 @@ function Motor(ctx) {
     const song = TALLER, dest = c.voces, k = step % 64, bar = (k / 16) | 0, i = k % 16, pass = (step / 64) | 0, conMel = pass % 2 === 1;
     const chord = song.chordsM[bar], root = song.rootsM[bar];
     const t = t0 + (SWING && c.v !== 'original' && i % 4 === 2 ? S * SWING_K : 0);
-    const L = conMel ? song.leadByStep.get(k) : null;
+    let L = conMel ? song.leadByStep.get(k) : null;
     if (c.v === 'original') {
+      if (SOLO === 'melodia') { if (L) pluck(mtof(L[0]), t, S * L[1] * 0.95, 0.045, 'square', dest); return; }
+      if (SOLO === 'resto') L = null;
       if (song.bass.includes(i)) pluck(mtof(root), t, S * song.bassLen, 0.12, 'square', dest);
       if (i % 2 === 0) pluck(mtof(chord[(i / 2) % 3] + 12), t, S * 1.8, 0.035, 'triangle', dest);
       if (song.hats.includes(i)) hiss(t, 0.025, dest);
@@ -292,12 +343,14 @@ function Motor(ctx) {
       return;
     }
     if (c.v === 'B2') {
+      if (SOLO === 'melodia') { if (L) { const [voz, vol] = MEL_VOZ[MEL]; voz(L[0], t, S * L[1] * 0.95, vol, dest, 0.1); } return; }
+      if (SOLO === 'resto') L = null;
       if (song.bass.includes(i)) bajoEB(root, t, S * song.bassLen, 0.12, dest);
       if (i % 2 === 0) rhodesB(chord[(i / 2) % 3] + 12, t, 0.045, dest, (i / 2) % 2 ? 0.2 : -0.2);
       if (song.hats.includes(i)) bongo(t, i % 8 === 2, 0.045, dest);
       if (i % 2 === 0) shaker(t, i % 4 === 2, 0.03, dest);
       if (i === 4 || i === 12) pandereta(t, 0.035, dest);
-      if (L) { vibraB(L[0], t, S * L[1] * 0.95, 0.06, dest, 0.1); glock(L[0] + 12, t, 0.018, dest, 0.2); }
+      if (L) { const [voz, vol] = MEL_VOZ[MEL]; voz(L[0], t, S * L[1] * 0.95, vol, dest, 0.1); if (MEL === 'vibra') glock(L[0] + 12, t, 0.025, dest, 0.2); }
       if (!conMel && k === 58) ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'].forEach((n, j) => { vibra(N(n), t + j * S * 0.5, S, 0.03, dest, -0.3 + j * 0.12); glock(N(n) + 12, t + j * S * 0.5, 0.012, dest, 0.2); });
     }
   }
@@ -308,13 +361,18 @@ function Motor(ctx) {
 const temas = document.getElementById('temas');
 temas.insertAdjacentHTML('beforeend', `<h2>El tema</h2><p>Taller. Tocá para escuchar; tocá otra para cambiar.</p><div class="par">` +
   OPCIONES.map(([v, t, d]) => `<button class="op tema" data-v="${v}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+temas.insertAdjacentHTML('beforeend', `<h2>La melodía de la B2</h2><p>Quién la toca. Se cambia con el tema sonando.</p><div class="par">` +
+  MELODIAS.map(([m, t, d]) => `<button class="op mel${m === MEL ? ' on' : ''}" data-m="${m}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+document.querySelectorAll('.mel').forEach(b => b.addEventListener('click', () => {
+  MEL = b.dataset.m; document.querySelectorAll('.mel').forEach(x => x.classList.toggle('on', x === b));
+}));
 temas.insertAdjacentHTML('beforeend', `<h2>Tempo</h2><p>En pulsos por minuto. Vale para todas; se cambia con el tema sonando.</p><div class="par">` +
   TEMPOS.map(([b, d]) => `<button class="op tempo${b === BPM ? ' on' : ''}" data-b="${b}"><b>${b}</b><span>${d}</span></button>`).join('') + '</div>');
 document.querySelectorAll('.tempo').forEach(b => b.addEventListener('click', () => {
   BPM = +b.dataset.b; document.querySelectorAll('.tempo').forEach(x => x.classList.toggle('on', x === b));
 }));
 temas.insertAdjacentHTML('beforeend', `<h2>Swing</h2><p>Las corcheas de contratiempo, un poco atrasadas: el andar saltarín de los dibujitos. Vale para A, B y B2.</p><div class="par">` +
-  [[0, 'Derecho', 'como en Fogonazo'], [1, 'Con swing', 'saltarín']].map(([s, t, d]) => `<button class="op swing${s ? '' : ' on'}" data-s="${s}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+  [[0, 'Derecho', 'como en Fogonazo'], [1, 'Con swing', 'saltarín']].map(([s, t, d]) => `<button class="op swing${!!s === SWING ? ' on' : ''}" data-s="${s}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
 document.querySelectorAll('.swing').forEach(b => b.addEventListener('click', () => {
   SWING = b.dataset.s === '1'; document.querySelectorAll('.swing').forEach(x => x.classList.toggle('on', x === b));
 }));
@@ -366,7 +424,7 @@ window.__renderBuf = async (v, swing, bpm) => {
   for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i] * g)) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i] * g)) * 32767, true); }
   let bin = ''; const u = new Uint8Array(dv.buffer); for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin);
 };
-window.__trim = TRIM;
+window.__trim = TRIM; window.__solo = x => { SOLO = x; }; window.__mel = x => { MEL = x; };
 </script>
 </body>
 </html>

@@ -81,4 +81,4 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 | S-40b | Normal con las imágenes (P-010, P-012 a P-015) | Aprobado (11/11), con los objetos más adelante en los estantes del medio y de abajo |
 | S-40c | Difícil, al tamaño de un teléfono | Aprobado (11/11) |
 | S-40d | Fácil (P-011) | Aprobado (11/11) |
-| S-41 | La música: Taller como primo de dibujos animados, A (caricatura clásica), B (dibujito de los 70) y B2 (B con brillo), con o sin swing y a cuatro tempos; en [`herramientas/biblioteca/prueba-musica.html`](../../herramientas/biblioteca/prueba-musica.html) | En revisión |
+| S-41 | La música: Taller como primo de dibujos animados, A (caricatura clásica), B (dibujito de los 70) y B2 (B con brillo), con o sin swing y a cuatro tempos; elegida B2 a 116 con swing, la melodía con cuatro instrumentos; en [`herramientas/biblioteca/prueba-musica.html`](../../herramientas/biblioteca/prueba-musica.html) | En revisión |
