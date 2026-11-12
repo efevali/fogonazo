@@ -81,5 +81,5 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 | S-40b | Normal con las imágenes (P-010, P-012 a P-015) | Aprobado (11/11), con los objetos más adelante en los estantes del medio y de abajo |
 | S-40c | Difícil, al tamaño de un teléfono | Aprobado (11/11) |
 | S-40d | Fácil (P-011) | Aprobado (11/11) |
-| S-41 | La música: Taller como primo de dibujos animados, A (caricatura clásica), B (dibujito de los 70) y B2 (B con brillo), con o sin swing y a cuatro tempos; elegida (12/11) B2 a 116 con swing y la melodía silbada; en [`herramientas/biblioteca/prueba-sonido.html`](../../herramientas/biblioteca/prueba-sonido.html) | Elegida: un solo tema en todo Biblioteca, igual de fuerte en la partida, que baja al terminar |
-| S-42 | Los efectos, en dos variantes: R (realistas, del rubro) y D (con un toque de dibujito, notas en do y silbidos), con la música de fondo; en la misma página | En revisión |
+| S-41 | La música: Taller como primo de dibujos animados, A (caricatura clásica), B (dibujito de los 70) y B2 (B con brillo), con o sin swing y a cuatro tempos; elegida (12/11) B2 a 116 con swing y la melodía silbada; en [`herramientas/biblioteca/prueba-sonido.html`](../../herramientas/biblioteca/prueba-sonido.html) | Aprobado (12/11): un solo tema en todo Biblioteca, igual de fuerte en la partida, que baja al terminar |
+| S-42 | Los efectos, en dos variantes: R (realistas, del rubro) y D (con un toque de dibujito, notas en do y silbidos), con la música de fondo; en la misma página | Aprobado (12/11): la D, entera |
