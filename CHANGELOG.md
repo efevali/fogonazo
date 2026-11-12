@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.22.0 — 12/11/2026
+
+- **Biblioteca suena** (S-41, S-42). La música es Taller de Fogonazo como primo de dibujito de los 70, a 116 y con swing, con bajo eléctrico, piano eléctrico, bongós, shaker, pandereta y la melodía silbada; un solo tema en la entrada y la partida, que baja al terminar.
+- **Los efectos:** cada objeto suena como lo que es al apoyarlo (libro, plástico, metal, madera), con una nota; el trío que se va, la llave que aparece, la puerta de vidrio y la reja, deshacer, «No queda lugar», las fichas, la dificultad, el final y el récord, con silbidos y glockenspiel.
+
 ## 0.21.1 — 11/11/2026
 
 - **Biblioteca: los objetos de los estantes de arriba y del medio, apoyados en el canto del estante.** Parecían flotar: ahí casi no se ve estante y quedaban por encima del borde.

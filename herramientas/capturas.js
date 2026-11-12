@@ -244,8 +244,9 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   await tocar('#jugar'); await bb();
   ok(ruta() === 'biblioteca/partida.html' && (await bbEstado()).objetos === 45 && (await bbEstado()).puertas === 1 && await pantalla().evaluate(() => document.querySelectorAll('.casillero').length) === 9, 'Fácil abre una partida de 9 casilleros, 45 objetos y una puerta');
   await foto('31-biblioteca-facil');
-  // una movida arrastrando: el primer objeto de adelante, al primer casillero con lugar
-  const mov = await pantalla().evaluate(() => { const B = window.__biblioteca.G.bib, R = window.Repartos; const a = B.findIndex(c => R.objetos(c).length), i = R.objetos(B[a])[0]; return { a, i, b: B.findIndex((c, k) => k !== a && R.libres(c).length) }; });
+  // una movida arrastrando: el primer objeto de adelante, al primer casillero con lugar (los dos, sin puerta cerrada:
+  // desde la 0.20.0, Fácil también tiene una)
+  const mov = await pantalla().evaluate(() => { const G = window.__biblioteca.G, B = G.bib, R = window.Repartos, abierto = k => !R.cerrada(G.puertas, k); const a = B.findIndex((c, k) => abierto(k) && R.objetos(c).length), i = R.objetos(B[a])[0]; return { a, i, b: B.findIndex((c, k) => k !== a && abierto(k) && R.libres(c).length) }; });
   const de = await pantalla().locator(`.obj.frente[data-k="${mov.a}"][data-i="${mov.i}"]`).boundingBox(), a = await pantalla().locator(`.casillero[data-k="${mov.b}"]`).boundingBox();
   await page.mouse.move(de.x + de.width / 2, de.y + de.height / 2); await page.mouse.down();
   await page.mouse.move(de.x + 30, de.y, { steps: 4 }); await page.mouse.move(a.x + a.width / 2, a.y + a.height * .7, { steps: 8 }); await page.mouse.up(); await espera(900);

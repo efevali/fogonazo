@@ -32,8 +32,9 @@
     // la práctica), un 30 % más baja, para concentrarse
     [/^buenojo\/partida\.html\?d=/, { lluvia: false, musica: 'tallerR', foco: 0.7 }],
     [/^buenojo\//, { lluvia: false, musica: 'tallerR' }],
-    // Biblioteca: por ahora sin música ni efectos (el sonido se define aparte, escuchándolo)
-    [/^biblioteca\//, { lluvia: false, musica: null }],
+    // Biblioteca: Taller de dibujito en todo el juego (S-41), igual de fuerte en la partida: se juega rápido y le va
+    // una música con energía
+    [/^biblioteca\//, { lluvia: false, musica: 'tallerD' }],
   ];
   function ambiente(url) {
     const a = (AMBIENTE.find(([re]) => re.test(url)) || [null, { lluvia: false, musica: null }])[1];
