@@ -208,6 +208,14 @@
   // the gate of an old lift, with its padlock: painted (P-015)
   const reja = () => '<img src="arte/reja.webp" alt="" draggable="false">';
   const svgDe = x => O.svg(R.dibujo(x));
+  // the sound (S-42): each object sounds like what it is when set down; the keys go to their door, which has its own
+  const fx = (n, a, gap) => App.sonido.fx(n, a, gap);
+  const MATERIAL = { tomo: 'libro', libros: 'libro', enciclopedia: 'libro', librosAlt: 'libro', tomoAzul: 'libro', enciclopediaVerde: 'libro',
+    casete: 'plastico', caseteBlanco: 'plastico', caseteAhumado: 'plastico', caseteTransparente: 'plastico', radio: 'plastico',
+    mamushka: 'madera', cactus: 'madera' };
+  const material = x => MATERIAL[R.dibujo(x)] || 'metal';
+  // a key that has just come to the front of cubby k (the row behind came forward): it sounds when it shows
+  const llaveAdelante = k => G.bib[k] && G.bib[k][0] && G.bib[k][0].some(y => y !== null && R.esLlave(y));
 
   // a cubby: the row in front, the row behind in shadow, and how many more there are; its door, if it is closed;
   // anim: which rows arrive
@@ -284,29 +292,33 @@
     G.movidas++;
     if (reg) { reg.jugadas.push([a, i, b, j, res.trio !== null ? 1 : 0, Math.round(G.t * 10) / 10]); Reg.borrador('biblioteca', reg); }
     pintar(a, { frente: res.avanzaA, atras: res.avanzaA });
+    if (res.avanzaA && llaveAdelante(a)) setTimeout(() => fx('bi_llave'), 220);
     // the key: the door opens (the glass one swings, the gate folds) and goes
     if (res.puerta) {
       animando.add(b);
       const el = celdas[b].querySelector('.puerta, .reja');
       if (el) { el.classList.remove('destino'); el.classList.add('abre'); }
+      fx('bi_' + res.puerta.tipo);
       setTimeout(() => { animando.delete(b); pintar(b, { destello: true }); despues(); }, 460);
       return;
     }
+    fx('bi_apoya', material(x), 0);
     if (res.trio === null) { pintar(b); despues(); return; }
+    setTimeout(() => fx('bi_trio'), 130);
     // the trio: first the three together and glowing, then they go and the row behind comes forward
     animando.add(b);
     const vista = antes[b].map(c => c.slice()); if (!vista.length) vista.push([null, null, null]); vista[0][j] = x;
     const real = G.bib[b]; G.bib[b] = vista; pintar(b, { brilla: true }); G.bib[b] = real;
     setTimeout(() => {
       celdas[b].querySelectorAll('.obj.frente').forEach(e => e.classList.add('seVa'));
-      setTimeout(() => { animando.delete(b); pintar(b, { frente: res.avanzaB, atras: res.avanzaB }); despues(); }, 260);
+      setTimeout(() => { animando.delete(b); pintar(b, { frente: res.avanzaB, atras: res.avanzaB }); if (res.avanzaB && llaveAdelante(b)) fx('bi_llave'); despues(); }, 260);
     }, 430);
   }
   // after each move: the end, or no room left
   function despues() {
     hud();
     if (R.vacia(G.bib)) { setTimeout(terminar, 250); return; }
-    if (!R.hayMovida(G.bib, G.puertas)) { if (reg) reg.trabadas++; mostrar('trabada'); }
+    if (!R.hayMovida(G.bib, G.puertas)) { if (reg) reg.trabadas++; mostrar('trabada'); fx('bi_trabada'); }
   }
   function terminar() {
     G.fin = true; soltarPantalla();
@@ -317,11 +329,14 @@
     $('sello').hidden = !r.record;
     $('fRecord').textContent = r.record ? (r.antes ? `antes: ${r.antes.movidas} · ${Est.reloj(r.antes.tiempo)}` : '') : `récord: ${r.antes.movidas} · ${Est.reloj(r.antes.tiempo)}`;
     hud(); mostrar('fin');
+    App.sonido.duck(true);   // the music goes down so the end is heard, as in the other games
+    fx(r.record ? 'bi_record' : 'bi_fin');
   }
   function deshacer() {
     if (animando.size || G.fin || !G.deshacer.length) return;
     const d = G.deshacer.pop(); G.bib = d.bib; G.puertas = d.puertas; G.sel = null;
     if (reg) reg.deshacer++;
+    fx('bi_deshace');
     pintarTodo(); hud();
   }
 
@@ -346,25 +361,26 @@
     if (abierta()) { App.volver(); return; }
     pausar(true);
   };
-  $('pausa').addEventListener('click', () => { if (G.fin || abierta()) return; if (App.extra > 0) App.volver(); else pausar(false); });
+  $('pausa').addEventListener('click', () => { if (G.fin || abierta()) return; fx('bi_boton'); if (App.extra > 0) App.volver(); else pausar(false); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && G.empezado && !G.fin && !abierta()) pausar(false); });
   $('deshacer').addEventListener('click', deshacer);
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act;
+    if (act !== 'deshacer') fx('bi_boton');
     if (act === 'seguir') seguir();
     if (act === 'deshacer') { ocultar(); deshacer(); }
     if (act === 'denuevo' || act === 'otra') {
       if (!G.fin) regCerrar('reinicio');
       const devolver = !$('menu').hidden && pausaGastada;
-      ocultar(); pausado = false; pausaGastada = false;
+      ocultar(); pausado = false; pausaGastada = false; App.sonido.duck(false);
       if (devolver) App.abrir();
       nueva(act === 'denuevo');
     }
     if (act === 'salir') { if (!G.fin) regCerrar('abandono'); App.volver(App.extra + 1); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('menu').hidden) seguir(); });
-  $('volver').addEventListener('click', () => { if (!G.fin) regCerrar('abandono'); App.volver(App.extra + 1); });
+  $('volver').addEventListener('click', () => { fx('bi_boton'); if (!G.fin) regCerrar('abandono'); App.volver(App.extra + 1); });
 
   // ------------------------------------------------------------ dragging and touching
   // An object is dragged to a free place of another cubby (the nearest one to where it is dropped); or touched (it
@@ -421,6 +437,7 @@
       flotante = document.createElement('div'); flotante.id = 'arrastre';
       flotante.innerHTML = svgDe(G.bib[toque.obj.k][0][toque.obj.i]);
       stage.appendChild(flotante); toque.el.classList.add('levantado');
+      fx('bi_agarra');
     }
     const p = enStage(e.clientX, e.clientY);
     flotante.style.left = p.x + 'rem'; flotante.style.top = p.y + 'rem';
@@ -441,6 +458,7 @@
     if (d) { jugar(G.sel.k, G.sel.i, d.k, d.j); return; }
     const antes = G.sel;
     G.sel = t.obj && !(antes && antes.k === t.obj.k && antes.i === t.obj.i) ? t.obj : null;
+    if (G.sel) fx('bi_agarra');
     if (antes) pintar(antes.k);
     if (G.sel && (!antes || antes.k !== G.sel.k)) pintar(G.sel.k);
   }

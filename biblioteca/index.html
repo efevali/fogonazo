@@ -98,10 +98,10 @@
   pintar();
   $('libros').addEventListener('click', e => {
     const b = e.target.closest('.libro'); if (!b || b.dataset.id === Est.dificultad) return;
-    Est.dificultad = b.dataset.id; pintar();
+    Est.dificultad = b.dataset.id; pintar(); App.sonido.fx('bi_dificultad');
   });
-  $('jugar').addEventListener('click', () => App.ir('biblioteca/partida.html?d=' + Est.dificultad, 1));
-  $('volver').addEventListener('click', () => App.volver(1 + App.extra));
+  $('jugar').addEventListener('click', () => { App.sonido.fx('bi_boton'); App.ir('biblioteca/partida.html?d=' + Est.dificultad, 1); });
+  $('volver').addEventListener('click', () => { App.sonido.fx('bi_boton'); App.volver(1 + App.extra); });
 
   // ------------------------------------------------------------ the title (S-37h)
   // «BIBLIOTECA» comes in shuffled, «BLIO BI CA TE», with red arrows that say where each syllable goes, and sorts

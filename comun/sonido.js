@@ -5,6 +5,8 @@
      Taller como primas orientales: mismo tempo, ritmo, acordes y bajo, la melodía en do pentatónica mayor.
    - Los de Buen ojo (S-33, S-34): voces renacentistas (laúd, flauta dulce, viola da gamba y tamboril), Taller como
      primo renacentista y efectos con esos instrumentos y sonidos del oficio del pintor.
+   - Los de Biblioteca (S-41, S-42): Taller como primo de dibujito de los 70, con la melodía silbada, y efectos con
+     el sonido de cada objeto, una nota en do, silbidos y glockenspiel.
    - La lluvia de la sala: un colchón de ruido rosa apagado y gotitas en el vidrio.
    - Un solo juego de volúmenes para toda la colección (música, efectos y lluvia, de 0 a 10), guardado en Chrome.
    Vive en la página contenedora (index.html), así que no se corta al pasar de una pantalla a otra. */
@@ -312,6 +314,20 @@ const Sound = (() => {
     // música baja (la partida la baja al terminar)
     bo_fin() { hojaBlock(ctx.currentTime, nivel(1)); },
     bo_record() { const t = ctx.currentTime, d = nivel(0.9); hojaBlock(t, d); selloGoma(t + 0.5, d); },
+
+    // Biblioteca (S-42): los efectos de la variante D, en Bi (más abajo); apoya recibe el material
+    bi_agarra(a) { Bi.efecto('agarra', a); },
+    bi_apoya(a) { Bi.efecto('apoya', a); },
+    bi_trio(a) { Bi.efecto('trio', a); },
+    bi_llave(a) { Bi.efecto('llave', a); },
+    bi_vidrio(a) { Bi.efecto('vidrio', a); },
+    bi_reja(a) { Bi.efecto('reja', a); },
+    bi_deshace(a) { Bi.efecto('deshace', a); },
+    bi_trabada(a) { Bi.efecto('trabada', a); },
+    bi_boton(a) { Bi.efecto('boton', a); },
+    bi_dificultad(a) { Bi.efecto('dificultad', a); },
+    bi_fin(a) { Bi.efecto('fin', a); },
+    bi_record(a) { Bi.efecto('record', a); },
   };
   // cada efecto de Buen ojo pasa por su nivel: el que tenía en la prueba (S-34), medido acá (los golpes muy cortos
   // salen más bajos con el ataque de noise(), por eso algunos niveles pasan de 1)
@@ -335,6 +351,168 @@ const Sound = (() => {
     noise({ at: t, dur: 0.06, vol: 0.27, filter: 'lowpass', freq: 650, q: 0.8, attack: 0.002, dest: d });
     noise({ at: t + 0.004, dur: 0.025, vol: 0.08, filter: 'bandpass', freq: 1800, q: 1.5, attack: 0.002, dest: d });
   }
+
+  // ------------------------------------------------------------ Biblioteca (S-41, S-42)
+  // La música: Taller como primo de dibujito de los 70 (B2), a 116 con swing: bajo eléctrico, piano eléctrico en el
+  // arpegio, bongós en los contratiempos, shaker en corcheas, pandereta en el 2 y el 4 y la melodía silbada; al cierre de
+  // la vuelta sin melodía, un barrido de vibráfono con glockenspiel. Los efectos, la variante D: cada objeto suena como
+  // lo que es (libro, plástico, metal, madera) con una nota en do, y el trío, la llave, las puertas, deshacer, «No queda
+  // lugar», el final y el récord con silbidos y glockenspiel. Las voces y los niveles son los de la prueba donde se
+  // aprobaron (herramientas/biblioteca/prueba-sonido.html, borrada al aprobarse: queda en Git).
+  const Bi = (() => {
+    const N2 = N;
+    const glk = (n, t, vol, d, pan) => glock(N2(n), t, vol, d, pan);
+    const sil = (n, t, dur, vol, d) => silbido(N2(n) - 12, t, dur, vol, d, 0.1);
+    const salida = (dest, pan) => { if (!pan) return dest; const p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(dest); return p; };
+
+    function ruido(t, dur, vol, tipo, freq, q, dest, pan, freq2) {
+      const s = ctx.createBufferSource(); s.buffer = noiseBuf; const f = ctx.createBiquadFilter(); f.type = tipo; f.frequency.setValueAtTime(freq, t); f.Q.value = q || 0.8;
+      if (freq2) f.frequency.exponentialRampToValueAtTime(freq2, t + dur);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f); f.connect(g); g.connect(salida(dest, pan)); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+    }
+    function seno(t, f, f2, dur, vol, dest, pan, tipo) {
+      const o = ctx.createOscillator(), g = ctx.createGain(); if (tipo) o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(salida(dest, pan)); o.start(t); o.stop(t + dur + 0.02);
+    }
+    function vibrato(param, f, t, prof, vel, demora) {
+      const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = vel || 5.2;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0, t + (demora || 0.15)); g.gain.linearRampToValueAtTime(f * prof, t + (demora || 0.15) + 0.25);
+      l.connect(g); g.connect(param); l.start(t); return l;
+    }
+    function bloque(t, alto, vol, dest) {
+      const f = alto ? 1250 : 880;
+      seno(t, f, f * 0.92, 0.06, vol, dest, alto ? 0.3 : -0.3);
+      ruido(t, 0.012, vol * 0.6, 'bandpass', f * 2.2, 3, dest, alto ? 0.3 : -0.3);
+    }
+    function silbato(t, m0, m1, dur, vol, dest) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), f0 = mtof(m0), f1 = mtof(m1);
+      o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.85);
+      const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 6; lg.gain.value = f1 * 0.012; l.connect(lg); lg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.06); g.gain.setValueAtTime(vol, t + dur * 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(salida(dest, 0.15));
+      const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 4;
+      bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.85);
+      const ng = ctx.createGain(); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(vol * 0.5, t + 0.05); ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(bp); bp.connect(ng); ng.connect(salida(dest, 0.15));
+      o.start(t); l.start(t); s.start(t); for (const x of [o, l, s]) x.stop(t + dur + 0.05);
+    }
+    function bajoE(m, t, d, vol, dest) {
+      const f = mtof(m), L = Math.min(d, 0.5), o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = f; o2.type = 'sawtooth'; o2.frequency.value = f; g2.gain.value = 0.25;
+      lp.type = 'lowpass'; lp.Q.value = 1.2; lp.frequency.setValueAtTime(1300, t); lp.frequency.exponentialRampToValueAtTime(350, t + 0.15);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(vol * 0.45, t + L); g.gain.exponentialRampToValueAtTime(0.0001, t + L + 0.06);
+      o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(dest);
+      o.start(t); o2.start(t); o.stop(t + L + 0.1); o2.stop(t + L + 0.1);
+    }
+    function fm(t, f, ratio, i0, i1, iT, dur, vol, dest, pan, dec) {
+      const car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
+      car.frequency.value = f; mod.frequency.value = f * ratio;
+      mg.gain.setValueAtTime(i0 * f * ratio, t); mg.gain.exponentialRampToValueAtTime(Math.max(0.01, i1 * f * ratio), t + iT);
+      mod.connect(mg); mg.connect(car.frequency);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(vol * (dec || 0.3), t + dur * 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      car.connect(g); g.connect(salida(dest, pan)); car.start(t); mod.start(t); car.stop(t + dur + 0.02); mod.stop(t + dur + 0.02);
+    }
+    function rhodesB(m, t, vol, dest, pan) {
+      const f = mtof(m);
+      fm(t, f, 1, 2.6, 0.35, 0.18, 0.8, vol, dest, pan, 0.3);
+      fm(t, f * 7, 1, 0.8, 0.05, 0.04, 0.16, vol * 0.3, dest, pan, 0.2);
+    }
+    function vibra(m, t, d, vol, dest, pan) {
+      const f = mtof(m), L = Math.max(0.9, d * 1.5), g = ctx.createGain(), trem = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+      l.frequency.value = 5.5; lg.gain.value = 0.28; trem.gain.value = 0.72; l.connect(lg); lg.connect(trem.gain);
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(); o.frequency.value = f; o2.frequency.value = f * 4; g2.gain.setValueAtTime(0.25, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(vol * 0.5, t + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
+      o.connect(g); o2.connect(g2); g2.connect(g); g.connect(trem); trem.connect(salida(dest, pan));
+      ruido(t, 0.01, vol * 0.25, 'bandpass', 3000, 1.2, dest, pan);
+      for (const x of [o, o2, l]) { x.start(t); x.stop(t + L + 0.05); }
+    }
+    function glock(m, t, vol, dest, pan) {
+      const f = mtof(m);
+      seno(t, f, 0, 0.6, vol, dest, pan);
+      seno(t, f * 2.76, 0, 0.15, vol * 0.35, dest, pan);
+      ruido(t, 0.006, vol * 0.5, 'highpass', 6000, 1, dest, pan);
+    }
+    function shaker(t, acc, vol, dest) { ruido(t, acc ? 0.05 : 0.035, acc ? vol : vol * 0.55, 'bandpass', 7500, 1.2, dest, 0.35); }
+    function pandereta(t, vol, dest) {
+      for (let j = 0; j < 4; j++) ruido(t + j * 0.006, 0.12 - j * 0.02, vol * (1 - j * 0.2), 'bandpass', 8500 + j * 700, 3, dest, -0.3);
+      ruido(t, 0.02, vol * 0.6, 'bandpass', 2200, 1.5, dest, -0.3);
+    }
+    function bajoEB(m, t, d, vol, dest) {
+      bajoE(m, t, d, vol, dest);
+      ruido(t, 0.015, vol * 0.3, 'bandpass', 1800, 2, dest);
+    }
+    function vibraP(m, t, d, vol, dest, pan) {
+      const f = mtof(m), L = Math.max(0.7, d * 1.3), g = ctx.createGain(), trem = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+      l.frequency.value = 5.5; lg.gain.value = 0.12; trem.gain.value = 0.88; l.connect(lg); lg.connect(trem.gain);
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(); o.frequency.value = f; o2.frequency.value = f * 4; g2.gain.setValueAtTime(0.3, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(vol * 0.7, t + 0.25); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
+      o.connect(g); o2.connect(g2); g2.connect(g); g.connect(trem); trem.connect(salida(dest, pan));
+      seno(t, f * 10, 0, 0.05, vol * 0.15, dest, pan); ruido(t, 0.01, vol * 0.3, 'bandpass', 3000, 1.2, dest, pan);
+      for (const x of [o, o2, l]) { x.start(t); x.stop(t + L + 0.05); }
+    }
+    function silbido(m, t, d, vol, dest, pan) {
+      const f = mtof(m) * 2, o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.setValueAtTime(f * 0.97, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.04);
+      const v = vibrato(o.frequency, f, t, 0.008, 6.2, 0.12);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.025); g.gain.setValueAtTime(vol * 0.9, t + Math.max(0.04, d - 0.04)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.04);
+      o.connect(g); g.connect(salida(dest, pan));
+      const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 6;
+      const ng = ctx.createGain(); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(vol * 0.6, t + 0.02); ng.gain.exponentialRampToValueAtTime(vol * 0.15, t + 0.08); ng.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.04);
+      s.connect(bp); bp.connect(ng); ng.connect(salida(dest, pan));
+      o.start(t); s.start(t, Math.random() * 0.5); o.stop(t + d + 0.08); s.stop(t + d + 0.08); v.stop(t + d + 0.08);
+    }
+    function bongo(t, alto, vol, dest) {
+      const f = alto ? 420 : 310, pan = alto ? 0.3 : -0.3;
+      seno(t, f, f * 0.86, alto ? 0.12 : 0.16, vol, dest, pan);
+      ruido(t, 0.018, vol * 0.4, 'bandpass', f * 4, 1.5, dest, pan);
+    }
+    function golpe(t, f, f2, dur, vol, d, pan) { seno(t, f, f2, dur, vol, d, pan); }
+    function timbre(t, d, vol) { seno(t, 2093, 0, 1.3, vol, d, 0.15); seno(t, 2093 * 2.71, 0, 0.5, vol * 0.3, d, 0.15); ruido(t, 0.006, vol * 0.8, 'bandpass', 5000, 2, d, 0.15); }
+    const APOYA = {
+      libro(t, d) { golpe(t, 170, 105, 0.08, 0.2, d); ruido(t, 0.05, 0.14, 'lowpass', 900, 0.8, d); ruido(t + 0.003, 0.03, 0.035, 'bandpass', 3000, 1.5, d); },
+      plastico(t, d) { ruido(t, 0.014, 0.16, 'bandpass', 3300, 3, d); seno(t, 1900, 0, 0.02, 0.05, d); ruido(t + 0.024, 0.01, 0.07, 'bandpass', 2600, 3, d); golpe(t, 260, 200, 0.04, 0.06, d); },
+      metal(t, d) { golpe(t, 220, 160, 0.04, 0.08, d); [[2450, 0.14, 0.045], [3720, 0.09, 0.028], [5330, 0.06, 0.016]].forEach(([f, l, v]) => seno(t, f, 0, l, v, d)); ruido(t, 0.008, 0.06, 'bandpass', 4000, 2, d); },
+      madera(t, d) { golpe(t, 540, 480, 0.07, 0.11, d); ruido(t, 0.018, 0.09, 'bandpass', 1500, 2, d); seno(t, 1950, 0, 0.05, 0.02, d); },
+    };
+    const NOTA_D = { libro: 'G4', plastico: 'C5', madera: 'E5', metal: 'G5' };
+    const FXD = {
+      agarra(t, d) { seno(t, 900, 1450, 0.06, 0.045, d); ruido(t, 0.02, 0.03, 'bandpass', 2400, 1.5, d); },
+      apoya(t, d, mat) { APOYA[mat](t, d); const n = NOTA_D[mat]; if (mat === 'metal') glk(n, t, 0.04, d, 0.1); else seno(t, mtof(N(n)), mtof(N(n)) * 0.82, 0.12, 0.07, d, 0.1); },
+      trio(t, d) { sil('C6', t, 0.07, 0.07, d); sil('E6', t + 0.07, 0.07, 0.07, d); sil('G6', t + 0.14, 0.14, 0.075, d); seno(t + 0.3, 500, 1300, 0.05, 0.09, d); ruido(t + 0.3, 0.03, 0.06, 'bandpass', 2000, 1.5, d); },
+      llave(t, d) { ['G6', 'C7', 'E7', 'G7'].forEach((n, j) => glk(n, t + j * 0.05, 0.035, d, -0.2 + j * 0.15)); },
+      vidrio(t, d) { ruido(t, 0.012, 0.1, 'bandpass', 2600, 3, d); ruido(t + 0.07, 0.012, 0.1, 'bandpass', 3000, 3, d); ['C6', 'E6', 'G6', 'C7'].forEach((n, j) => glk(n, t + 0.14 + j * 0.06, 0.04, d, -0.2 + j * 0.15)); },
+      reja(t, d) { golpe(t, 300, 180, 0.08, 0.1, d); for (let j = 0; j < 6; j++) ruido(t + 0.08 + j * 0.025, 0.01, 0.06, 'bandpass', 2400 + j * 300, 3, d, -0.3 + j * 0.12);
+        silbato(t + 0.1, N('C5'), N('C6'), 0.25, 0.035, d); [[1046, 0.3, 0.05], [1568, 0.2, 0.025]].forEach(([f, l, v]) => seno(t + 0.36, f, 0, l, v, d, 0.3)); },
+      deshace(t, d) { silbido(N('A5') - 12, t, 0.13, 0.06, d, 0); seno(t, 1400, 800, 0.14, 0.02, d); },
+      trabada(t, d) { sil('G5', t, 0.14, 0.07, d); sil('E5', t + 0.2, 0.28, 0.07, d); },
+      boton(t, d) { bloque(t, true, 0.06, d); },
+      dificultad(t, d) { ruido(t, 0.14, 0.06, 'bandpass', 900, 1, d, 0, 1800); glk('E6', t + 0.1, 0.035, d, 0.1); },
+      fin(t, d) { sil('G5', t, 0.1, 0.075, d); sil('C6', t + 0.12, 0.1, 0.075, d); sil('E6', t + 0.24, 0.4, 0.08, d); ['C5', 'E5', 'G5'].forEach((n, j) => vibraP(N(n), t + 0.24, 0.6, 0.03, d, -0.2 + j * 0.2)); },
+      record(t, d) { FXD.fin(t, d); ['C7', 'E7', 'G7', 'C8'].forEach((n, j) => glk(n, t + 0.5 + j * 0.05, 0.03, d, -0.2 + j * 0.15)); timbre(t + 0.8, d, 0.04); },
+    };
+    // el nivel de cada efecto, medido contra la música en la prueba
+    const NIVEL = { 'agarra': 1.349, 'apoya:libro': 0.519, 'apoya:plastico': 0.955, 'apoya:metal': 0.495, 'apoya:madera': 0.741, 'trio': 0.335, 'llave': 0.398, 'vidrio': 0.417, 'reja': 0.569, 'deshace': 0.275, 'trabada': 0.237, 'boton': 1.334, 'dificultad': 0.610, 'fin': 0.248, 'record': 0.269 };
+    function efecto(nombre, mat) {
+      const g = ctx.createGain(); g.gain.value = NIVEL[nombre + (mat ? ':' + mat : '')] || 1; g.connect(sfxBus);
+      setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 4000);
+      FXD[nombre](ctx.currentTime + 0.01, g, mat);
+    }
+    // un paso de la música (una semicorchea): las corcheas de contratiempo, atrasadas por el swing
+    function paso(song, step, t0, S, dest) {
+      const k = step % 64, bar = (k / 16) | 0, i = k % 16, conMel = ((step / 64) | 0) % 2 === 1;
+      const chord = song.chordsM[bar], root = song.rootsM[bar], t = t0 + (i % 4 === 2 ? S * 0.6 : 0);
+      if (song.bass.includes(i)) bajoEB(root, t, S * song.bassLen, 0.12, dest);
+      if (i % 2 === 0) { rhodesB(chord[(i / 2) % 3] + 12, t, 0.045, dest, (i / 2) % 2 ? 0.2 : -0.2); shaker(t, i % 4 === 2, 0.03, dest); }
+      if (song.hats.includes(i)) bongo(t, i % 8 === 2, 0.045, dest);
+      if (i === 4 || i === 12) pandereta(t, 0.035, dest);
+      const L = conMel ? song.leadByStep.get(k) : null;
+      if (L) silbido(L[0], t, S * L[1] * 0.95, 0.066, dest, 0.1);
+      if (!conMel && k === 58) ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'].forEach((n, j) => { vibra(N2(n), t + j * S * 0.5, S, 0.03, dest, -0.3 + j * 0.12); glk(n, t + j * S * 0.5, 0.012, dest, 0.2); });
+    }
+    return { efecto, paso };
+  })();
 
   function play(name, arg, gap) {
     if (!ctx || set.mute || set.sfx <= 0) return;
@@ -422,6 +600,9 @@ const Sound = (() => {
   };
   for (const [id, [base, o]] of Object.entries(RENACENTISTAS))
     SONGS[id] = Object.assign({}, SONGS[base], { name: SONGS[base].name + ' renacentista', ren: true, soft: false, escala: [0, 2, 4, 5, 7, 9, 11] }, o);
+  // el primo de dibujito de Taller, para todo Biblioteca (S-41): mismos acordes, bajo y melodía, a 116 y con swing; los
+  // instrumentos y el swing, en Bi.paso. Suena tan fuerte como el original (trim, medido en la prueba)
+  SONGS.tallerD = Object.assign({}, SONGS.map, { name: 'Taller de dibujito', bpm: 116, dib: true, soft: false, trim: 0.42 });
   function defineSong(id, s) {
     s.chordsM = s.chords.map(c => c.map(N));
     s.rootsM = s.roots.map(N);
@@ -484,6 +665,8 @@ const Sound = (() => {
       // las orientales: eco a tres semicorcheas y un poco de sala
       if (song && song.jp) { d.delayTime.value = (60 / song.bpm / 4) * 3; const s = ctx.createGain(); s.gain.value = 0.14; b.connect(s); s.connect(revIn); }
       // las renacentistas: su nivel y la misma sala chica
+      // la de dibujito: su nivel y un poco de la sala chica
+      if (song && song.dib) { b.gain.value = song.trim; const s = ctx.createGain(); s.gain.value = 0.175; b.connect(s); s.connect(revIn); }
       if (song && song.ren) { b.gain.value = song.trim; const s = ctx.createGain(); s.gain.value = 0.275; b.connect(s); s.connect(revIn); }
       return { b, echoIn: d, delay: d };
     }
@@ -519,6 +702,7 @@ const Sound = (() => {
     function schedStep(c, t, S) {
       if (c.song.jp) { schedJp(c, t, S); return; }
       if (c.song.ren) { schedRen(c, t, S); return; }
+      if (c.song.dib) { Bi.paso(c.song, step, t, S, c.bus.b); return; }
       const song = c.song, A = ARR[song.soft ? '8s' : '8'], dest = c.bus.b, k = step % 64, bar = (k / 16) | 0, b = k % 16;
       const chord = song.chordsM[bar], root = song.rootsM[bar];
       if (song.bass.includes(b)) A.bass(mtof(root + (song.octave.includes(b) ? 12 : 0)), t, S * song.bassLen, dest);

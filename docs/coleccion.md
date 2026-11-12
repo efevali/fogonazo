@@ -69,8 +69,7 @@ Cada evento lleva la hora y la versión. Si la app se cierra en medio de una par
 
 ## Lo que sigue
 
-1. **El sonido de Biblioteca** (desde la 0.21.0 está pintada; ver [Biblioteca](biblioteca/README.md#lo-que-falta)): un primo de Taller con otra instrumentación y efectos del rubro. Antes, Producto la juega en el teléfono con las imágenes.
-2. **Segunda pasada del bot persona de Fogonazo.** La 0.17.0 recalibró los 30 niveles y la fórmula de los generados con un bot ajustado a las partidas reales de una sola persona. Con los registros que se junten desde entonces se vuelve a ajustar el bot y se corrigen sus desvíos: hoy sobrestima a Producto del 11 al 20 (incluido el 16 en Normal) y lo subestima en los generados.
-3. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
+1. **Segunda pasada del bot persona de Fogonazo.** La 0.17.0 recalibró los 30 niveles y la fórmula de los generados con un bot ajustado a las partidas reales de una sola persona. Con los registros que se junten desde entonces se vuelve a ajustar el bot y se corrigen sus desvíos: hoy sobrestima a Producto del 11 al 20 (incluido el 16 en Normal) y lo subestima en los generados.
+2. **Los nombres** de la colección y de Fogonazo, el ícono definitivo y el nombre del repositorio. Sin apuro: se sigue con lo demás hasta tener un nombre que convenza (ver [decisiones](decisiones.md#la-colección)).
 
 Las ideas sueltas están en los [issues abiertos](https://github.com/efevali/fogonazo/issues). Entre ellas, un juego nuevo: una carrera de gotas de lluvia sobre el vidrio ([#70](https://github.com/efevali/fogonazo/issues/70)). Y una, a evaluar en una charla aparte: un gato que duerme en el sofá de la sala.
