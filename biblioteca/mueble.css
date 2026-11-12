@@ -16,6 +16,9 @@ button:focus { outline: none; }
 #stage { position: fixed; left: 0; top: 0; font-size: 1px; width: 915em; height: 412em; overflow: clip; }
 #stage > * { position: absolute; }
 
+/* el fondo pintado (P-010, P-011 y P-016): 2576 × 1438, casi 16:9; el escenario muestra su franja central, 20:9 */
+#fondo { left: 0; top: -49.4rem; width: 915rem; height: 510.8rem; display: block; pointer-events: none; }
+
 /* la pared: tablas verticales de madera clara, más oscuras abajo y a la izquierda, con la luz de la lámpara a la derecha */
 #pared { left: 0; top: 0; width: 915rem; height: 412rem; pointer-events: none;
   background:

@@ -8,7 +8,7 @@
 
    El sitio, efevali.github.io, es el mismo de Kasa: lo guardado lleva el prefijo «coleccion-» y solo se borra lo
    propio, más lo que guardaba el Fogonazo publicado («fogonazo-»), al que esta versión reemplaza. */
-const VERSION = '0.20.0';
+const VERSION = '0.21.0';
 const FECHA = '11/11/2026';
 const CACHE = 'coleccion-v' + VERSION;
 const ARCHIVOS = [
@@ -80,6 +80,38 @@ const ARCHIVOS = [
   'buenojo/index.html',
   'buenojo/mesa.css',
   'buenojo/partida.html',
+  'biblioteca/arte/dif-dificil.webp',
+  'biblioteca/arte/dif-facil.webp',
+  'biblioteca/arte/dif-normal.webp',
+  'biblioteca/arte/fondo-entrada.webp',
+  'biblioteca/arte/fondo-partida-facil.webp',
+  'biblioteca/arte/fondo-partida.webp',
+  'biblioteca/arte/objetos/auto.webp',
+  'biblioteca/arte/objetos/avion.webp',
+  'biblioteca/arte/objetos/cactus.webp',
+  'biblioteca/arte/objetos/camara.webp',
+  'biblioteca/arte/objetos/casete.webp',
+  'biblioteca/arte/objetos/caseteA.webp',
+  'biblioteca/arte/objetos/caseteAhumado.webp',
+  'biblioteca/arte/objetos/caseteB.webp',
+  'biblioteca/arte/objetos/caseteBlanco.webp',
+  'biblioteca/arte/objetos/caseteTransparente.webp',
+  'biblioteca/arte/objetos/despertador.webp',
+  'biblioteca/arte/objetos/eiffel.webp',
+  'biblioteca/arte/objetos/enciclopedia.webp',
+  'biblioteca/arte/objetos/enciclopediaVerde.webp',
+  'biblioteca/arte/objetos/globo.webp',
+  'biblioteca/arte/objetos/libros.webp',
+  'biblioteca/arte/objetos/librosAlt.webp',
+  'biblioteca/arte/objetos/llave.webp',
+  'biblioteca/arte/objetos/llaveReja.webp',
+  'biblioteca/arte/objetos/mamushka.webp',
+  'biblioteca/arte/objetos/pila.webp',
+  'biblioteca/arte/objetos/radio.webp',
+  'biblioteca/arte/objetos/tomo.webp',
+  'biblioteca/arte/objetos/tomoAzul.webp',
+  'biblioteca/arte/puerta.webp',
+  'biblioteca/arte/reja.webp',
   'biblioteca/estado.js',
   'biblioteca/index.html',
   'biblioteca/mueble.css',

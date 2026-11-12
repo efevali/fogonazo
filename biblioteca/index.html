@@ -15,15 +15,21 @@
 #escena svg { width: 100%; height: 100%; display: block; }
 /* the three books, standing on the cabinet */
 #libros { left: 0; top: 0; width: 915rem; height: 412rem; pointer-events: none; z-index: 2; }
-.libro { position: absolute; bottom: 108rem; display: flex; align-items: center; justify-content: center; border-radius: 1.5rem 1.5rem 0 0;
-  box-shadow: inset -3rem 0 0 rgba(0, 0, 0, .18), inset 2rem 0 0 rgba(255, 255, 255, .08), 0 2rem 4rem rgba(0, 0, 0, .3); transition: transform .15s, box-shadow .15s; pointer-events: auto; }
-.libro::before, .libro::after { content: ''; position: absolute; left: 0; right: 0; height: 2.5rem; background: #d8b04a; }
-.libro::before { top: 10rem; } .libro::after { bottom: 10rem; }
-.libro span { transform: rotate(-90deg); font: 700 11.5rem Barlow; letter-spacing: .14em; color: #f4ead2; white-space: nowrap; }
-.libro.elegido { transform: translateY(-9rem); box-shadow: 0 0 0 2.5rem var(--ambar), inset -3rem 0 0 rgba(0, 0, 0, .18), 0 10rem 12rem rgba(0, 0, 0, .3); }
+/* pintados (P-012): el lomo liso con sus dos bandas doradas; el nombre lo escribe el código */
+.libro { position: absolute; bottom: 106rem; display: flex; align-items: center; justify-content: center; border-radius: 2rem;
+  background: center / 100% 100% no-repeat; filter: drop-shadow(0 2rem 3rem rgba(0, 0, 0, .35)); transition: transform .15s, filter .15s; pointer-events: auto; }
+/* el nombre, como un título grabado en el lomo: Fraunces, como el título, en un dorado viejo y apagado */
+.libro span { transform: rotate(-90deg); font: 600 12.5rem Fraunces, Georgia, serif; font-variation-settings: "SOFT" 30; letter-spacing: .1em; color: #c8a55e;
+  text-shadow: 0 -.6rem 0 rgba(0, 0, 0, .45), 0 .5rem 0 rgba(255, 230, 170, .12); white-space: nowrap; }
+.libro.elegido { transform: translateY(-9rem); filter: drop-shadow(0 0 2rem var(--ambar)) drop-shadow(0 0 2rem var(--ambar)) drop-shadow(0 0 1rem var(--ambar)) drop-shadow(0 10rem 8rem rgba(0, 0, 0, .3)); }
 
-#ficha { left: 387rem; top: 13rem; width: 303rem; height: 245rem; transform: rotate(.8deg); z-index: 3; }
-#ficha .chinche { left: 149rem; top: 3rem; }
+/* la cámara: la pieza del P-013, derecha y más grande, encima de la que trae pintada el fondo (chica y torcida), para que
+   guarde la proporción con el despertador */
+#camara { left: 614rem; top: 207rem; width: 80rem; height: 106.7rem; pointer-events: none; z-index: 1;
+  filter: drop-shadow(0 2rem 2.5rem rgba(40, 20, 5, .4)); }
+/* la ficha y su chinche vienen pintadas (P-016): acá solo lo escrito */
+#ficha { left: 387rem; top: 13rem; width: 303rem; height: 245rem; transform: rotate(.8deg); z-index: 3; background: none; box-shadow: none; }
+#ficha .chinche { display: none; }
 #titulo { left: 30rem; top: 34rem; width: 245rem; height: 58rem; }
 #titulo span { position: absolute; top: 6rem; font: 600 37rem/1 Fraunces, Georgia, serif; font-variation-settings: "SOFT" 30; color: #2a201a; white-space: nowrap; transform-origin: 50% 80%; }
 #flechas { position: absolute; left: 0; top: -14rem; width: 245rem; height: 86rem; overflow: visible; }
@@ -36,64 +42,8 @@
 </head>
 <body>
 <div id="stage">
-  <div id="pared" aria-hidden="true"></div>
-  <div id="escena" aria-hidden="true"><svg viewBox="0 0 915 412">
-    <defs>
-      <linearGradient id="tapa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ecc58c"/><stop offset=".55" stop-color="#d9a868"/><stop offset="1" stop-color="#b98a50"/></linearGradient>
-      <linearGradient id="hueco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f130b"/><stop offset="1" stop-color="#4a301c"/></linearGradient>
-      <radialGradient id="luz" cx="790" cy="200" r="230" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffb35a" stop-opacity=".55"/><stop offset=".5" stop-color="#ff9a40" stop-opacity=".18"/><stop offset="1" stop-color="#ff9a40" stop-opacity="0"/></radialGradient>
-      <linearGradient id="pantalla" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb060"/><stop offset=".75" stop-color="#ee7a26"/><stop offset="1" stop-color="#c85a14"/></linearGradient>
-      <linearGradient id="pie" x1="0" x2="1"><stop offset="0" stop-color="#e88a3a"/><stop offset=".5" stop-color="#ffb070"/><stop offset="1" stop-color="#d06a20"/></linearGradient>
-    </defs>
-    <rect x="0" y="0" width="915" height="412" fill="url(#luz)"/>
-    <!-- the Swiss cheese plant, on the left, behind the cabinet -->
-    <g fill="#3f7d45" stroke="#2c5e33" stroke-width="1.2">
-      <path d="M118 412 C116 330 112 240 104 170" fill="none" stroke="#3a7440" stroke-width="3.6"/>
-      <path d="M118 412 C128 320 160 230 214 150" fill="none" stroke="#3a7440" stroke-width="3.2"/>
-      <path d="M100 412 C90 360 60 320 20 290" fill="none" stroke="#3a7440" stroke-width="3"/>
-      <path d="M140 412 C150 370 170 300 196 262" fill="none" stroke="#3a7440" stroke-width="2.8"/>
-      <path d="M104 172 C60 170 34 130 44 84 C52 46 92 20 134 26 C176 32 198 72 186 112 C176 146 142 172 104 172 Z"/>
-      <path d="M214 152 C188 120 194 74 230 54 C262 36 302 54 306 92 C310 128 278 156 244 160 Z"/>
-      <path d="M22 292 C-14 286 -36 248 -26 208 C-16 172 22 154 56 168 C90 182 96 222 80 254 C68 280 46 294 22 292 Z"/>
-      <path d="M196 264 C176 240 180 206 206 194 C232 182 260 198 262 226 C264 252 240 270 216 270 Z"/>
-      <path d="M8 412 C-10 390 -10 350 14 336 C40 322 66 340 66 368 C66 392 40 412 8 412 Z"/>
-    </g>
-    <g stroke="#e9dcb8" stroke-width="3.6" stroke-linecap="round" opacity=".9">
-      <path d="M58 72 L80 92 M48 110 L76 116 M70 150 L92 136 M150 40 L136 66 M182 92 L156 100 M170 138 L148 126"/>
-      <path d="M236 62 L246 86 M290 70 L270 92 M296 124 L272 120 M258 152 L252 128"/>
-      <path d="M-6 220 L18 228 M8 270 L30 254 M70 196 L46 214 M74 248 L50 240"/>
-      <path d="M190 228 L210 230 M218 196 L222 216 M254 220 L234 228"/>
-    </g>
-    <path d="M104 172 L130 40 M244 160 L270 64 M22 292 L40 180" stroke="#2c5e33" stroke-width="1.6" fill="none"/>
-    <!-- the cabinet: the top and two dark openings below -->
-    <rect x="150" y="304" width="780" height="36" fill="url(#tapa)"/>
-    <rect x="150" y="304" width="780" height="2" fill="#f6dcb0"/>
-    <rect x="150" y="338" width="780" height="80" fill="#c08c52"/>
-    <rect x="170" y="340" width="300" height="80" fill="url(#hueco)"/>
-    <rect x="484" y="340" width="330" height="80" fill="url(#hueco)"/>
-    <rect x="150" y="338" width="780" height="3" fill="rgba(0,0,0,.18)"/>
-    <!-- the alarm clock -->
-    <g transform="translate(357 252) scale(.68)">
-      <path d="M19 66 L12 77 M41 66 L48 77" stroke="#7a5a2a" stroke-width="3.4" stroke-linecap="round"/>
-      <circle cx="16" cy="22" r="8.5" fill="#c9a55a"/><circle cx="44" cy="22" r="8.5" fill="#c9a55a"/><rect x="27.5" y="15" width="5" height="7" fill="#8a6c3a"/>
-      <circle cx="30" cy="46" r="21" fill="#2aa198"/><circle cx="30" cy="46" r="16" fill="#f4ecd8"/>
-      <path d="M30 46 V35 M30 46 L37 50" stroke="#222" stroke-width="2.4" stroke-linecap="round"/><circle cx="30" cy="46" r="1.7" fill="#c0392b"/>
-    </g>
-    <!-- the camera, a little turned -->
-    <g transform="translate(632 262) rotate(-6 25 25)">
-      <rect x="8" y="6" width="11" height="6" rx="1" fill="#9a9a96"/><circle cx="37" cy="8" r="3" fill="#8a8a86"/>
-      <rect x="0" y="10" width="50" height="34" rx="3.5" fill="#1d1a19"/><rect x="0" y="10" width="50" height="9" rx="2.5" fill="#d6d6d2"/>
-      <circle cx="25" cy="29" r="12" fill="#9a9a96"/><circle cx="25" cy="29" r="9" fill="#1f2e3e"/><circle cx="25" cy="29" r="5" fill="#2e4a66"/><circle cx="22" cy="26" r="2" fill="#fff" opacity=".45"/>
-    </g>
-    <ellipse cx="658" cy="309" rx="26" ry="3" fill="rgba(0,0,0,.25)"/>
-    <!-- the mushroom lamp, lit -->
-    <ellipse cx="791" cy="300" rx="34" ry="7" fill="rgba(0,0,0,.25)"/>
-    <ellipse cx="791" cy="294" rx="31" ry="9" fill="url(#pie)"/>
-    <rect x="783" y="205" width="16" height="90" fill="url(#pie)"/>
-    <path d="M712 210 C712 168 748 150 790 150 C832 150 869 168 869 210 C869 214 866 216 862 216 H719 C715 216 712 214 712 210 Z" fill="url(#pantalla)"/>
-    <ellipse cx="790" cy="214" rx="72" ry="5" fill="#fff1c8" opacity=".9"/>
-    <ellipse cx="770" cy="170" rx="28" ry="7" fill="#fff" opacity=".18"/>
-  </svg></div>
+  <img id="fondo" src="arte/fondo-entrada.webp" alt="" draggable="false">
+  <img id="camara" src="arte/objetos/camara.webp" alt="" draggable="false">
 
   <div id="libros" role="radiogroup" aria-label="Dificultad"></div>
 
@@ -140,7 +90,7 @@
     const d = Est.dificultad;
     $('libros').innerHTML = Object.entries(LIBROS).map(([id, b]) =>
       `<button class="libro${id === d ? ' elegido' : ''}" type="button" role="radio" aria-checked="${id === d}" data-id="${id}"
-        style="left:${b.x}rem;width:${b.w}rem;height:${b.h}rem;background:${b.color}"><span>${R.DIFICULTADES[id].nombre.toUpperCase()}</span></button>`).join('');
+        style="left:${b.x}rem;width:${b.w}rem;height:${b.h}rem;background-image:url(arte/dif-${id}.webp)"><span>${R.DIFICULTADES[id].nombre.toUpperCase()}</span></button>`).join('');
     $('vDif').textContent = R.DIFICULTADES[d].nombre;
     const r = Est.record(d);
     $('vRec').textContent = r ? `${r.movidas} movidas · ${Est.reloj(r.tiempo)}` : 'todavía no hay';
@@ -162,7 +112,8 @@
   SIL.forEach(s => { const e = document.createElement('span'); e.textContent = s; titulo.appendChild(e); span[s] = e; });
   function armar() {
     const ancho = s => span[s].getBoundingClientRect().width / (parseFloat(document.documentElement.style.fontSize) || 1);
-    const W = titulo.clientWidth || 245, GAP = 1.5;
+    // el ancho, en unidades del diseño (clientWidth viene en píxeles: en la PC, con la escena agrandada, corría el título)
+    const W = titulo.clientWidth / (parseFloat(document.documentElement.style.fontSize) || 1) || 245, GAP = 1.5;
     const pos = orden => { const tot = orden.reduce((t, s) => t + ancho(s), 0) + GAP * (orden.length - 1); let x = (W - tot) / 2; const p = {}; orden.forEach(s => { p[s] = x; x += ancho(s) + GAP; }); return p; };
     const fin = pos(SIL), ini = pos(DESORDEN);
     const t = (s, x, y = 0, r = 0) => `translate(${x}rem, ${y}rem) rotate(${r}deg)`;

@@ -68,7 +68,9 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **A la IA, solo lo que puede ver o usar** (26/10). Producto: no suma darle detalles que no puede verificar.
 - **ChatGPT para las imágenes grandes** (26/10, P-004). Con el mismo pedido respetó la composición y salió más limpio que Gemini, pero Producto no lo paga y el cupo es limitado.
 - **Las fichas del mahjong, dibujadas con código** (26/10): cada una pide una cantidad exacta de círculos o bambúes y su ideograma correcto.
-- **Entregas en PNG** (26/10).
+- **Entregas en PNG, o en JPG si la IA no da otra cosa** (26/10; 11/11). Desde el P-010, Gemini solo entrega JPG; para fondos y para láminas sobre magenta alcanza.
+- **Primero las piezas, después la escena que las muestra** (11/11, Biblioteca): el despertador, la cámara y los libros de la entrada son objetos del juego; pintados primero como piezas, la entrada se pidió con ellos de referencia y no salen dos versiones distintas. Si hacen falta tres referencias, se juntan en una sola lámina (P-016).
+- **Corregir a mano antes que insistir** (11/11): si la IA ignora un cambio puntual (el P-011 volvió idéntico) o la proporción (el P-015 salió cuadrado), Desarrollo corrige la imagen con código (duplicar una tira, llevar a la proporción conservando la cerradura) y Producto la aprueba así.
 
 ## Fogonazo
 
@@ -161,5 +163,7 @@ Por qué la colección es como es: cada decisión vigente con su fecha y su moti
 - **Puertas con llave** (11/11, S-38): un casillero cerrado (vidrio en Normal; vidrio y reja de ascensor viejo en Difícil) que se abre con su llave, escondida unas filas atrás en otro casillero sin que se sepa en cuál. La llave solo va a su puerta, cuenta como una movida y se deshace. Fácil, sin puertas. *Descartado:* un objeto fijo que ocupe un lugar para siempre y menos lugares libres sin mecánica nueva.
 - **Más difícil sin alargar** (11/11, 0.20.0): menos lugares libres, repartos sin pares regalados, el tercero de más tríos escondido (la sensación de «tener siempre todo a mano»), una puerta en Fácil y dos en Normal, la fila de atrás en silueta en Difícil (S-39b) y otra enciclopedia parecida (S-39a). *Descartado:* límite de movidas o de tiempo (rompe la calma de la colección) y más tríos (alarga).
 - **Difícil de 26 tríos** (11/11, 0.19.1): con 33 se sentía demasiado largo.
+- **Las imágenes pintadas** (11/11, 0.21.0, S-40, P-010 a P-016): el mueble con profundidad, a pedido de Producto, que le pidió a Gemini corregir el boceto plano; los objetos, en el mismo recuadro y tamaño que su dibujo con código, así no cambia la mecánica ni dónde se agarra. Los objetos se adelantan en los estantes del medio y de abajo, donde se ve más estante; la fila de atrás conserva su lugar estilizado (más chica, más arriba), porque en su lugar real la taparía la de adelante. El vidrio de la puerta lo dibuja el código: sobre magenta se tiñe.
+- **Los lomos de la dificultad, en Fraunces dorado viejo** (11/11), acorde a libros antiguos. **La cámara de la entrada, derecha y más grande** que la pintada en el fondo, con la pieza del P-013 encima, para que guarde la proporción con el despertador.
 - **Primero con los dibujos del boceto** (10/11, 0.18.0): se implementa con los dibujos hechos con código para probar la mecánica y la dificultad antes de pedir las imágenes y el sonido, como se hizo con Buen ojo.
 

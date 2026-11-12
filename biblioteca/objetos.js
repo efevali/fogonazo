@@ -1,5 +1,6 @@
-/* Biblioteca: los veinte objetos y las dos llaves, dibujados con código como en los bocetos S-37g, S-38a y S-39a (son de
-   ejemplo: los definitivos los pinta la IA). Cada uno en un recuadro de 60 × 80, apoyado abajo, con silueta propia
+/* Biblioteca: los veinte objetos y las dos llaves. Desde la 0.21.0 se ven las piezas pintadas (P-012 a P-014, recortadas
+   en biblioteca/arte/objetos/ con herramientas/biblioteca/recortar.py); los dibujos con código de los bocetos S-37g,
+   S-38a y S-39a quedan como medida (cada pieza ocupa el recuadro de su dibujo) y como respaldo. Cada uno en un recuadro de 60 × 80, apoyado abajo, con silueta propia
    para reconocerlo de un vistazo, salvo los que en Difícil se parecen a propósito.
 
    Objetos.instalar() pone los dibujos en la página (como símbolos de SVG); Objetos.svg(tipo) devuelve uno listo para
@@ -117,6 +118,13 @@ window.Objetos = (() => {
     s.innerHTML = '<defs>' + Object.entries(D).map(([k, v]) => `<symbol id="o-${k}" viewBox="0 0 60 80">${v}</symbol>`).join('') + '</defs>';
     document.body.prepend(s);
   }
-  const svg = (tipo, extra = '') => `<svg viewBox="0 0 60 80" ${extra}><use href="#o-${tipo}"/></svg>`;
+  // las piezas pintadas (P-012 a P-014), recortadas en el mismo recuadro de 60 × 80 que el dibujo con código, a 240 × 320;
+  // los dibujos con código quedan para los casetes A y B y como respaldo
+  const PINTADOS = new Set(['tomo', 'casete', 'eiffel', 'avion', 'globo', 'despertador', 'mamushka', 'cactus', 'libros', 'auto', 'camara', 'radio',
+    'caseteBlanco', 'pila', 'enciclopedia', 'librosAlt', 'tomoAzul', 'caseteTransparente', 'enciclopediaVerde', 'llave', 'llaveReja', 'caseteAhumado']);
+  const base = new URL('arte/objetos/', document.currentScript ? document.currentScript.src : location.href).href;
+  const svg = (tipo, extra = '') => PINTADOS.has(tipo)
+    ? `<img src="${base}${tipo}.webp" alt="" draggable="false" ${extra}>`
+    : `<svg viewBox="0 0 60 80" ${extra}><use href="#o-${tipo}"/></svg>`;
   return { instalar, svg, NOMBRES, TIPOS: Object.keys(D) };
 })();
