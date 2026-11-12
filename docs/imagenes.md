@@ -20,11 +20,11 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 
 - **Sobre fondo magenta**, parejo, sin sombras ni halos, para recortarlas. No verde croma, porque la bobina de Fogonazo es verde.
 - **En una grilla** (por ejemplo, de 4 × 2), en el orden de la lámina, con la misma luz y terminación entre sí.
-- **Se recortan con código:** `herramientas/sala/piezas.py` (piezas con patas, que acorta, y sombra suave) y `herramientas/sala/obstaculos.py` (objetos que ocupan la casilla entera o van debajo de una pieza), que exportan PNG de 256 × 256 a `fogonazo/piezas/`. Las que deben reemplazarse una por otra (los tres pads de Fogonazo) tienen que salir del mismo tamaño.
+- **Se recortan con código:** `herramientas/biblioteca/recortar.py` (las de Biblioteca: objetos, llaves, libros, puertas y fondos, en WebP), `herramientas/sala/piezas.py` (piezas con patas, que acorta, y sombra suave) y `herramientas/sala/obstaculos.py` (objetos que ocupan la casilla entera o van debajo de una pieza), que exportan PNG de 256 × 256 a `fogonazo/piezas/`. Las que deben reemplazarse una por otra (los tres pads de Fogonazo) tienen que salir del mismo tamaño.
 
 ## La entrega
 
-- **En PNG, bajada con la opción de descarga de la IA.** Copiarla, compartirla o capturarla da una vista previa de baja resolución; de Gemini, la descarga dio 2752 × 1536. Que la IA la suba a otro lado también la achica.
+- **En PNG si se puede, bajada con la opción de descarga de la IA.** Desde el P-010, Gemini solo entrega JPG (2576 × 1438): sirve igual, también para las láminas sobre magenta. Copiarla, compartirla o capturarla da una vista previa de baja resolución; de Gemini, la descarga dio 2752 × 1536. Que la IA la suba a otro lado también la achica.
 - **Se revisa antes de aprobar:** que respete la composición, el orden y los colores pedidos; la lógica de los objetos; que lo importante quede en la franja central; y, en las piezas, que el fondo sea parejo y el recorte salga limpio.
 - **Lo aprobado se guarda en la carpeta `arte/` de su parte**, y se cuenta en su README. Lo que reemplaza a otra imagen la reemplaza en el repositorio: la anterior queda en el historial de Git.
 
@@ -40,6 +40,13 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 | P-007 | El ícono con la lámpara más arriba | Gemini: subió la lámpara, pero rehízo la imagen con un encuadre más abierto (ver abajo) | [`sala/arte/P-007_icono.jpg`](sala/arte/P-007_icono.jpg) |
 | P-008 | El fondo de Buen ojo: la mesa del pintor desde arriba | Gemini, a la primera | [`buenojo/arte/P-008_fondo-mesa.jpg`](buenojo/arte/P-008_fondo-mesa.jpg) |
 | P-009 | El block de Buen ojo sobre la mesa del P-008 | Gemini, al segundo intento: el primero lo centró. Con la posición en píxeles y las distancias a los bordes, la respetó | [`buenojo/arte/P-009_block-mesa.jpg`](buenojo/arte/P-009_block-mesa.jpg) |
+| P-010 | El fondo de la partida de Biblioteca: la pared y el mueble de 4 × 3 | Gemini; Producto le pidió en la misma charla darle profundidad al mueble, que el boceto tenía plano, y quedó mejor | [`biblioteca/arte/P-010_fondo-partida.jpg`](biblioteca/arte/P-010_fondo-partida.jpg) |
+| P-011 | El mismo fondo con el mueble de 3 × 3, para Fácil | Gemini, como cambio puntual sobre el P-010: lo respetó, pero con la columna del medio un 9 % más angosta. Pedirle que la igualara no cambió nada (0,03 % de la imagen); se ensanchó a mano duplicando una tira | [`biblioteca/arte/P-011_fondo-facil.jpg`](biblioteca/arte/P-011_fondo-facil.jpg) |
+| P-012 | Los diez libros: los siete del juego y los tres de la dificultad | Gemini, a la primera; los números de las enciclopedias salieron bien | [`biblioteca/arte/P-012_libros.jpg`](biblioteca/arte/P-012_libros.jpg) |
+| P-013 | Los nueve adornos | Gemini, a la primera, con más volumen que el P-012; las láminas siguientes lo tomaron de referencia | [`biblioteca/arte/P-013_adornos.jpg`](biblioteca/arte/P-013_adornos.jpg) |
+| P-014 | Los seis casetes y las dos llaves | Gemini, a la primera; los huecos de los carretes vinieron en magenta y se rellenan al recortar | [`biblioteca/arte/P-014_casetes-llaves.jpg`](biblioteca/arte/P-014_casetes-llaves.jpg) |
+| P-015 | La puerta de vidrio (solo el marco) y la reja | Gemini, casi cuadradas en vez de apaisadas: se llevaron a mano a la proporción del casillero, con la cerradura sin deformar | [`biblioteca/arte/P-015_puertas.jpg`](biblioteca/arte/P-015_puertas.jpg) |
+| P-016 | El fondo de la entrada de Biblioteca | Gemini, a la primera y en su lugar al píxel, con tres referencias juntas en una lámina (la sala, el despertador y la cámara, la madera) | [`biblioteca/arte/P-016_fondo-entrada.jpg`](biblioteca/arte/P-016_fondo-entrada.jpg) |
 
 ## Un pedido que salió a la primera
 

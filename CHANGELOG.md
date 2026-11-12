@@ -2,6 +2,12 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.21.0 — 11/11/2026
+
+- **Biblioteca, pintada** (S-40). La partida es la biblioteca baja de frente, con casilleros con profundidad (P-010; en Fácil, el mueble de tres columnas del P-011), y los veinte objetos, las llaves, la puerta de vidrio y la reja son ilustraciones (P-012 a P-015) en lugar de los dibujos del boceto. Los objetos tienen el mismo tamaño y se agarran igual que antes; se paran sobre el estante, un poco más adelante en los de abajo.
+- **La entrada, pintada** (P-016): la planta, la lámpara hongo encendida, el despertador, la cámara y la ficha de préstamo. Los libros de la dificultad, pintados, con el nombre en una letra con serif dorada.
+- **En la computadora, el título de la entrada** ya no queda corrido a la derecha, fuera de la ficha.
+
 ## 0.20.0 — 11/11/2026
 
 - **Biblioteca, más difícil sin alargar.** Menos lugares libres al empezar, repartos sin pares de iguales ya armados y, en más tríos, el tercero escondido dos filas atrás o detrás de una puerta. Fácil suma la puerta de vidrio (con la llave a la vista en la sombra) y Normal, también la reja; en Difícil las llaves van 3 o 4 filas atrás y **la fila de atrás se ve en silueta** (S-39b).

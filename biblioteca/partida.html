@@ -13,15 +13,13 @@
    On the left, a loan card pinned to the wall with the moves, the time and the record, and the difficulty on a tape;
    on the right, «Deshacer» and «Pausa». In Normal one cubby starts behind a glass door, and in Difícil another one
    behind a gate (S-38): its key is hidden a few rows back in another cubby, and is taken to its door to open it. */
-#mueble { top: 8rem; height: 378rem; border-radius: 3rem; z-index: 1; touch-action: none;
-  background: linear-gradient(90deg, rgba(0, 0, 0, .1), transparent 8%, transparent 92%, rgba(0, 0, 0, .12)), linear-gradient(#d7a364, #c18a4c 60%, #b07a40);
-  box-shadow: inset 0 1.5rem 0 rgba(255, 235, 200, .45), inset 0 -2rem 0 rgba(0, 0, 0, .18), 0 6rem 14rem rgba(40, 20, 5, .4); }
+#mueble { top: 8rem; height: 378rem; z-index: 1; touch-action: none; }
 .casillero { position: absolute; width: 144rem; height: 114rem; border-radius: 1.5rem; overflow: hidden;
-  background: linear-gradient(#24160d, #3a2617 55%, #4a311d); box-shadow: inset 0 6rem 10rem rgba(0, 0, 0, .55), inset 0 -1rem 0 rgba(255, 220, 170, .08); }
+}
 .casillero > * { position: absolute; }
 .mas { right: 7rem; top: 4rem; font: 600 9.5rem Barlow; color: rgba(255, 236, 210, .5); letter-spacing: .04em; }
 .obj { width: 44rem; height: 58.7rem; }
-.obj svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.obj svg, .obj img { width: 100%; height: 100%; display: block; overflow: visible; }
 .obj.frente { top: 51rem; filter: drop-shadow(0 2rem 2rem rgba(0, 0, 0, .45)); transition: transform .12s, opacity .12s; cursor: grab; }
 /* Difícil (S-39b): the row behind, in black silhouette; the shape is guessed, not the colour */
 .silueta .obj.atras { filter: brightness(0); opacity: .62; }
@@ -45,21 +43,18 @@
 /* the doors (S-38): glass with a brass frame and lock (Normal and Difícil) and an old lift's scissor gate with its
    padlock (Difícil). What is inside shows through, a little dimmed; it opens with its key: the glass one swings on its
    hinge and the gate folds against the left side, and they go */
-.puerta { position: absolute; left: 0; top: 0; width: 144rem; height: 114rem; box-sizing: border-box; z-index: 3; border-radius: 1.5rem; pointer-events: none;
-  border: 4rem solid #b8893a; box-shadow: inset 0 0 0 1rem rgba(255, 232, 170, .55), inset 0 0 14rem rgba(170, 210, 230, .25), 0 0 0 1rem rgba(60, 35, 10, .5);
-  background: linear-gradient(115deg, rgba(190, 220, 235, .22), rgba(150, 185, 205, .1) 38%, rgba(235, 248, 255, .34) 44%, rgba(150, 185, 205, .08) 50%, rgba(235, 248, 255, .22) 56%, rgba(160, 195, 215, .14) 60%, rgba(180, 210, 225, .2));
+.puerta { position: absolute; left: 0; top: 0; width: 144rem; height: 114rem; z-index: 3; pointer-events: none;
+  background: url(arte/puerta.webp) 0 0 / 100% 100% no-repeat,
+    linear-gradient(115deg, rgba(190, 220, 235, .22), rgba(150, 185, 205, .1) 38%, rgba(235, 248, 255, .34) 44%, rgba(150, 185, 205, .08) 50%, rgba(235, 248, 255, .22) 56%, rgba(160, 195, 215, .14) 60%, rgba(180, 210, 225, .2)) 8rem 8rem / 128rem 98rem no-repeat;
   transform-origin: 0 50%; transition: transform .45s ease-in, opacity .45s ease-in; }
-.puerta::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 2rem; margin-left: -1rem; background: #b8893a; box-shadow: 0 0 0 .6rem rgba(255, 232, 170, .45); }
-.cerradura { position: absolute; right: 6rem; top: 44rem; width: 12rem; height: 22rem; border-radius: 2.5rem; background: linear-gradient(90deg, #a87a2c, #e6c070 50%, #a87a2c); box-shadow: 0 1rem 2rem rgba(0, 0, 0, .5); }
-.cerradura::before { content: ''; position: absolute; left: 4rem; top: 5rem; width: 4rem; height: 4rem; border-radius: 50%; background: #2a1a0a; }
-.cerradura::after { content: ''; position: absolute; left: 5rem; top: 8rem; width: 2rem; height: 7rem; background: #2a1a0a; }
-.puerta.destino { box-shadow: inset 0 0 0 1rem rgba(255, 232, 170, .55), 0 0 0 2rem rgba(255, 196, 90, .85), 0 0 14rem rgba(255, 196, 90, .6); }
+/* la cerradura la trae la imagen (P-015); este recuadro, encima de la pintada, solo se ilumina cuando la llave llega */
+.cerradura { position: absolute; right: 5rem; top: 45rem; width: 13rem; height: 25rem; border-radius: 3rem; }
+.puerta.destino { filter: drop-shadow(0 0 3rem rgba(255, 196, 90, .9)) drop-shadow(0 0 8rem rgba(255, 196, 90, .6)); }
 .puerta.destino .cerradura { box-shadow: 0 0 0 2.5rem rgba(255, 196, 90, .95), 0 0 10rem 4rem rgba(255, 196, 90, .7); }
 .puerta.abre { transform: perspective(260rem) rotateY(-80deg); opacity: 0; }
 .reja { position: absolute; left: 0; top: 0; width: 144rem; height: 114rem; z-index: 3; pointer-events: none; transform-origin: 0 50%; transition: transform .45s ease-in, opacity .45s ease-in; }
-.reja svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.reja.destino .candado { filter: drop-shadow(0 0 3rem rgba(255, 196, 90, .95)) drop-shadow(0 0 6rem rgba(255, 196, 90, .7)); }
-.reja.destino svg { filter: drop-shadow(0 0 4rem rgba(255, 196, 90, .7)); }
+.reja img { width: 100%; height: 100%; display: block; }
+.reja.destino img { filter: drop-shadow(0 0 4rem rgba(255, 196, 90, .7)); }
 .reja.abre { transform: scaleX(.2); opacity: 0; }
 .cerrado .obj { filter: brightness(.68) saturate(.75); cursor: default; }
 .enrejado .obj { filter: brightness(.82) saturate(.85); cursor: default; }
@@ -68,7 +63,7 @@
 @keyframes destello { to { opacity: 0; } }
 #arrastre { z-index: 5; width: 50rem; height: 66.7rem; margin: -50rem 0 0 -25rem; pointer-events: none; transform: rotate(-6deg);
   filter: drop-shadow(0 8rem 6rem rgba(0, 0, 0, .45)); }
-#arrastre svg { width: 100%; height: 100%; display: block; }
+#arrastre svg, #arrastre img { width: 100%; height: 100%; display: block; }
 
 /* the loan card on the left */
 #tarjeta { left: 7rem; top: 21rem; width: 130rem; height: 151rem; transform: rotate(-1deg); z-index: 2; }
@@ -101,7 +96,7 @@
 </head>
 <body>
 <div id="stage">
-  <div id="pared" aria-hidden="true"></div>
+  <img id="fondo" src="arte/fondo-partida.webp" alt="" draggable="false">
 
   <div id="tarjeta" class="ficha" aria-live="polite">
     <span class="chinche"></span>
@@ -186,7 +181,12 @@
   const anchoMueble = PAD * 2 + D.columnas * CW + (D.columnas - 1) * GAP;
   const mueble = $('mueble');
   mueble.style.width = anchoMueble + 'rem';
-  mueble.style.left = (458 - anchoMueble / 2) + 'rem';
+  // el fondo pintado: el mueble de 4 columnas (P-010) o el de 3 de Fácil (P-011), que quedó 7,5 a la derecha del centro
+  mueble.style.left = (458 - anchoMueble / 2 + (D.columnas === 3 ? 7.5 : 0)) + 'rem';
+  if (D.columnas === 3) $('fondo').src = 'arte/fondo-partida-facil.webp';
+  // los casilleros tienen profundidad: en las filas de abajo se ve más estante, y los objetos se paran sobre él
+  const ALTO_FILA = [0, 1, 1.5];
+  const topObj = k => 51 - ALTO_FILA[Math.min(2, Math.floor(k / D.columnas))];
   const celdas = [];
   for (let k = 0; k < D.casilleros; k++) {
     const c = document.createElement('div');
@@ -204,20 +204,8 @@
   // the cubbies being animated (a trio going, a door opening): only those wait; the rest can be played meanwhile
   const animando = new Set();
 
-  // the gate of an old lift: vertical bars and scissors in X, with its padlock
-  function reja() {
-    const n = 7, paso = 144 / (n - 1);
-    let b = '';
-    for (let i = 0; i < n; i++) b += `<rect x="${i * paso - 1.6}" y="2" width="3.2" height="110" fill="#2d2f33"/><rect x="${i * paso - .6}" y="2" width="1" height="110" fill="#7c8088"/>`;
-    for (let i = 0; i < n - 1; i++) for (let r = 0; r < 4; r++) {
-      const x1 = i * paso, x2 = (i + 1) * paso, y1 = 6 + r * 26, y2 = y1 + 26;
-      b += `<path d="M${x1} ${y1} L${x2} ${y2} M${x2} ${y1} L${x1} ${y2}" stroke="#2d2f33" stroke-width="2.2"/><circle cx="${(x1 + x2) / 2}" cy="${(y1 + y2) / 2}" r="1.8" fill="#6a6e75"/>`;
-    }
-    b += `<rect x="0" y="0" width="144" height="4" fill="#2d2f33"/><rect x="0" y="110" width="144" height="4" fill="#2d2f33"/>`;
-    b += `<g class="candado"><path d="M116 52 V45 C116 38 128 38 128 45 V52" fill="none" stroke="#5d6067" stroke-width="3.2"/><rect x="112" y="51" width="20" height="17" rx="2.5" fill="#5d6067"/>
-      <rect x="113" y="52" width="18" height="3" fill="#8a8e95"/><circle cx="122" cy="59" r="2.2" fill="#15161a"/><rect x="121" y="60" width="2" height="5" fill="#15161a"/></g>`;
-    return `<svg viewBox="0 0 144 114" aria-hidden="true">${b}</svg>`;
-  }
+  // the gate of an old lift, with its padlock: painted (P-015)
+  const reja = () => '<img src="arte/reja.webp" alt="" draggable="false">';
   const svgDe = x => O.svg(R.dibujo(x));
 
   // a cubby: the row in front, the row behind in shadow, and how many more there are; its door, if it is closed;
@@ -228,13 +216,14 @@
     celdas[k].classList.toggle('cerrado', !!p && p.tipo === 'vidrio');
     celdas[k].classList.toggle('enrejado', !!p && p.tipo === 'reja');
     let h = '';
-    if (at) at.forEach((x, i) => { if (x !== null) h += `<div class="obj atras${anim.atras ? ' avanza' : ''}" style="left:${SX + i * SLOT}rem">${svgDe(x)}</div>`; });
+    const top = topObj(k);
+    if (at) at.forEach((x, i) => { if (x !== null) h += `<div class="obj atras${anim.atras ? ' avanza' : ''}" style="left:${SX + i * SLOT}rem;top:${top}rem">${svgDe(x)}</div>`; });
     fr.forEach((x, i) => {
-      if (x === null) h += `<div class="hueco" data-i="${i}" style="left:${SX + i * SLOT}rem"></div>`;
+      if (x === null) h += `<div class="hueco" data-i="${i}" style="left:${SX + i * SLOT}rem;top:${top}rem"></div>`;
       else {
         const el = G.sel && G.sel.k === k && G.sel.i === i ? ' elegido' : '';
         const br = anim.brilla ? ' brilla' : '';
-        h += `<div class="obj frente${el}${br}${anim.frente ? ' avanza' : ''}" data-k="${k}" data-i="${i}" style="left:${SX + i * SLOT}rem" aria-label="${O.NOMBRES[R.dibujo(x)]}">${svgDe(x)}</div>`;
+        h += `<div class="obj frente${el}${br}${anim.frente ? ' avanza' : ''}" data-k="${k}" data-i="${i}" style="left:${SX + i * SLOT}rem;top:${top}rem" aria-label="${O.NOMBRES[R.dibujo(x)]}">${svgDe(x)}</div>`;
       }
     });
     if (mas) h += `<div class="mas">+${mas}</div>`;
