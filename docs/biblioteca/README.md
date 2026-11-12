@@ -20,12 +20,12 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 ## Cómo se ve
 
 - **La sala** (S-37a): la biblioteca baja pasa a ser objeto activo, con el brillo tenue de los demás. Hace falta solo su máscara, no una imagen nueva.
-- **La entrada** (S-37d): la parte de arriba de la biblioteca baja de cerca, con la lámpara hongo a la derecha, la costilla de Adán a la izquierda y, sobre el mueble, los tres libros de la dificultad (el más gordo, el más difícil; el elegido, levantado y con borde ámbar), un despertador y la cámara. En la pared, una ficha de préstamo clavada con el título, la dificultad, el récord y «Jugar». Desde la 0.21.0, pintada (P-016): la ficha y su chinche vienen en la imagen y el código escribe encima; la cámara es la pieza del P-013, derecha y más grande que la del fondo; los libros, pintados (P-012), con el nombre en Fraunces dorado viejo.
+- **La entrada** (S-43): la parte de arriba de la biblioteca baja de cerca, con la lámpara hongo a la derecha, la costilla de Adán a la izquierda y, sobre el mueble, los tres libros de la dificultad (el más gordo, el más difícil; el elegido, levantado y con borde ámbar), un despertador y la cámara. En la pared, una ficha de préstamo clavada con el título, la dificultad, el récord y «Jugar». Desde la 0.21.0, pintada (P-016): la ficha y su chinche vienen en la imagen y el código escribe encima; la cámara es la pieza del P-013, derecha y más grande que la del fondo; los libros, pintados (P-012), con el nombre en Fraunces dorado viejo.
 - **El título** (S-37h): «BIBLIOTECA» en Fraunces, que al entrar aparece desordenado («BLIO BI CA TE»), con flechas rojas que dicen dónde va cada sílaba, y se ordena en unos 4 segundos; las sílabas quedan apenas torcidas.
-- **La partida** (S-37b y c): el mueble de frente, de madera, con sus casilleros; a la izquierda, una ficha clavada con las movidas, el tiempo y el récord, y la dificultad; a la derecha, «Deshacer» y «Pausa»; «◀ Volver» en Dymo, como en toda la colección. Desde la 0.21.0, el mueble es la imagen (P-010, y P-011 en Fácil), con profundidad: los objetos se apoyan en el canto del estante arriba y en el medio (0.21.1: antes parecían flotar), y apenas adentro en el de abajo, donde se ve más estante.
+- **La partida** (S-37c; con las imágenes, S-40b a d): el mueble de frente, de madera, con sus casilleros; a la izquierda, una ficha clavada con las movidas, el tiempo y el récord, y la dificultad; a la derecha, «Deshacer» y «Pausa»; «◀ Volver» en Dymo, como en toda la colección. Desde la 0.21.0, el mueble es la imagen (P-010, y P-011 en Fácil), con profundidad: los objetos se apoyan en el canto del estante arriba y en el medio (0.21.1: antes parecían flotar), y apenas adentro en el de abajo, donde se ve más estante.
 - **El final** (S-37e): una ficha de préstamo con las movidas y el tiempo; el récord, con un sello rojo. «Otra partida» y «Salir».
 - **La pausa:** sin boceto; una ficha como la del final, con «Seguir», «Empezar de nuevo» y «Salir».
-- **Los objetos** (S-37g, S-38a y S-39a), veinte: el tomo, tres libros parados (fino y alto, medio, bajo, sin que se vean las hojas), tres casetes (naranja con carcasa negra, blanco con etiqueta celeste, ahumado con etiqueta roja), la torre Eiffel (gris claro desde S-38a, para que se despegue del fondo; era de bronce), el avión, el auto, el globo terráqueo, el despertador, la mamushka, el cactus, la cámara y la radio; otra enciclopedia, verde botella, más baja y con números plateados (S-39a, Difícil); y desde S-38a, dos libros muy distintos (una pila de tres acostados y una enciclopedia de cuatro tomos finos numerados) y tres que se parecen a propósito, para Difícil (los tres libros con la misma forma en verde, bordó, verde; el tomo en azul; un casete transparente azulado de etiqueta amarilla, el C de S-38a). Cada uno, de silueta propia, salvo los parecidos.
+- **Los objetos** (pintados en los pedidos P-012 a P-014), veinte: el tomo, tres libros parados (fino y alto, medio, bajo, sin que se vean las hojas), tres casetes (naranja con carcasa negra, blanco con etiqueta celeste, ahumado con etiqueta roja), la torre Eiffel (gris claro desde S-38a, para que se despegue del fondo; era de bronce), el avión, el auto, el globo terráqueo, el despertador, la mamushka, el cactus, la cámara y la radio; otra enciclopedia, verde botella, más baja y con números plateados (S-39a, Difícil); y desde S-38a, dos libros muy distintos (una pila de tres acostados y una enciclopedia de cuatro tomos finos numerados) y tres que se parecen a propósito, para Difícil (los tres libros con la misma forma en verde, bordó, verde; el tomo en azul; un casete transparente azulado de etiqueta amarilla, el C de S-38a). Cada uno, de silueta propia, salvo los parecidos.
 - **Las puertas y las llaves** (S-38b a g): la puerta de vidrio, la reja y las dos llaves, como se describen arriba.
 - **Las imágenes** (0.21.0): [los pedidos](../imagenes.md#pedidos-cerrados) P-010 a P-016; las entregas aprobadas, en [`arte/`](arte/), y sus composiciones, en [`bocetos/`](bocetos/). `python3 herramientas/biblioteca/recortar.py` las recorta y las deja en `biblioteca/arte/` en WebP: cada objeto en el recuadro de su dibujo con código (60 × 80, a 4×), con su mismo tamaño y apoyo, así no cambia dónde se agarra; los huecos de los casetes, del tono de la cinta. Se pintaron también los casetes A y B de S-38a, que no entran en el juego, para tenerlos. El P-011 tiene la columna del medio ensanchada a mano y el P-015, las puertas llevadas a mano a la proporción del casillero (ver [imágenes](../imagenes.md)).
 
@@ -60,26 +60,22 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 | Boceto | Qué es | Estado |
 |---|---|---|
 | S-37a | La sala, con la biblioteca baja como objeto activo | Aprobado (10/11) |
-| S-37b | La partida | Aprobado (10/11) |
 | S-37c | Una movida: el trío que brilla antes de irse | Aprobado (10/11) |
-| S-37d | La entrada, sobre la biblioteca baja | Aprobado (10/11) |
 | S-37e | El final, con récord | Aprobado (10/11) |
 | S-37f | Sin lugares libres | Aprobado (10/11) |
-| S-37g | Los catorce objetos | Aprobado (10/11); los dibujos son de ejemplo |
 | S-37h | El título animado | Aprobado (10/11) |
-| S-38a | Objetos nuevos: cuatro libros, tres casetes para elegir (A, B, C) y la Eiffel gris | Aprobado (11/11): los cuatro libros, el casete C y la Eiffel gris; A y B solo para los pedidos de imágenes |
 | S-38b | Un casillero cerrado con puerta de vidrio | Aprobado (11/11) |
 | S-38c | Aparece la llave, entre dos objetos | Aprobado (11/11) |
 | S-38d | La llave, arrastrada a su puerta | Aprobado (11/11) |
 | S-38e | La puerta, abierta | Aprobado (11/11) |
 | S-38f | Difícil con dos puertas: vidrio y reja, y sus dos llaves | Aprobado (11/11), con la llave de hierro más clara |
 | S-38g | La reja, plegada al abrirse | Aprobado (11/11) |
-| S-39a | Otra enciclopedia, verde y más baja | Aprobado (11/11) |
 | S-39b | Difícil con la fila de atrás en silueta | Aprobado (11/11) |
-| S-40a | La entrada con las imágenes (P-016), los lomos en Fraunces dorado y la cámara derecha | Aprobado (11/11), en la 0.21.0 |
 | S-40b | Normal con las imágenes (P-010, P-012 a P-015) | Aprobado (11/11), con los objetos más adelante en los estantes del medio y de abajo |
 | S-40c | Difícil, al tamaño de un teléfono | Aprobado (11/11) |
 | S-40d | Fácil (P-011) | Aprobado (11/11) |
 | S-41 | La música: Taller como primo de dibujos animados, A (caricatura clásica), B (dibujito de los 70) y B2 (B con brillo), con o sin swing y a cuatro tempos; elegida (12/11) B2 a 116 con swing y la melodía silbada | Aprobado (12/11): un solo tema en todo Biblioteca, igual de fuerte en la partida, que baja al terminar; en la 0.22.0 |
 | S-42 | Los efectos, en dos variantes: R (realistas, del rubro) y D (con un toque de dibujito, notas en do y silbidos), con la música de fondo | Aprobado (12/11): la D, entera; en la 0.22.0 |
 | S-43 | La entrada con el fondo sin despertador ni cámara (P-016, versión del 12/11) y las dos piezas del P-013 encima; el despertador, entre el tamaño que tenía y el de la cámara | Aprobado (12/11), en la 0.22.1 |
+
+Superados y borrados el 12/11 (quedan en el historial de Git): S-37b y S-37d (la partida y la entrada dibujadas con código), S-37g, S-38a y S-39a (los objetos dibujados con código) y S-40a (la entrada antes de la 0.22.1).
