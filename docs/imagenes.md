@@ -46,7 +46,7 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 | P-013 | Los nueve adornos | Gemini, a la primera, con más volumen que el P-012; las láminas siguientes lo tomaron de referencia | [`biblioteca/arte/P-013_adornos.jpg`](biblioteca/arte/P-013_adornos.jpg) |
 | P-014 | Los seis casetes y las dos llaves | Gemini, a la primera; los huecos de los carretes vinieron en magenta y se rellenan al recortar | [`biblioteca/arte/P-014_casetes-llaves.jpg`](biblioteca/arte/P-014_casetes-llaves.jpg) |
 | P-015 | La puerta de vidrio (solo el marco) y la reja | Gemini, casi cuadradas en vez de apaisadas: se llevaron a mano a la proporción del casillero, con la cerradura sin deformar | [`biblioteca/arte/P-015_puertas.jpg`](biblioteca/arte/P-015_puertas.jpg) |
-| P-016 | El fondo de la entrada de Biblioteca | Gemini, a la primera y en su lugar al píxel, con tres referencias juntas en una lámina (la sala, el despertador y la cámara, la madera) | [`biblioteca/arte/P-016_fondo-entrada.jpg`](biblioteca/arte/P-016_fondo-entrada.jpg) |
+| P-016 | El fondo de la entrada de Biblioteca | Gemini, a la primera y en su lugar al píxel, con tres referencias juntas en una lámina (la sala, el despertador y la cámara, la madera). El 12/11, Producto le pidió en la misma línea la versión sin el despertador ni la cámara, idéntica en todo lo demás: desde la 0.22.1 esos dos son las piezas del P-013, encima | [`biblioteca/arte/P-016_fondo-entrada.jpg`](biblioteca/arte/P-016_fondo-entrada.jpg) |
 
 ## Un pedido que salió a la primera
 

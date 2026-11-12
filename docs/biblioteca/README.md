@@ -82,3 +82,4 @@ Un juego de ordenar en la biblioteca baja del living: se juntan tres objetos igu
 | S-40d | Fácil (P-011) | Aprobado (11/11) |
 | S-41 | La música: Taller como primo de dibujos animados, A (caricatura clásica), B (dibujito de los 70) y B2 (B con brillo), con o sin swing y a cuatro tempos; elegida (12/11) B2 a 116 con swing y la melodía silbada | Aprobado (12/11): un solo tema en todo Biblioteca, igual de fuerte en la partida, que baja al terminar; en la 0.22.0 |
 | S-42 | Los efectos, en dos variantes: R (realistas, del rubro) y D (con un toque de dibujito, notas en do y silbidos), con la música de fondo | Aprobado (12/11): la D, entera; en la 0.22.0 |
+| S-43 | La entrada con el fondo sin despertador ni cámara (P-016, versión del 12/11) y las dos piezas del P-013 encima; el despertador, entre el tamaño que tenía y el de la cámara | Aprobado (12/11), en la 0.22.1 |

@@ -23,8 +23,11 @@
   text-shadow: 0 -.6rem 0 rgba(0, 0, 0, .45), 0 .5rem 0 rgba(255, 230, 170, .12); white-space: nowrap; }
 .libro.elegido { transform: translateY(-9rem); filter: drop-shadow(0 0 2rem var(--ambar)) drop-shadow(0 0 2rem var(--ambar)) drop-shadow(0 0 1rem var(--ambar)) drop-shadow(0 10rem 8rem rgba(0, 0, 0, .3)); }
 
-/* la cámara: la pieza del P-013, derecha y más grande, encima de la que trae pintada el fondo (chica y torcida), para que
-   guarde la proporción con el despertador */
+/* el despertador y la cámara: las piezas del P-013, apoyadas sobre la tapa del mueble (el fondo, P-016, viene sin ellos
+   desde la 0.22.1, para poder cambiarlos sin volver a pedirlo). El despertador, entre el tamaño que tenía pintado y el de la
+   cámara (S-43) */
+#reloj { left: 347.5rem; top: 232.3rem; width: 59.8rem; height: 79.7rem; pointer-events: none; z-index: 1;
+  filter: drop-shadow(0 2rem 2.5rem rgba(40, 20, 5, .4)); }
 #camara { left: 614rem; top: 207rem; width: 80rem; height: 106.7rem; pointer-events: none; z-index: 1;
   filter: drop-shadow(0 2rem 2.5rem rgba(40, 20, 5, .4)); }
 /* la ficha y su chinche vienen pintadas (P-016): acá solo lo escrito */
@@ -43,6 +46,7 @@
 <body>
 <div id="stage">
   <img id="fondo" src="arte/fondo-entrada.webp" alt="" draggable="false">
+  <img id="reloj" src="arte/objetos/despertador.webp" alt="" draggable="false">
   <img id="camara" src="arte/objetos/camara.webp" alt="" draggable="false">
 
   <div id="libros" role="radiogroup" aria-label="Dificultad"></div>
