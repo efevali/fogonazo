@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<!-- S-41, página de prueba de la música de Biblioteca: Taller de Fogonazo como primo de dibujos animados, de la misma
+<!-- S-42, los efectos de Biblioteca, en dos variantes (R, realistas, del rubro; D, con un toque de dibujito, con
+     notas en do y silbidos como la melodía), con la música elegida de fondo.
+     S-41, la música de Biblioteca: Taller de Fogonazo como primo de dibujos animados, de la misma
      familia que las primas orientales del mahjong y el primo renacentista de Buen ojo (mismo tempo, acordes, bajo y
      ritmo; el color lo dan los instrumentos). Dos caminos, cada uno con o sin swing:
        A, caricatura clásica (los cortos de cine): fagot y tuba en el bajo, pizzicato de cuerdas en el arpegio,
@@ -20,7 +22,7 @@
      ella para escucharla enseguida. Se borra una vez aprobado. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4a3222">
-<title>Biblioteca · prueba de música</title>
+<title>Biblioteca · prueba de sonido</title>
 <style>
 @font-face { font-family: Barlow; font-weight: 500; src: url(../../comun/fuentes/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); }
 @font-face { font-family: Barlow; font-weight: 700; src: url(../../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
@@ -36,14 +38,21 @@ h2 { font-size: 17px; margin: 18px 0 2px; } h2 + p { font-size: 14px; margin-bot
 .op b { display: block; font-size: 17px; } .op span { display: block; font-weight: 500; font-size: 13px; color: #7a6c5c; margin-top: 2px; }
 .op.on { border-left-color: #b5402e; background: #fff; }
 .op.on b::after { content: "  ♪"; color: #b5402e; }
+.fila { display: flex; align-items: center; gap: 8px; margin: 6px 0; } .fila > span { flex: 0 0 38%; font-weight: 500; font-size: 14px; line-height: 1.25; }
+.fila .fx { flex: 1; padding: 9px 6px; border: 0; font: 700 16px Barlow; cursor: pointer; background: #fbfaf6; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
+.fila .fx[data-var="R"] { border-bottom: 4px solid #8a6a4a; } .fila .fx[data-var="D"] { border-bottom: 4px solid #d4862a; }
+.fila .fx:active { background: #efe6d2; } .fila small { display: block; margin: 0; font-size: 11px; }
 #parar { background: linear-gradient(#c95a3d, #a63f27); color: #fff6ec; font: 700 18px Barlow; border: 0; padding: 10px 26px; cursor: pointer; margin-top: 20px; }
 small { display: block; margin-top: 16px; color: #9a8b78; font-weight: 500; font-size: 13px; line-height: 1.4; }
 </style>
 </head>
 <body>
 <div class="hoja">
-  <h1>Biblioteca · la música (S-41)</h1>
-  <p>Taller de Fogonazo como primo de dibujos animados: el mismo tema, con otros instrumentos. Tocá una opción para escucharla; el swing se puede prender o apagar con el tema sonando.</p>
+  <h1>Biblioteca · el sonido (S-41, S-42)</h1>
+  <p>Los efectos, en dos variantes para cada momento: <b>R</b>, realistas, del rubro (cada objeto suena como lo que es), y <b>D</b>, con un toque de dibujito, en sintonía con la música. Conviene escucharlos con la música de fondo, como en el juego.</p>
+  <div id="efectos"></div>
+  <h1 style="margin-top:28px">La música (S-41)</h1>
+  <p>Elegida: B2, a 116, con swing y la melodía silbada. Abajo quedan las otras opciones, como referencia.</p>
   <div id="temas"></div>
   <button id="parar" type="button">Parar</button>
   <small>Mismos acordes, bajo y ritmo que en Fogonazo; cambian los instrumentos. Todas suenan con el mismo volumen. En el juego el tema arranca con una vuelta sin melodía; acá arranca con ella. Conviene escucharla también con el parlante del teléfono.</small>
@@ -73,10 +82,11 @@ let BPM = 116;
 // B2's melody: who plays it (12/11: the vibraphone was barely heard)
 const MELODIAS = [['vibra', 'Vibráfono, más presente', 'el de antes, más fuerte y más parejo'], ['trompeta', 'Trompeta con sordina', 'la de los dibujitos, con un quejido al entrar'],
   ['silbido', 'Silbido', 'alguien que silba mientras ordena'], ['moog', 'Sintetizador', 'un Moog de los 70, redondo']];
-let MEL = 'vibra', SOLO = null;   // SOLO, for the tools: 'melodia' or 'resto', to measure the balance
+let MEL = 'silbido', SOLO = null;   // SOLO, for the tools: 'melodia' or 'resto', to measure the balance
 // how much each version is turned up or down to sound as loud as the original (measured offline, see __render)
 const TRIM = { original: 1, A: 0.345, B: 0.49, B2: 0.42 };
 let SWING = true;
+let NIVEL_FX = 1;   // all the effects together (for the tools)
 const SWING_K = 0.6;   // how late the off-beat eighth falls, in sixteenths (0.67 would be a full triplet)
 
 // ------------------------------------------------------------------ the engine (works on a live or an offline context)
@@ -86,6 +96,8 @@ function Motor(ctx) {
   const master = ctx.createGain(); master.gain.value = 1.035;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
   const bus = ctx.createGain(); bus.gain.value = 0.35 * 0.6;
+  // the effects, as in the game at volume 8 (0.7)
+  const sfx = ctx.createGain(); sfx.gain.value = 0.7; sfx.connect(master);
   bus.connect(master); master.connect(comp); comp.connect(ctx.destination);
   const noiseBuf = ctx.createBuffer(1, sr, sr); { const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
   function sala(seg, curva) {
@@ -354,7 +366,72 @@ function Motor(ctx) {
       if (!conMel && k === 58) ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'].forEach((n, j) => { vibra(N(n), t + j * S * 0.5, S, 0.03, dest, -0.3 + j * 0.12); glock(N(n) + 12, t + j * S * 0.5, 0.012, dest, 0.2); });
     }
   }
-  return { crear, paso, bus };
+
+  // ================================================================== the effects (S-42)
+  // R, realistic: each thing sounds like what it is. D, a cartoon touch: the same things, with a tuned note or a whistle
+  // in the key of the music (C). Every effect goes through its own level, measured against the music (see __fx).
+  function nv(v) { const g = ctx.createGain(); g.gain.value = v * NIVEL_FX; g.connect(sfx); return g; }
+  const glk = (n, t, vol, d, pan) => glock(N(n), t, vol, d, pan);
+  const sil = (n, t, dur, vol, d) => silbido(N(n) - 12, t, dur, vol, d, 0.1);
+  function golpe(t, f, f2, dur, vol, d, pan) { seno(t, f, f2, dur, vol, d, pan); }
+  // the thump of something set down, by material
+  const APOYA = {
+    libro(t, d) { golpe(t, 170, 105, 0.08, 0.2, d); ruido(t, 0.05, 0.14, 'lowpass', 900, 0.8, d); ruido(t + 0.003, 0.03, 0.035, 'bandpass', 3000, 1.5, d); },
+    plastico(t, d) { ruido(t, 0.014, 0.16, 'bandpass', 3300, 3, d); seno(t, 1900, 0, 0.02, 0.05, d); ruido(t + 0.024, 0.01, 0.07, 'bandpass', 2600, 3, d); golpe(t, 260, 200, 0.04, 0.06, d); },
+    metal(t, d) { golpe(t, 220, 160, 0.04, 0.08, d); [[2450, 0.14, 0.045], [3720, 0.09, 0.028], [5330, 0.06, 0.016]].forEach(([f, l, v]) => seno(t, f, 0, l, v, d)); ruido(t, 0.008, 0.06, 'bandpass', 4000, 2, d); },
+    madera(t, d) { golpe(t, 540, 480, 0.07, 0.11, d); ruido(t, 0.018, 0.09, 'bandpass', 1500, 2, d); seno(t, 1950, 0, 0.05, 0.02, d); },
+  };
+  const NOTA_D = { libro: 'G4', plastico: 'C5', madera: 'E5', metal: 'G5' };
+  function fechador(t, d) {   // the library's date stamp: the wheel clicks, then the press
+    ruido(t, 0.015, 0.07, 'bandpass', 3200, 3, d); golpe(t + 0.03, 150, 70, 0.11, 0.24, d); ruido(t + 0.03, 0.06, 0.16, 'lowpass', 700, 0.8, d);
+    ruido(t + 0.035, 0.02, 0.05, 'bandpass', 2000, 2, d);
+  }
+  function timbre(t, d, vol) { seno(t, 2093, 0, 1.3, vol, d, 0.15); seno(t, 2093 * 2.71, 0, 0.5, vol * 0.3, d, 0.15); ruido(t, 0.006, vol * 0.8, 'bandpass', 5000, 2, d, 0.15); }
+  function ficha(t, d) { ruido(t, 0.18, 0.08, 'bandpass', 1400, 1, d, 0, 2600); ruido(t + 0.16, 0.04, 0.07, 'lowpass', 1200, 0.8, d); }
+  const FX = {
+    R: {
+      agarra(t, d) { ruido(t, 0.03, 0.06, 'bandpass', 2400, 1.5, d); ruido(t + 0.01, 0.06, 0.025, 'bandpass', 4200, 2, d); },
+      apoya(t, d, mat) { APOYA[mat](t, d); },
+      trio(t, d) { [-0.35, 0, 0.35].forEach((p, j) => ruido(t + j * 0.05, 0.13, 0.06, 'bandpass', 1100, 1.2, d, p, 2600)); ['C6', 'E6', 'G6'].forEach((n, j) => vibraP(N(n), t + 0.12 + j * 0.03, 0.4, 0.035, d, -0.2 + j * 0.2)); },
+      llave(t, d) { [[0, 3200], [0.05, 4300], [0.11, 3700]].forEach(([dt, f]) => { seno(t + dt, f, 0, 0.12, 0.03, d, 0.2); seno(t + dt, f * 1.48, 0, 0.06, 0.012, d, 0.2); }); },
+      vidrio(t, d) { ruido(t, 0.015, 0.1, 'bandpass', 2600, 3, d); seno(t, 1200, 0, 0.03, 0.04, d); ruido(t + 0.06, 0.3, 0.035, 'bandpass', 800, 1, d, 0, 400);
+        [[3100, 0.3, 0.025], [4400, 0.2, 0.016], [6200, 0.12, 0.01]].forEach(([f, l, v]) => seno(t + 0.09, f, 0, l, v, d, -0.2)); },
+      reja(t, d) { golpe(t, 300, 180, 0.08, 0.12, d); ruido(t, 0.05, 0.1, 'lowpass', 1200, 0.8, d);
+        for (let j = 0; j < 8; j++) { const tj = t + 0.1 + j * 0.035; seno(tj, 1500 + j * 120, 0, 0.03, 0.03, d, -0.4 + j * 0.1); ruido(tj, 0.012, 0.05, 'bandpass', 2500 + j * 200, 2.5, d, -0.4 + j * 0.1); }
+        [[880, 0.25, 0.05], [1335, 0.18, 0.03]].forEach(([f, l, v]) => seno(t + 0.42, f, 0, l, v, d, 0.35)); ruido(t + 0.42, 0.03, 0.08, 'bandpass', 1800, 2, d, 0.35); },
+      deshace(t, d) { seno(t, 900, 1700, 0.11, 0.03, d, 0, 'triangle'); ruido(t, 0.12, 0.04, 'bandpass', 3000, 2, d, 0, 5200); },
+      trabada(t, d) { golpe(t, 125, 80, 0.1, 0.13, d); golpe(t + 0.14, 110, 70, 0.12, 0.1, d); ruido(t, 0.05, 0.06, 'lowpass', 600, 0.8, d); },
+      boton(t, d) { ruido(t, 0.03, 0.12, 'lowpass', 1400, 0.8, d); ruido(t, 0.04, 0.04, 'bandpass', 3800, 1.5, d); },
+      dificultad(t, d) { ruido(t, 0.14, 0.07, 'bandpass', 900, 1, d, 0, 1800); golpe(t + 0.13, 180, 120, 0.05, 0.06, d); },
+      fin(t, d) { ficha(t, d); fechador(t + 0.35, d); },
+      record(t, d) { ficha(t, d); fechador(t + 0.35, d); timbre(t + 0.75, d, 0.05); },
+    },
+    D: {
+      agarra(t, d) { seno(t, 900, 1450, 0.06, 0.045, d); ruido(t, 0.02, 0.03, 'bandpass', 2400, 1.5, d); },
+      apoya(t, d, mat) { APOYA[mat](t, d); const n = NOTA_D[mat]; if (mat === 'metal') glk(n, t, 0.04, d, 0.1); else seno(t, mtof(N(n)), mtof(N(n)) * 0.82, 0.12, 0.07, d, 0.1); },
+      trio(t, d) { sil('C6', t, 0.07, 0.07, d); sil('E6', t + 0.07, 0.07, 0.07, d); sil('G6', t + 0.14, 0.14, 0.075, d); seno(t + 0.3, 500, 1300, 0.05, 0.09, d); ruido(t + 0.3, 0.03, 0.06, 'bandpass', 2000, 1.5, d); },
+      llave(t, d) { ['G6', 'C7', 'E7', 'G7'].forEach((n, j) => glk(n, t + j * 0.05, 0.035, d, -0.2 + j * 0.15)); },
+      vidrio(t, d) { ruido(t, 0.012, 0.1, 'bandpass', 2600, 3, d); ruido(t + 0.07, 0.012, 0.1, 'bandpass', 3000, 3, d); ['C6', 'E6', 'G6', 'C7'].forEach((n, j) => glk(n, t + 0.14 + j * 0.06, 0.04, d, -0.2 + j * 0.15)); },
+      reja(t, d) { golpe(t, 300, 180, 0.08, 0.1, d); for (let j = 0; j < 6; j++) ruido(t + 0.08 + j * 0.025, 0.01, 0.06, 'bandpass', 2400 + j * 300, 3, d, -0.3 + j * 0.12);
+        silbato(t + 0.1, N('C5'), N('C6'), 0.25, 0.035, d); [[1046, 0.3, 0.05], [1568, 0.2, 0.025]].forEach(([f, l, v]) => seno(t + 0.36, f, 0, l, v, d, 0.3)); },
+      deshace(t, d) { silbido(N('A5') - 12, t, 0.13, 0.06, d, 0); seno(t, 1400, 800, 0.14, 0.02, d); },
+      trabada(t, d) { sil('G5', t, 0.14, 0.07, d); sil('E5', t + 0.2, 0.28, 0.07, d); },
+      boton(t, d) { bloque(t, true, 0.06, d); },
+      dificultad(t, d) { ruido(t, 0.14, 0.06, 'bandpass', 900, 1, d, 0, 1800); glk('E6', t + 0.1, 0.035, d, 0.1); },
+      fin(t, d) { sil('G5', t, 0.1, 0.075, d); sil('C6', t + 0.12, 0.1, 0.075, d); sil('E6', t + 0.24, 0.4, 0.08, d); ['C5', 'E5', 'G5'].forEach((n, j) => vibraP(N(n), t + 0.24, 0.6, 0.03, d, -0.2 + j * 0.2)); },
+      record(t, d) { FX.D.fin(t, d); ['C7', 'E7', 'G7', 'C8'].forEach((n, j) => glk(n, t + 0.5 + j * 0.05, 0.03, d, -0.2 + j * 0.15)); timbre(t + 0.8, d, 0.04); },
+    },
+  };
+  // each effect's level, per variant (measured against the music, see __fx)
+  // targets, in momentary loudness: the music runs about -45 (its loudest moments, -40). The frequent ones (grabbing,
+  // setting down, buttons) at or under the music; the trio, the key and the doors a bit over it; the end and the record
+  // over the lowered music
+  const NIVEL = { 'R:agarra': 3.199, 'D:agarra': 1.349, 'R:apoya:libro': 0.507, 'D:apoya:libro': 0.519, 'R:apoya:plastico': 1.429, 'D:apoya:plastico': 0.955, 'R:apoya:metal': 0.661, 'D:apoya:metal': 0.495, 'R:apoya:madera': 0.813, 'D:apoya:madera': 0.741, 'R:trio': 0.324, 'D:trio': 0.335, 'R:llave': 1.230, 'D:llave': 0.398, 'R:vidrio': 1.288, 'D:vidrio': 0.417, 'R:reja': 0.912, 'D:reja': 0.569, 'R:deshace': 2.042, 'D:deshace': 0.275, 'R:trabada': 0.610, 'D:trabada': 0.237, 'R:boton': 2.483, 'D:boton': 1.334, 'R:dificultad': 1.216, 'D:dificultad': 0.610, 'R:fin': 0.556, 'D:fin': 0.248, 'R:record': 0.646, 'D:record': 0.269 };
+  function efecto(variante, nombre, mat, at) {
+    const t = at !== undefined ? at : ctx.currentTime + 0.02, d = nv(NIVEL[variante + ':' + nombre + (mat ? ':' + mat : '')]);
+    FX[variante][nombre](t, d, mat);
+  }
+  return { crear, paso, bus, efecto };
 }
 
 // ------------------------------------------------------------------ the page and live playback
@@ -378,8 +455,7 @@ document.querySelectorAll('.swing').forEach(b => b.addEventListener('click', () 
 }));
 let ctx = null, motor = null, cur = null, step = 0, nextT = 0, timer = null;
 function sonar(v) {
-  if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); motor = Motor(ctx); }
-  if (ctx.state === 'suspended') ctx.resume();
+  asegurar();
   parar(0.25);
   cur = motor.crear(v); step = 64; nextT = ctx.currentTime + 0.1;
   timer = setInterval(() => { const S = 60 / BPM / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
@@ -394,6 +470,39 @@ function marcar(v) { document.querySelectorAll('.tema').forEach(b => b.classList
 document.querySelectorAll('.tema').forEach(b => b.addEventListener('click', () => sonar(b.dataset.v)));
 document.getElementById('parar').addEventListener('click', () => parar(0.3));
 document.addEventListener('visibilitychange', () => { if (document.hidden) parar(0.1); });
+
+
+// ------------------------------------------------------------------ the effects on the page
+const EFECTOS = [
+  ['agarra', 'Agarrar un objeto'], ['apoya:libro', 'Apoyar un libro'], ['apoya:plastico', 'Apoyar un casete o la radio'],
+  ['apoya:metal', 'Apoyar algo de metal (Eiffel, avión, globo, reloj, auto, cámara, pila)'], ['apoya:madera', 'Apoyar la mamushka o el cactus'],
+  ['trio', 'El trío que se va'], ['llave', 'Aparece una llave'], ['vidrio', 'Se abre la puerta de vidrio'], ['reja', 'Se abre la reja'],
+  ['deshace', 'Deshacer'], ['trabada', '«No queda lugar»'], ['boton', 'Tocar una ficha o un botón'], ['dificultad', 'Elegir la dificultad (el libro se levanta)'],
+  ['fin', 'Fin de la partida (la ficha y el fechador; la música baja)'], ['record', 'Récord (lo mismo y el timbre de mostrador)'],
+];
+const ef = document.getElementById('efectos');
+ef.insertAdjacentHTML('beforeend', `<h2>Música de fondo</h2><p>La elegida, mientras probás los efectos.</p><div class="par">` +
+  [[1, 'Con música', 'B2 silbada, a 116'], [0, 'Sin música', 'los efectos solos']].map(([m, t, d]) => `<button class="op fondo" data-m="${m}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+ef.insertAdjacentHTML('beforeend', `<h2>Una jugada</h2><p>Unas movidas seguidas, rápidas, hasta un trío: para escuchar el ritmo del juego.</p><div class="fila"><span>Tres movidas y un trío</span><button class="fx" data-var="R" data-e="jugada">R</button><button class="fx" data-var="D" data-e="jugada">D</button></div>`);
+ef.insertAdjacentHTML('beforeend', `<h2>Cada momento</h2>` + EFECTOS.map(([e, t]) => `<div class="fila"><span>${t}</span><button class="fx" data-var="R" data-e="${e}">R</button><button class="fx" data-var="D" data-e="${e}">D</button></div>`).join(''));
+function asegurar() { if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); motor = Motor(ctx); } if (ctx.state === 'suspended') ctx.resume(); }
+function bajarMusica() { if (!motor) return; const g = motor.bus.gain, t = ctx.currentTime, v = 0.35 * 0.6; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(v * 0.3, t + 0.3); g.setValueAtTime(v * 0.3, t + 3); g.linearRampToValueAtTime(v, t + 4); }
+document.querySelectorAll('.fx').forEach(b => b.addEventListener('click', () => {
+  asegurar();
+  const v = b.dataset.var, [e, mat] = b.dataset.e.split(':'), t = ctx.currentTime + 0.03;
+  if (e === 'jugada') {
+    const mats = ['libro', 'metal', 'plastico'];
+    mats.forEach((m, j) => { motor.efecto(v, 'agarra', null, t + j * 0.55); motor.efecto(v, 'apoya', m, t + j * 0.55 + 0.25); });
+    motor.efecto(v, 'agarra', null, t + 1.65); motor.efecto(v, 'apoya', 'libro', t + 1.9); motor.efecto(v, 'trio', null, t + 2.3);
+    return;
+  }
+  if (e === 'fin' || e === 'record') bajarMusica();
+  motor.efecto(v, e, mat, t);
+}));
+document.querySelectorAll('.fondo').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.m === '1') { BPM = 116; SWING = true; MEL = 'silbido'; sonar('B2'); } else parar(0.3);
+  document.querySelectorAll('.fondo').forEach(x => x.classList.toggle('on', x === b && b.dataset.m === '1'));
+}));
 
 // ------------------------------------------------------------------ for the tools (offline)
 async function renderizar(v, swing, bpm) {
@@ -422,6 +531,41 @@ window.__renderBuf = async (v, swing, bpm) => {
   w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true);
   dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);
   for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i] * g)) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i] * g)) * 32767, true); }
+  let bin = ''; const u = new Uint8Array(dv.buffer); for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin);
+};
+// an effect alone, through the same chain: its loudest 400 ms (momentary loudness), to set it against the music
+window.__fx = async (variante, nombre, mat) => {
+  const sr = 44100, off = new OfflineAudioContext(2, sr * 3, sr), m = Motor(off); m.efecto(variante, nombre, mat, 0.05);
+  const buf = await off.startRendering(), d = buf.getChannelData(0), d1 = buf.getChannelData(1);
+  return { lufs: momentanea(d, d1, sr), pico: Math.max(...[d, d1].map(x => x.reduce((a, b) => Math.max(a, Math.abs(b)), 0))) };
+};
+window.__musicaM = async () => {   // the music's loudest 400 ms and its typical (median) 400 ms
+  SWING = true; MEL = 'silbido'; const { buf, sr } = await renderizar('B2', 1, 116);
+  return momentanea(buf.getChannelData(0), buf.getChannelData(1), sr, true);
+};
+function momentanea(d, d1, sr, mediana) {
+  const kw = x => { const o = new Float32Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0, w1 = 0, w2 = 0;
+    for (let i = 0; i < x.length; i++) { const y = 1.53512485958697 * x[i] - 2.69169618940638 * x1 + 1.19839281085285 * x2 + 1.69065929318241 * y1 - 0.73248077421585 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = y;
+      const w = y - 2 * u1 + u2 + 1.99004745483398 * w1 - 0.99007225036621 * w2; u2 = u1; u1 = y; w2 = w1; w1 = w; o[i] = w; } return o; };
+  const a = kw(d), b = kw(d1), W = Math.floor(0.4 * sr), H = Math.floor(0.1 * sr), vals = [];
+  for (let s = 0; s + W <= a.length; s += H) { let e = 0; for (let i = s; i < s + W; i++) e += a[i] * a[i] + b[i] * b[i]; vals.push(-0.691 + 10 * Math.log10(e / W + 1e-12)); }
+  vals.sort((x, y) => x - y);
+  return mediana ? { max: vals[vals.length - 1], med: vals[vals.length >> 1] } : vals[vals.length - 1];
+}
+// a demo for the chat: the music with a run of effects over it, as a WAV (base64)
+window.__demo = async v => {
+  SWING = true; MEL = 'silbido';
+  const sr = 44100, S = 60 / 116 / 4, dur = 14, off = new OfflineAudioContext(2, sr * dur, sr), m = Motor(off), c = m.crear('B2');
+  for (let st = 0, t = 0.05; t < 12; st++, t += S) m.paso(c, st + 64, t, S);
+  const T = [[0.6, 'agarra'], [0.85, 'apoya', 'libro'], [1.3, 'agarra'], [1.55, 'apoya', 'metal'], [2.0, 'agarra'], [2.25, 'apoya', 'plastico'], [2.7, 'agarra'], [2.95, 'apoya', 'madera'],
+    [3.5, 'agarra'], [3.75, 'apoya', 'libro'], [4.15, 'trio'], [5.2, 'llave'], [6.0, 'agarra'], [6.25, 'vidrio'], [7.3, 'agarra'], [7.55, 'reja'], [8.6, 'deshace'], [9.4, 'trabada'], [10.5, 'boton'], [11.0, 'record']];
+  for (const [t, n, mat] of T) m.efecto(v, n, mat, t);
+  const g = m.bus.gain; g.setValueAtTime(0.21, 10.9); g.linearRampToValueAtTime(0.063, 11.2);
+  const buf = await off.startRendering(), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, k = 4;
+  const dv = new DataView(new ArrayBuffer(44 + n * 4)), w = (o, t) => [...t].forEach((ch, i) => dv.setUint8(o + i, ch.charCodeAt(0)));
+  w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true);
+  dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);
+  for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i] * k)) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i] * k)) * 32767, true); }
   let bin = ''; const u = new Uint8Array(dv.buffer); for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin);
 };
 window.__trim = TRIM; window.__solo = x => { SOLO = x; }; window.__mel = x => { MEL = x; };
