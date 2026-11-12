@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!-- S-41, página de prueba de la música de Biblioteca: Taller de Fogonazo como primo de dibujos animados, de la misma
+     familia que las primas orientales del mahjong y el primo renacentista de Buen ojo (mismo tempo, acordes, bajo y
+     ritmo; el color lo dan los instrumentos). Dos caminos, cada uno con o sin swing:
+       A, caricatura clásica (los cortos de cine): fagot y tuba en el bajo, pizzicato de cuerdas en el arpegio,
+          clarinete en la melodía, bloques de madera en los contratiempos (tic, tac) y un silbato de émbolo que sube
+          al final de la vuelta sin melodía, con un xilofón que contesta.
+       B, dibujito de los 70 (sábado a la mañana): bajo eléctrico, piano eléctrico en el arpegio, vibráfono en la
+          melodía, bongós en los contratiempos y un barrido de vibráfono al final de la vuelta sin melodía.
+     El swing corre las corcheas de contratiempo hacia atrás (el ritmo de shuffle de los dibujitos).
+     Todo sintetizado, sin archivos de audio. En el juego el tema arranca con una vuelta sin melodía; acá arranca con
+     ella para escucharla enseguida. Se borra una vez aprobado. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4a3222">
+<title>Biblioteca · prueba de música</title>
+<style>
+@font-face { font-family: Barlow; font-weight: 500; src: url(../../comun/fuentes/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: Barlow; font-weight: 700; src: url(../../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
+html, body { margin: 0; min-height: 100%; background: #4a3222; }
+body { font-family: Barlow, "Arial Narrow", sans-serif; color: #3a332c; display: flex; justify-content: center; padding: 18px 16px 32px; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+.hoja { background: #f6f3ea; max-width: 640px; width: 100%; padding: 20px 20px 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, .4); box-sizing: border-box; }
+h1 { font-size: 22px; margin: 0 0 4px; } p { font-weight: 500; color: #7a6c5c; font-size: 15px; line-height: 1.4; margin: 0 0 14px; }
+h2 { font-size: 17px; margin: 18px 0 2px; } h2 + p { font-size: 14px; margin-bottom: 8px; }
+.par { display: flex; gap: 10px; flex-wrap: wrap; }
+.op { flex: 1 1 40%; text-align: left; border: 0; margin: 0; padding: 10px 12px; font: inherit; color: inherit; cursor: pointer;
+  background: #fbfaf6; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); border-left: 6px solid #d9cfbd; }
+.op b { display: block; font-size: 17px; } .op span { display: block; font-weight: 500; font-size: 13px; color: #7a6c5c; margin-top: 2px; }
+.op.on { border-left-color: #b5402e; background: #fff; }
+.op.on b::after { content: "  ♪"; color: #b5402e; }
+#parar { background: linear-gradient(#c95a3d, #a63f27); color: #fff6ec; font: 700 18px Barlow; border: 0; padding: 10px 26px; cursor: pointer; margin-top: 20px; }
+small { display: block; margin-top: 16px; color: #9a8b78; font-weight: 500; font-size: 13px; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Biblioteca · la música (S-41)</h1>
+  <p>Taller de Fogonazo como primo de dibujos animados: el mismo tema, con otros instrumentos. Tocá una opción para escucharla; el swing se puede prender o apagar con el tema sonando.</p>
+  <div id="temas"></div>
+  <button id="parar" type="button">Parar</button>
+  <small>Mismo tempo (92), acordes, bajo y ritmo que en Fogonazo; cambian los instrumentos. Las tres suenan con el mismo volumen. En el juego el tema arranca con una vuelta sin melodía; acá arranca con ella. Conviene escucharla también con el parlante del teléfono.</small>
+</div>
+<script>
+'use strict';
+// ------------------------------------------------------------------ Taller (from comun/sonido.js)
+const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const N = s => { const m = /^([A-G])([#b]?)(-?\d)$/.exec(s); return 12 * (+m[3] + 1) + NOTE[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+const TALLER = { name: 'Taller', bpm: 92,
+  chords: [['C4', 'E4', 'G4'], ['G3', 'B3', 'D4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4']], roots: ['C3', 'G2', 'A2', 'F2'],
+  bass: [0, 6, 8, 14], bassLen: 1.8, arpEvery: 2, hats: [2, 6, 10, 14],
+  lead: [[0, 'E5', 4], [4, 'G5', 2], [6, 'E5', 2], [8, 'D5', 4], [12, 'C5', 4], [16, 'D5', 2], [18, 'B4', 2], [20, 'D5', 4], [24, 'G5', 6],
+    [32, 'C5', 2], [34, 'E5', 2], [36, 'A5', 4], [40, 'G5', 2], [42, 'E5', 2], [44, 'C5', 4], [48, 'A4', 2], [50, 'C5', 2], [52, 'F5', 4], [56, 'E5', 3], [60, 'D5', 4]] };
+TALLER.chordsM = TALLER.chords.map(c => c.map(N)); TALLER.rootsM = TALLER.roots.map(N);
+TALLER.leadByStep = new Map(TALLER.lead.map(([st, n, len]) => [st, [N(n), len]]));
+
+const OPCIONES = [
+  ['original', 'Taller, como en Fogonazo', 'para comparar'],
+  ['A', 'A · Caricatura clásica', 'fagot, pizzicato, clarinete, maderas'],
+  ['B', 'B · Dibujito de los 70', 'bajo eléctrico, piano eléctrico, vibráfono, bongós'],
+];
+// how much each version is turned up or down to sound as loud as the original (measured offline, see __render)
+const TRIM = { original: 1, A: 0.345, B: 0.49 };
+let SWING = false;
+const SWING_K = 0.6;   // how late the off-beat eighth falls, in sixteenths (0.67 would be a full triplet)
+
+// ------------------------------------------------------------------ the engine (works on a live or an offline context)
+function Motor(ctx) {
+  const sr = ctx.sampleRate;
+  // as in the game: the music bus at volume 7 (0.35 × 0.6), the master and its compressor
+  const master = ctx.createGain(); master.gain.value = 1.035;
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+  const bus = ctx.createGain(); bus.gain.value = 0.35 * 0.6;
+  bus.connect(master); master.connect(comp); comp.connect(ctx.destination);
+  const noiseBuf = ctx.createBuffer(1, sr, sr); { const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  function sala(seg, curva) {
+    const len = Math.floor(sr * seg), ir = ctx.createBuffer(2, len, sr);
+    for (let ch = 0; ch < 2; ch++) { const c = ir.getChannelData(ch); for (let i = 0; i < len; i++) c[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, curva); }
+    const conv = ctx.createConvolver(); conv.buffer = ir; return conv;
+  }
+  const salida = (dest, pan) => { if (!pan) return dest; const p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(dest); return p; };
+  function ruido(t, dur, vol, tipo, freq, q, dest, pan, freq2) {
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; const f = ctx.createBiquadFilter(); f.type = tipo; f.frequency.setValueAtTime(freq, t); f.Q.value = q || 0.8;
+    if (freq2) f.frequency.exponentialRampToValueAtTime(freq2, t + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(salida(dest, pan)); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+  }
+  function seno(t, f, f2, dur, vol, dest, pan, tipo) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); if (tipo) o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(salida(dest, pan)); o.start(t); o.stop(t + dur + 0.02);
+  }
+  function vibrato(param, f, t, prof, vel, demora) {
+    const l = ctx.createOscillator(), g = ctx.createGain(); l.frequency.value = vel || 5.2;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0, t + (demora || 0.15)); g.gain.linearRampToValueAtTime(f * prof, t + (demora || 0.15) + 0.25);
+    l.connect(g); g.connect(param); l.start(t); return l;
+  }
+
+  // -------- the original (ARR['8'] of the game)
+  function pluck(f, t, dur, vol, type, dest) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.02);
+  }
+  function hiss(t, vol, dest) {
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
+    const g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    s.connect(f); f.connect(g); g.connect(dest); s.start(t, Math.random() * 0.5); s.stop(t + 0.06);
+  }
+
+  // -------- A, caricatura clásica
+  // pizzicato: a plucked string (Karplus-Strong) that dies fast, round, with the finger noise
+  const cuerdas = new Map();
+  function cuerda(m) {
+    if (cuerdas.has(m)) return cuerdas.get(m);
+    const f = mtof(m), P = Math.max(2, Math.round(sr / f - 0.5)), len = Math.floor(sr * 0.7);
+    const buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0), ring = new Float32Array(P);
+    let prev = 0; for (let i = 0; i < P; i++) { prev = prev * 0.7 + (Math.random() * 2 - 1) * 0.3; ring[i] = prev; }
+    let q = 0; for (let i = 0; i < len; i++) { const a = ring[q], b = ring[(q + 1) % P]; d[i] = a; ring[q] = 0.986 * 0.5 * (a + b); q = (q + 1) % P; }
+    let pk = 0; for (let i = 0; i < len; i++) pk = Math.max(pk, Math.abs(d[i])); for (let i = 0; i < len; i++) d[i] /= pk || 1;
+    cuerdas.set(m, buf); return buf;
+  }
+  function pizz(m, t, vol, dest, pan) {
+    const s = ctx.createBufferSource(); s.buffer = cuerda(m);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200; const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    s.connect(lp); lp.connect(g); g.connect(salida(dest, pan)); s.start(t); s.stop(t + 0.5);
+  }
+  // fagot and tuba, staccato: a reedy saw with a closing filter, and a round sine under it
+  function fagot(m, t, d, vol, dest) {
+    const f = mtof(m), L = Math.min(d, 0.24), o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 0.985, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.03);
+    o2.frequency.setValueAtTime(f, t); g2.gain.value = 0.9;
+    lp.type = 'lowpass'; lp.Q.value = 2.5; lp.frequency.setValueAtTime(1500, t); lp.frequency.exponentialRampToValueAtTime(420, t + L);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.018); g.gain.setValueAtTime(vol * 0.8, t + L * 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + L + 0.07);
+    o.connect(lp); lp.connect(g); o2.connect(g2); g2.connect(g); g.connect(dest);
+    ruido(t, 0.03, vol * 0.25, 'bandpass', 900, 1.5, dest);
+    o.start(t); o2.start(t); o.stop(t + L + 0.1); o2.stop(t + L + 0.1);
+  }
+  // clarinete: odd harmonics (a square through a soft filter), a breathy attack and a late vibrato
+  function clarinete(m, t, d, vol, dest, pan) {
+    const f = mtof(m), o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+    o.type = 'square'; o.frequency.value = f; o2.frequency.value = f; g2.gain.value = 0.8;
+    lp.type = 'lowpass'; lp.frequency.value = Math.min(f * 3.2, 3400); lp.Q.value = 0.7;
+    const v1 = vibrato(o.frequency, f, t, 0.005, 5.2, 0.2), v2 = vibrato(o2.frequency, f, t, 0.005, 5.2, 0.2);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.03); g.gain.setValueAtTime(vol * 0.9, t + Math.max(0.05, d - 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.06);
+    o.connect(lp); lp.connect(g); o2.connect(g2); g2.connect(g); g.connect(salida(dest, pan));
+    ruido(t, 0.06, vol * 0.35, 'bandpass', f * 2.5, 2.5, dest, pan);
+    for (const x of [o, o2]) x.start(t); for (const x of [o, o2, v1, v2]) x.stop(t + d + 0.1);
+  }
+  // xilofón: a hard mallet on a wooden bar (the fundamental and its fourth partial, which dies first)
+  function xilo(m, t, vol, dest, pan) {
+    const f = mtof(m);
+    seno(t, f, 0, 0.32, vol, dest, pan);
+    seno(t, f * 3.93, 0, 0.07, vol * 0.4, dest, pan);
+    ruido(t, 0.008, vol * 0.6, 'bandpass', 4000, 1.5, dest, pan);
+  }
+  // bloques de madera: tic (high) and tac (low), like a clock
+  function bloque(t, alto, vol, dest) {
+    const f = alto ? 1250 : 880;
+    seno(t, f, f * 0.92, 0.06, vol, dest, alto ? 0.3 : -0.3);
+    ruido(t, 0.012, vol * 0.6, 'bandpass', f * 2.2, 3, dest, alto ? 0.3 : -0.3);
+  }
+  // silbato de émbolo: a breathy sine that slides up, with a wobble
+  function silbato(t, m0, m1, dur, vol, dest) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), f0 = mtof(m0), f1 = mtof(m1);
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.85);
+    const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 6; lg.gain.value = f1 * 0.012; l.connect(lg); lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.06); g.gain.setValueAtTime(vol, t + dur * 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(salida(dest, 0.15));
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 4;
+    bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.85);
+    const ng = ctx.createGain(); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(vol * 0.5, t + 0.05); ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(bp); bp.connect(ng); ng.connect(salida(dest, 0.15));
+    o.start(t); l.start(t); s.start(t); for (const x of [o, l, s]) x.stop(t + dur + 0.05);
+  }
+
+  // -------- B, dibujito de los 70
+  // bajo eléctrico, con los dedos: round, a short pluck and a closing filter
+  function bajoE(m, t, d, vol, dest) {
+    const f = mtof(m), L = Math.min(d, 0.5), o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = f; o2.type = 'sawtooth'; o2.frequency.value = f; g2.gain.value = 0.25;
+    lp.type = 'lowpass'; lp.Q.value = 1.2; lp.frequency.setValueAtTime(1300, t); lp.frequency.exponentialRampToValueAtTime(350, t + 0.15);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(vol * 0.45, t + L); g.gain.exponentialRampToValueAtTime(0.0001, t + L + 0.06);
+    o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(dest);
+    o.start(t); o2.start(t); o.stop(t + L + 0.1); o2.stop(t + L + 0.1);
+  }
+  // piano eléctrico: two-operator FM (a soft bark that mellows) and the tine (a short bell an octave and a half up)
+  function fm(t, f, ratio, i0, i1, iT, dur, vol, dest, pan, dec) {
+    const car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
+    car.frequency.value = f; mod.frequency.value = f * ratio;
+    mg.gain.setValueAtTime(i0 * f * ratio, t); mg.gain.exponentialRampToValueAtTime(Math.max(0.01, i1 * f * ratio), t + iT);
+    mod.connect(mg); mg.connect(car.frequency);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(vol * (dec || 0.3), t + dur * 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    car.connect(g); g.connect(salida(dest, pan)); car.start(t); mod.start(t); car.stop(t + dur + 0.02); mod.stop(t + dur + 0.02);
+  }
+  function rhodes(m, t, vol, dest, pan) {
+    const f = mtof(m);
+    fm(t, f, 1, 1.6, 0.25, 0.3, 1.1, vol, dest, pan, 0.35);
+    fm(t, f * 7, 1, 0.5, 0.05, 0.05, 0.18, vol * 0.18, dest, pan, 0.2);
+  }
+  // vibráfono: a soft mallet on a metal bar, its fourth partial, and the motor's tremolo
+  function vibra(m, t, d, vol, dest, pan) {
+    const f = mtof(m), L = Math.max(0.9, d * 1.5), g = ctx.createGain(), trem = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+    l.frequency.value = 5.5; lg.gain.value = 0.28; trem.gain.value = 0.72; l.connect(lg); lg.connect(trem.gain);
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g2 = ctx.createGain(); o.frequency.value = f; o2.frequency.value = f * 4; g2.gain.setValueAtTime(0.25, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(vol * 0.5, t + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(trem); trem.connect(salida(dest, pan));
+    ruido(t, 0.01, vol * 0.25, 'bandpass', 3000, 1.2, dest, pan);
+    for (const x of [o, o2, l]) { x.start(t); x.stop(t + L + 0.05); }
+  }
+  // bongós: macho (high) and hembra (low)
+  function bongo(t, alto, vol, dest) {
+    const f = alto ? 420 : 310, pan = alto ? 0.3 : -0.3;
+    seno(t, f, f * 0.86, alto ? 0.12 : 0.16, vol, dest, pan);
+    ruido(t, 0.018, vol * 0.4, 'bandpass', f * 4, 1.5, dest, pan);
+  }
+
+  // -------- each version: its bus (with the trim and a send to a small room)
+  function crear(v) {
+    // the voices go into b; b and its room go out through the trim
+    const b = ctx.createGain(), post = ctx.createGain(); post.gain.value = TRIM[v]; b.connect(post); post.connect(bus);
+    const eco = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain(), lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 2400; fb.gain.value = 0.22; wet.gain.value = 0.14;
+    eco.connect(lp); lp.connect(fb); fb.connect(eco); lp.connect(wet); wet.connect(b);
+    if (v !== 'original') { const s = ctx.createGain(), conv = sala(v === 'A' ? 1.4 : 1.0, 3.6); s.gain.value = v === 'A' ? 0.22 : 0.14; b.connect(s); s.connect(conv); conv.connect(post); }
+    return { v, b: post, voces: b, eco };
+  }
+  function paso(c, step, t0, S) {
+    const song = TALLER, dest = c.voces, k = step % 64, bar = (k / 16) | 0, i = k % 16, pass = (step / 64) | 0, conMel = pass % 2 === 1;
+    const chord = song.chordsM[bar], root = song.rootsM[bar];
+    const t = t0 + (SWING && c.v !== 'original' && i % 4 === 2 ? S * SWING_K : 0);
+    const L = conMel ? song.leadByStep.get(k) : null;
+    if (c.v === 'original') {
+      if (song.bass.includes(i)) pluck(mtof(root), t, S * song.bassLen, 0.12, 'square', dest);
+      if (i % 2 === 0) pluck(mtof(chord[(i / 2) % 3] + 12), t, S * 1.8, 0.035, 'triangle', dest);
+      if (song.hats.includes(i)) hiss(t, 0.025, dest);
+      if (L) pluck(mtof(L[0]), t, S * L[1] * 0.95, 0.045, 'square', dest);
+      return;
+    }
+    if (c.v === 'A') {
+      if (song.bass.includes(i)) fagot(root, t, S * song.bassLen, 0.11, dest);
+      if (i % 2 === 0) pizz(chord[(i / 2) % 3] + 12, t, 0.07, dest, (i / 2) % 2 ? 0.25 : -0.25);
+      if (song.hats.includes(i)) bloque(t, i % 8 === 2, 0.035, dest);
+      if (L) clarinete(L[0], t, S * L[1] * 0.92, 0.05, dest, 0.1);
+      // the slide whistle into the melody, and the xylophone that answers, at the end of the pass without it
+      if (!conMel && k === 56) silbato(t, N('G4'), N('G5'), S * 6, 0.03, dest);
+      if (!conMel && k === 62) { xilo(N('C6'), t, 0.06, dest, -0.1); xilo(N('G6'), t + S, 0.05, dest, 0.1); }
+      return;
+    }
+    if (c.v === 'B') {
+      if (song.bass.includes(i)) bajoE(root, t, S * song.bassLen, 0.12, dest);
+      if (i % 2 === 0) rhodes(chord[(i / 2) % 3] + 12, t, 0.045, dest, (i / 2) % 2 ? 0.2 : -0.2);
+      if (song.hats.includes(i)) bongo(t, i % 8 === 2, 0.04, dest);
+      if (L) vibra(L[0], t, S * L[1] * 0.95, 0.06, dest, 0.1);
+      // a vibraphone sweep up the chord at the end of the pass without the melody
+      if (!conMel && k === 58) ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'].forEach((n, j) => vibra(N(n), t + j * S * 0.5, S, 0.03, dest, -0.3 + j * 0.12));
+    }
+  }
+  return { crear, paso, bus };
+}
+
+// ------------------------------------------------------------------ the page and live playback
+const temas = document.getElementById('temas');
+temas.insertAdjacentHTML('beforeend', `<h2>El tema</h2><p>Taller, 92 bpm. Tocá para escuchar; tocá otra para cambiar.</p><div class="par">` +
+  OPCIONES.map(([v, t, d]) => `<button class="op tema" data-v="${v}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+temas.insertAdjacentHTML('beforeend', `<h2>Swing</h2><p>Las corcheas de contratiempo, un poco atrasadas: el andar saltarín de los dibujitos. Vale para A y B.</p><div class="par">` +
+  [[0, 'Derecho', 'como en Fogonazo'], [1, 'Con swing', 'saltarín']].map(([s, t, d]) => `<button class="op swing${s ? '' : ' on'}" data-s="${s}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
+document.querySelectorAll('.swing').forEach(b => b.addEventListener('click', () => {
+  SWING = b.dataset.s === '1'; document.querySelectorAll('.swing').forEach(x => x.classList.toggle('on', x === b));
+}));
+let ctx = null, motor = null, cur = null, step = 0, nextT = 0, timer = null;
+function sonar(v) {
+  if (!ctx) { ctx = new (window.AudioContext || window.webkitAudioContext)(); motor = Motor(ctx); }
+  if (ctx.state === 'suspended') ctx.resume();
+  parar(0.25);
+  cur = motor.crear(v); step = 64; nextT = ctx.currentTime + 0.1;
+  timer = setInterval(() => { const S = 60 / TALLER.bpm / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
+  marcar(v);
+}
+function parar(fade) {
+  if (timer) { clearInterval(timer); timer = null; }
+  if (cur) { const b = cur.b, t = ctx.currentTime; b.gain.setValueAtTime(b.gain.value, t); b.gain.linearRampToValueAtTime(0, t + (fade || 0.3)); setTimeout(() => { try { b.disconnect(); } catch (e) {} }, 3000); }
+  cur = null; marcar();
+}
+function marcar(v) { document.querySelectorAll('.tema').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+document.querySelectorAll('.tema').forEach(b => b.addEventListener('click', () => sonar(b.dataset.v)));
+document.getElementById('parar').addEventListener('click', () => parar(0.3));
+document.addEventListener('visibilitychange', () => { if (document.hidden) parar(0.1); });
+
+// ------------------------------------------------------------------ for the tools (offline)
+async function renderizar(v, swing) {
+  const sr = 44100, S = 60 / TALLER.bpm / 4, dur = 128 * S + 2.5, prev = SWING; SWING = !!swing;
+  const off = new OfflineAudioContext(2, Math.ceil(sr * dur), sr), m = Motor(off), c = m.crear(v);
+  for (let s = 0; s < 128; s++) m.paso(c, s + 64, 0.05 + s * S, S);
+  SWING = prev;
+  return { buf: await off.startRendering(), S, sr };
+}
+// loudness as the ear hears it (K-weighting, ITU BS.1770), over the pass with the melody
+window.__render = async (v, swing) => {
+  const { buf, S, sr } = await renderizar(v, swing), d = buf.getChannelData(0), d1 = buf.getChannelData(1);
+  const a = Math.floor(0.05 * sr), z = Math.floor((0.05 + 128 * S) * sr);
+  const kw = x => { const o = new Float32Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0, w1 = 0, w2 = 0;
+    for (let i = 0; i < x.length; i++) { const y = 1.53512485958697 * x[i] - 2.69169618940638 * x1 + 1.19839281085285 * x2 + 1.69065929318241 * y1 - 0.73248077421585 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = y;
+      const w = y - 2 * u1 + u2 + 1.99004745483398 * w1 - 0.99007225036621 * w2; u2 = u1; u1 = y; w2 = w1; w1 = w; o[i] = w; } return o; };
+  const k0 = kw(d.subarray(a, z)), k1 = kw(d1.subarray(a, z)); let ks = 0, pk = 0, nan = 0;
+  for (let i = 0; i < k0.length; i++) ks += k0[i] * k0[i] + k1[i] * k1[i];
+  for (let i = 0; i < d.length; i++) { if (!Number.isFinite(d[i])) nan++; pk = Math.max(pk, Math.abs(d[i]), Math.abs(d1[i])); }
+  return { lufs: -0.691 + 10 * Math.log10(ks / k0.length), pico: pk, nan };
+};
+// the version as a WAV (base64): the pass with the melody and the one without, at a listening level
+window.__renderBuf = async (v, swing) => {
+  const { buf, sr } = await renderizar(v, swing), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, g = 4;
+  const dv = new DataView(new ArrayBuffer(44 + n * 4)), w = (o, t) => [...t].forEach((ch, i) => dv.setUint8(o + i, ch.charCodeAt(0)));
+  w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true);
+  dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);
+  for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i] * g)) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i] * g)) * 32767, true); }
+  let bin = ''; const u = new Uint8Array(dv.buffer); for (let i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(bin);
+};
+window.__trim = TRIM;
+</script>
+</body>
+</html>
