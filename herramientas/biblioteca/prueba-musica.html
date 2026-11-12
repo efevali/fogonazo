@@ -10,6 +10,9 @@
           al final de la vuelta sin melodía, con un xilofón que contesta.
        B, dibujito de los 70 (sábado a la mañana): bajo eléctrico, piano eléctrico en el arpegio, vibráfono en la
           melodía, bongós en los contratiempos y un barrido de vibráfono al final de la vuelta sin melodía.
+       B2, B con brillo (12/11): más ataque en el piano eléctrico y el bajo, un brillo arriba en el vibráfono, shaker
+          en corcheas, pandereta en el 2 y el 4 y un glockenspiel suave que dobla la melodía una octava arriba.
+     El tempo se elige (92, el de Taller, a 126) para todas.
      El swing corre las corcheas de contratiempo hacia atrás (el ritmo de shuffle de los dibujitos).
      Todo sintetizado, sin archivos de audio. En el juego el tema arranca con una vuelta sin melodía; acá arranca con
      ella para escucharla enseguida. Se borra una vez aprobado. -->
@@ -41,7 +44,7 @@ small { display: block; margin-top: 16px; color: #9a8b78; font-weight: 500; font
   <p>Taller de Fogonazo como primo de dibujos animados: el mismo tema, con otros instrumentos. Tocá una opción para escucharla; el swing se puede prender o apagar con el tema sonando.</p>
   <div id="temas"></div>
   <button id="parar" type="button">Parar</button>
-  <small>Mismo tempo (92), acordes, bajo y ritmo que en Fogonazo; cambian los instrumentos. Las tres suenan con el mismo volumen. En el juego el tema arranca con una vuelta sin melodía; acá arranca con ella. Conviene escucharla también con el parlante del teléfono.</small>
+  <small>Mismos acordes, bajo y ritmo que en Fogonazo; cambian los instrumentos. Todas suenan con el mismo volumen. En el juego el tema arranca con una vuelta sin melodía; acá arranca con ella. Conviene escucharla también con el parlante del teléfono.</small>
 </div>
 <script>
 'use strict';
@@ -61,9 +64,12 @@ const OPCIONES = [
   ['original', 'Taller, como en Fogonazo', 'para comparar'],
   ['A', 'A · Caricatura clásica', 'fagot, pizzicato, clarinete, maderas'],
   ['B', 'B · Dibujito de los 70', 'bajo eléctrico, piano eléctrico, vibráfono, bongós'],
+  ['B2', 'B2 · Dibujito de los 70, con brillo', 'B con más ataque y aire: shaker, pandereta y un glockenspiel que dobla la melodía'],
 ];
+const TEMPOS = [[92, 'como Taller'], [104, 'como Placa'], [116, 'más ágil'], [126, 'bien movida']];
+let BPM = 92;
 // how much each version is turned up or down to sound as loud as the original (measured offline, see __render)
-const TRIM = { original: 1, A: 0.345, B: 0.49 };
+const TRIM = { original: 1, A: 0.345, B: 0.49, B2: 0.49 };
 let SWING = false;
 const SWING_K = 0.6;   // how late the off-beat eighth falls, in sixteenths (0.67 would be a full triplet)
 
@@ -212,6 +218,31 @@ function Motor(ctx) {
     ruido(t, 0.01, vol * 0.25, 'bandpass', 3000, 1.2, dest, pan);
     for (const x of [o, o2, l]) { x.start(t); x.stop(t + L + 0.05); }
   }
+  // B2: the same instruments with more bite, and some air on top
+  function rhodesB(m, t, vol, dest, pan) {
+    const f = mtof(m);
+    fm(t, f, 1, 2.6, 0.35, 0.18, 0.8, vol, dest, pan, 0.3);
+    fm(t, f * 7, 1, 0.8, 0.05, 0.04, 0.16, vol * 0.3, dest, pan, 0.2);
+  }
+  function vibraB(m, t, d, vol, dest, pan) {
+    vibra(m, t, d, vol, dest, pan);
+    seno(t, mtof(m) * 10, 0, 0.05, vol * 0.12, dest, pan);
+  }
+  function glock(m, t, vol, dest, pan) {
+    const f = mtof(m);
+    seno(t, f, 0, 0.6, vol, dest, pan);
+    seno(t, f * 2.76, 0, 0.15, vol * 0.35, dest, pan);
+    ruido(t, 0.006, vol * 0.5, 'highpass', 6000, 1, dest, pan);
+  }
+  function shaker(t, acc, vol, dest) { ruido(t, acc ? 0.05 : 0.035, acc ? vol : vol * 0.55, 'bandpass', 7500, 1.2, dest, 0.35); }
+  function pandereta(t, vol, dest) {
+    for (let j = 0; j < 4; j++) ruido(t + j * 0.006, 0.12 - j * 0.02, vol * (1 - j * 0.2), 'bandpass', 8500 + j * 700, 3, dest, -0.3);
+    ruido(t, 0.02, vol * 0.6, 'bandpass', 2200, 1.5, dest, -0.3);
+  }
+  function bajoEB(m, t, d, vol, dest) {
+    bajoE(m, t, d, vol, dest);
+    ruido(t, 0.015, vol * 0.3, 'bandpass', 1800, 2, dest);
+  }
   // bongós: macho (high) and hembra (low)
   function bongo(t, alto, vol, dest) {
     const f = alto ? 420 : 310, pan = alto ? 0.3 : -0.3;
@@ -258,6 +289,16 @@ function Motor(ctx) {
       if (L) vibra(L[0], t, S * L[1] * 0.95, 0.06, dest, 0.1);
       // a vibraphone sweep up the chord at the end of the pass without the melody
       if (!conMel && k === 58) ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'].forEach((n, j) => vibra(N(n), t + j * S * 0.5, S, 0.03, dest, -0.3 + j * 0.12));
+      return;
+    }
+    if (c.v === 'B2') {
+      if (song.bass.includes(i)) bajoEB(root, t, S * song.bassLen, 0.12, dest);
+      if (i % 2 === 0) rhodesB(chord[(i / 2) % 3] + 12, t, 0.045, dest, (i / 2) % 2 ? 0.2 : -0.2);
+      if (song.hats.includes(i)) bongo(t, i % 8 === 2, 0.045, dest);
+      if (i % 2 === 0) shaker(t, i % 4 === 2, 0.03, dest);
+      if (i === 4 || i === 12) pandereta(t, 0.035, dest);
+      if (L) { vibraB(L[0], t, S * L[1] * 0.95, 0.06, dest, 0.1); glock(L[0] + 12, t, 0.018, dest, 0.2); }
+      if (!conMel && k === 58) ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'].forEach((n, j) => { vibra(N(n), t + j * S * 0.5, S, 0.03, dest, -0.3 + j * 0.12); glock(N(n) + 12, t + j * S * 0.5, 0.012, dest, 0.2); });
     }
   }
   return { crear, paso, bus };
@@ -265,9 +306,14 @@ function Motor(ctx) {
 
 // ------------------------------------------------------------------ the page and live playback
 const temas = document.getElementById('temas');
-temas.insertAdjacentHTML('beforeend', `<h2>El tema</h2><p>Taller, 92 bpm. Tocá para escuchar; tocá otra para cambiar.</p><div class="par">` +
+temas.insertAdjacentHTML('beforeend', `<h2>El tema</h2><p>Taller. Tocá para escuchar; tocá otra para cambiar.</p><div class="par">` +
   OPCIONES.map(([v, t, d]) => `<button class="op tema" data-v="${v}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
-temas.insertAdjacentHTML('beforeend', `<h2>Swing</h2><p>Las corcheas de contratiempo, un poco atrasadas: el andar saltarín de los dibujitos. Vale para A y B.</p><div class="par">` +
+temas.insertAdjacentHTML('beforeend', `<h2>Tempo</h2><p>En pulsos por minuto. Vale para todas; se cambia con el tema sonando.</p><div class="par">` +
+  TEMPOS.map(([b, d]) => `<button class="op tempo${b === BPM ? ' on' : ''}" data-b="${b}"><b>${b}</b><span>${d}</span></button>`).join('') + '</div>');
+document.querySelectorAll('.tempo').forEach(b => b.addEventListener('click', () => {
+  BPM = +b.dataset.b; document.querySelectorAll('.tempo').forEach(x => x.classList.toggle('on', x === b));
+}));
+temas.insertAdjacentHTML('beforeend', `<h2>Swing</h2><p>Las corcheas de contratiempo, un poco atrasadas: el andar saltarín de los dibujitos. Vale para A, B y B2.</p><div class="par">` +
   [[0, 'Derecho', 'como en Fogonazo'], [1, 'Con swing', 'saltarín']].map(([s, t, d]) => `<button class="op swing${s ? '' : ' on'}" data-s="${s}"><b>${t}</b><span>${d}</span></button>`).join('') + '</div>');
 document.querySelectorAll('.swing').forEach(b => b.addEventListener('click', () => {
   SWING = b.dataset.s === '1'; document.querySelectorAll('.swing').forEach(x => x.classList.toggle('on', x === b));
@@ -278,7 +324,7 @@ function sonar(v) {
   if (ctx.state === 'suspended') ctx.resume();
   parar(0.25);
   cur = motor.crear(v); step = 64; nextT = ctx.currentTime + 0.1;
-  timer = setInterval(() => { const S = 60 / TALLER.bpm / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
+  timer = setInterval(() => { const S = 60 / BPM / 4; while (cur && nextT < ctx.currentTime + 0.2) { motor.paso(cur, step, nextT, S); step++; nextT += S; } }, 30);
   marcar(v);
 }
 function parar(fade) {
@@ -292,16 +338,16 @@ document.getElementById('parar').addEventListener('click', () => parar(0.3));
 document.addEventListener('visibilitychange', () => { if (document.hidden) parar(0.1); });
 
 // ------------------------------------------------------------------ for the tools (offline)
-async function renderizar(v, swing) {
-  const sr = 44100, S = 60 / TALLER.bpm / 4, dur = 128 * S + 2.5, prev = SWING; SWING = !!swing;
+async function renderizar(v, swing, bpm) {
+  const sr = 44100, S = 60 / (bpm || TALLER.bpm) / 4, dur = 128 * S + 2.5, prev = SWING; SWING = !!swing;
   const off = new OfflineAudioContext(2, Math.ceil(sr * dur), sr), m = Motor(off), c = m.crear(v);
   for (let s = 0; s < 128; s++) m.paso(c, s + 64, 0.05 + s * S, S);
   SWING = prev;
   return { buf: await off.startRendering(), S, sr };
 }
 // loudness as the ear hears it (K-weighting, ITU BS.1770), over the pass with the melody
-window.__render = async (v, swing) => {
-  const { buf, S, sr } = await renderizar(v, swing), d = buf.getChannelData(0), d1 = buf.getChannelData(1);
+window.__render = async (v, swing, bpm) => {
+  const { buf, S, sr } = await renderizar(v, swing, bpm), d = buf.getChannelData(0), d1 = buf.getChannelData(1);
   const a = Math.floor(0.05 * sr), z = Math.floor((0.05 + 128 * S) * sr);
   const kw = x => { const o = new Float32Array(x.length); let x1 = 0, x2 = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0, w1 = 0, w2 = 0;
     for (let i = 0; i < x.length; i++) { const y = 1.53512485958697 * x[i] - 2.69169618940638 * x1 + 1.19839281085285 * x2 + 1.69065929318241 * y1 - 0.73248077421585 * y2; x2 = x1; x1 = x[i]; y2 = y1; y1 = y;
@@ -312,8 +358,8 @@ window.__render = async (v, swing) => {
   return { lufs: -0.691 + 10 * Math.log10(ks / k0.length), pico: pk, nan };
 };
 // the version as a WAV (base64): the pass with the melody and the one without, at a listening level
-window.__renderBuf = async (v, swing) => {
-  const { buf, sr } = await renderizar(v, swing), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, g = 4;
+window.__renderBuf = async (v, swing, bpm) => {
+  const { buf, sr } = await renderizar(v, swing, bpm), L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length, g = 4;
   const dv = new DataView(new ArrayBuffer(44 + n * 4)), w = (o, t) => [...t].forEach((ch, i) => dv.setUint8(o + i, ch.charCodeAt(0)));
   w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true);
   dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);
