@@ -184,8 +184,9 @@
   // el fondo pintado: el mueble de 4 columnas (P-010) o el de 3 de Fácil (P-011), que quedó 7,5 a la derecha del centro
   mueble.style.left = (458 - anchoMueble / 2 + (D.columnas === 3 ? 7.5 : 0)) + 'rem';
   if (D.columnas === 3) $('fondo').src = 'arte/fondo-partida-facil.webp';
-  // los casilleros tienen profundidad: en las filas de abajo se ve más estante, y los objetos se paran sobre él
-  const ALTO_FILA = [0, 1, 1.5];
+  // los casilleros tienen profundidad: los objetos se apoyan sobre el canto del estante (arriba y en el medio casi no se
+  // ve estante, así que bajan hasta el borde); en la fila de abajo se ve más estante y se paran apenas adentro
+  const ALTO_FILA = [-5.5, -4, 1.5];
   const topObj = k => 51 - ALTO_FILA[Math.min(2, Math.floor(k / D.columnas))];
   const celdas = [];
   for (let k = 0; k < D.casilleros; k++) {
