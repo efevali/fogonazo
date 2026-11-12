@@ -73,7 +73,7 @@ La biblioteca baja del living vista de frente y de cerca, con la pared de tablas
 - **La partida** (P-010; Fácil, P-011): el mueble de madera clara con sus casilleros con profundidad (costados, techo y estante), 4 × 3 o, en Fácil, 3 × 3. Los objetos los pone el código sobre la abertura de cada casillero: adelante, parados sobre el estante; atrás, más chicos, más arriba y en sombra (en silueta en Difícil).
 - **Los objetos** (P-012 a P-014): pintados, de frente, con la luz de arriba a la derecha y una silueta propia, salvo los que se parecen a propósito. Los casetes, con el centro de los carretes del tono de la cinta.
 - **Las puertas** (P-015): el marco de bronce de una vidriera de dos hojas, con su cerradura (el vidrio, con código), y una reja de tijera de hierro gris con candado. Las llaves, de bronce con cinta roja y de hierro con ojo de trébol y cinta verde.
-- **La entrada** (P-016): la tapa del mueble con la costilla de Adán, el despertador, la cámara (la pieza del P-013, derecha) y la lámpara hongo encendida; en la pared, la ficha de préstamo pintada en blanco, con lo escrito encima. Los tres libros de la dificultad, pintados, con el nombre en Fraunces dorado viejo; el elegido, levantado y con borde ámbar.
+- **La entrada** (P-016): la tapa del mueble con la costilla de Adán y la lámpara hongo encendida; encima, el despertador y la cámara son las piezas del P-013 (S-43), para poder cambiarlos sin volver a pedir el fondo; en la pared, la ficha de préstamo pintada en blanco, con lo escrito encima. Los tres libros de la dificultad, pintados, con el nombre en Fraunces dorado viejo; el elegido, levantado y con borde ámbar.
 
 ## Sonido
 

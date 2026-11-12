@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.22.1 — 12/11/2026
+
+- **La entrada de Biblioteca, más prolija** (S-43): el fondo ya no trae pintados el despertador ni la cámara; los dos son las piezas de los objetos, apoyadas sobre el mueble, la cámara derecha y el despertador un poco más grande. Así se pueden cambiar sin volver a pedir el fondo.
+
 ## 0.22.0 — 12/11/2026
 
 - **Biblioteca suena** (S-41, S-42). La música es Taller de Fogonazo como primo de dibujito de los 70, a 116 y con swing, con bajo eléctrico, piano eléctrico, bongós, shaker, pandereta y la melodía silbada; un solo tema en la entrada y la partida, que baja al terminar.
