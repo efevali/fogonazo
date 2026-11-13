@@ -16,6 +16,7 @@ La pantalla de inicio de la colección: un living de los 70 ilustrado donde algu
   - **La biblioteca baja con la lámpara hongo**, a la derecha, lleva a Biblioteca, a la entrada, que vuelve con «◀ Volver» (desde la 0.18.0, S-37a).
   - **El equipo de audio** abre los ajustes de la colección (S-14), un rack de audio: sonido (música, efectos y lluvia, de 0 a 10, en medidores de LEDs), sistema (la versión y un botón que busca la nueva y, si la hay, pasa a «Actualizar») y, en el navegador sin instalar, «Instalar»; en Samsung Internet, que no deja instalarla, ofrece «Abrir en Chrome».
 - **El ambiente animado** de la [guía de estilo](../estilo.md#la-sala).
+- **La gata** (desde la 0.23.0, S-44): una gata calicó duerme ovillada en una punta del sillón, delante del almohadón chico. Respira y, de vez en cuando, mueve la cola. Son videos de Gemini (P-018 y P-019) que se encadenan tal cual: la respiración (al 70 % de su velocidad) de dos a cuatro veces, al azar, y la cola (al 85 %), una. Duerme en una punta o en la otra: al azar al abrir la app, y una de cada tres veces cambió de punta al volver a la sala (de un juego o al cerrar los ajustes, que tapan el sillón); nunca se la ve moverse de lugar. Se queda quieta cuando la app no está a la vista y con «reducir movimiento» del sistema. Todavía no se toca: el ronroneo y la charla al tocarla vienen después.
 - **«Salir ▶»**, abajo a la derecha, cierra la app. Si Chrome no la deja cerrarse sola, avisa cómo salir con el gesto del teléfono.
 - **La lluvia** suena mientras se está en la sala, con el volumen de los ajustes, y se apaga al entrar a un juego.
 - **Para revisar las zonas táctiles,** `sala/?zonas` las muestra. En vertical se ve la sala entera, achicada.
@@ -24,9 +25,9 @@ La pantalla de inicio de la colección: un living de los 70 ilustrado donde algu
 
 | Carpeta | Qué hay |
 |---|---|
-| [`arte/`](arte/) | La imagen base vigente, en la resolución original. |
+| [`arte/`](arte/) | La imagen base vigente, en la resolución original, y las entregas de la gata: la imagen (P-017) y los videos originales de Gemini (P-018 y P-019). |
 | [`bocetos/`](bocetos/) | Los bocetos de la sala y de lo común de la colección (ver abajo). |
-| [`sala/`](../../sala/) (en la app) | La página, la imagen base para la web, una copia aclarada para el brillo de los objetos activos y las máscaras de cada objeto activo (el cuadro, `mask-cuadro.png`, desde la 0.14.0; la biblioteca baja, `mask-biblioteca.png`, desde la 0.18.0) y de la ventana. |
+| [`sala/`](../../sala/) (en la app) | La página, la imagen base para la web, una copia aclarada para el brillo de los objetos activos y las máscaras de cada objeto activo (el cuadro, `mask-cuadro.png`, desde la 0.14.0; la biblioteca baja, `mask-biblioteca.png`, desde la 0.18.0) y de la ventana; los videos de la gata (`gata-respira.webm` y `gata-cola.webm`), que arma `herramientas/sala/gata.py` desde los originales. |
 
 ### Bocetos
 
@@ -36,6 +37,7 @@ La pantalla de inicio de la colección: un living de los 70 ilustrado donde algu
 | S-11 | [Los pasos para instalar](bocetos/S-11-instalar-pasos.jpg), cuando Chrome no ofrece su cuadro. Los ajustes de ese boceto quedaron superados por S-14 | Aprobado (27/10) |
 | S-14 | Los ajustes como rack de audio, para la 0.5.0: [al día](bocetos/S-14a-ajustes-al-dia.jpg) y [con versión nueva](bocetos/S-14b-ajustes-version-nueva.jpg) (el número es de ejemplo). Capturas de la app | Aprobado (29/10), sin los tornillos del boceto |
 | P-007 | El ícono con la lámpara más arriba: [el ícono anterior](bocetos/P-007-icono-actual.png) y [el boceto](bocetos/P-007-boceto-lampara.png), un retoque a mano que solo vale por la posición; el texto, en [imágenes](../imagenes.md#pedidos-cerrados). [La entrega](arte/P-007_icono.jpg), de 2048 × 2048, va entera en los íconos (`herramientas/iconos.py`) | Aprobado (29/10), con el encuadre más abierto que dio Gemini |
+| S-44 | La gata en el sillón: [en la punta derecha](bocetos/S-44a-gata-derecha.jpg) y [en la izquierda](bocetos/S-44b-gata-izquierda.jpg), espejada. Capturas de la app. Se probó en una página aparte: la ubicación (más atrás en el asiento, para que no cuelgue), la sombra que la apoya sobre el almohadón, y los videos encadenados sin intervenir | Aprobado (12/11) |
 | S-12 | Los botones de volver, abajo a la derecha, en toda la colección: en la sala, [«Salir ▶»](bocetos/S-12a-sala-salir.jpg), con la flecha hacia afuera, como a una puerta; en Fogonazo, «◀ Volver» (ver [sus bocetos](../fogonazo/README.md#bocetos)). Capturas de la app con los cambios | Aprobado (27/10), con la flecha de «Salir» pasada a la derecha |
 
 Las referencias de estilo de terceros (ilustraciones isométricas, fotos de livings de época, el recorte de revista) no se guardan en este repositorio, que es público.
@@ -46,6 +48,9 @@ Las referencias de estilo de terceros (ilustraciones isométricas, fotos de livi
 - **Si la imagen cambia,** se pide un cambio puntual sobre ella (ver [imágenes](../imagenes.md#cómo-se-pide)), para no tener que volver a medir.
 - **El brillo de cada objeto activo** va en una capa propia, separada del destello del toque, para que el ciclo de aviso no se interrumpa.
 
+- **La gata:** cada video se prepara con `python3 herramientas/sala/gata.py original.mp4 sala/gata-….webm`: quita el magenta, la entona a la luz de la sala y le hornea la sombra en cada cuadro, sin cortarlo ni cambiarle el tiempo; las velocidades se dan al reproducir. Todos los videos usan el mismo recorte, porque Gemini deja a la gata en el mismo lugar: así se encadenan sin salto. Va en un `foreignObject` del SVG, en las coordenadas de la sala, debajo de las zonas táctiles (no tapa el toque del mahjong). El que sigue arranca debajo del que se ve y lo reemplaza cuando pintó su primer cuadro. El service worker responde los pedidos por partes (`Range`) con lo guardado, para que los videos anden sin conexión.
+
 ## Por definir
 
+- La gata: el ronroneo y la charla al tocarla, y más gestos (estirarse, quizás la oreja).
 - La transición de la sala a cada juego. Para la 0.1.0, un fundido corto, provisorio.

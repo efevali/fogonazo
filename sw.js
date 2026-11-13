@@ -8,7 +8,7 @@
 
    El sitio, efevali.github.io, es el mismo de Kasa: lo guardado lleva el prefijo «coleccion-» y solo se borra lo
    propio, más lo que guardaba el Fogonazo publicado («fogonazo-»), al que esta versión reemplaza. */
-const VERSION = '0.22.1';
+const VERSION = '0.23.0';
 const FECHA = '12/11/2026';
 const CACHE = 'coleccion-v' + VERSION;
 const ARCHIVOS = [
@@ -35,6 +35,8 @@ const ARCHIVOS = [
   'comun/pantalla.js',
   'comun/registro.js',
   'comun/sonido.js',
+  'sala/gata-cola.webm',
+  'sala/gata-respira.webm',
   'sala/index.html',
   'sala/mask-audio.png',
   'sala/mask-bench.png',
@@ -152,6 +154,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  // los videos (la gata de la sala) se piden por partes: se responde la parte pedida de lo guardado
+  if (req.headers.has('range')) { e.respondWith(parte(req)); return; }
   const base = new URL('./', self.registration.scope).pathname;
   e.respondWith(caches.open(CACHE).then(c => {
     if (req.mode === 'navigate' && (url.pathname === base || url.pathname === base + 'index.html')) {
@@ -162,3 +166,20 @@ self.addEventListener('fetch', e => {
     return c.match(req, { ignoreSearch: true });
   }).then(r => r || fetch(req)));
 });
+
+// Un pedido «Range» (así pide Chrome los videos): de lo guardado se responde solo el tramo pedido, con 206
+async function parte(req) {
+  const c = await caches.open(CACHE);
+  const r = await c.match(req, { ignoreSearch: true });
+  if (!r) return fetch(req);
+  const b = await r.blob();
+  const m = /bytes=(\d*)-(\d*)/.exec(req.headers.get('range') || '') || [];
+  let ini = m[1] ? Number(m[1]) : 0, fin = m[2] ? Number(m[2]) : b.size - 1;
+  if (!m[1] && m[2]) { ini = Math.max(0, b.size - Number(m[2])); fin = b.size - 1; }
+  fin = Math.min(fin, b.size - 1);
+  return new Response(b.slice(ini, fin + 1), {
+    status: 206, statusText: 'Partial Content',
+    headers: { 'Content-Type': r.headers.get('Content-Type') || 'video/webm', 'Content-Range': `bytes ${ini}-${fin}/${b.size}`,
+      'Content-Length': String(fin - ini + 1), 'Accept-Ranges': 'bytes' },
+  });
+}
