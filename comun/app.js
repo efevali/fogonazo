@@ -182,6 +182,10 @@
       setVolumen(k, v) { Sound.ensure(); Sound.setVolume(k, v); },
       duck(on) { Sound.duck(on); },
       musica(tema) { Sound.music(tema); },
+      // el ronroneo de la gata de la sala: devuelve una promesa con cuánto dura, en segundos (0 si no sonó)
+      ronronear() { return Sound.purr(); },
+      callarRonroneo() { Sound.stopPurr(); },
+      prepararRonroneo() { Sound.preparePurr(); },
     },
     version: {
       // { actual, nueva }: la versión instalada y la que espera (null si no hay)

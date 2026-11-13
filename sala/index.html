@@ -354,6 +354,8 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     <path class="hit" id="hitBiblioteca" data-href="biblioteca/index.html" data-hl="hlBiblioteca" role="button" tabindex="0" aria-label="Abrir Biblioteca"
       d="M2372,852L2420,838L2576,858V1138H2372Z M2425,780H2556V884H2425Z"/>
     <path class="secreto" id="lampara" aria-hidden="true" d="M1000,620H1210V762H1000Z"/>
+    <!-- the cat, curled up: touching her makes her purr (S-45). Gata moves it to the end of the sofa where she sleeps -->
+    <rect class="secreto" id="hitGata" aria-label="Acariciar la gata" x="1253" y="851" width="180" height="106"/>
     <text class="zone-label" x="383" y="470" text-anchor="middle">FOGONAZO</text>
     <text class="zone-label" x="1096" y="860" text-anchor="middle">MAHJONG</text>
     <text class="zone-label" x="1872" y="630" text-anchor="middle">AJUSTES</text>
@@ -477,12 +479,14 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     resp.muted = cola.muted = estira.muted = true;   // muted, Chrome lets them play on their own
     // the box is wider than the curled-up cat, to fit the stretch: these put her in the same place at either end
     const X = { der: 1232.2, izq: 771.1 }, CLAVE = 'sala.gata';
+    // where to touch her: the curled-up cat (measured on the first frame of the breathing video), with a small margin
+    const zona = document.getElementById('hitGata'), ZONA = { der: 1253, izq: 778 };
     const VEL = new Map([[resp, 0.7], [cola, 0.85], [estira, 0.7]]);
     const quieta = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let punta = null, quedan = 0, colas = 0;
     try { punta = sessionStorage.getItem(CLAVE); } catch (e) {}
     function poner(p) {
-      punta = p; fo.setAttribute('x', X[p]); caja.classList.toggle('izq', p === 'izq');
+      punta = p; fo.setAttribute('x', X[p]); caja.classList.toggle('izq', p === 'izq'); zona.setAttribute('x', ZONA[p]);
       try { sessionStorage.setItem(CLAVE, p); } catch (e) {}
     }
     const otra = () => punta === 'izq' ? 'der' : 'izq';
@@ -520,6 +524,26 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   })();
   window.Gata = Gata;   // for the screenshots (herramientas/capturas.js)
 
+  // ---------- touching the cat: she purrs (S-45) ----------
+  // Each touch, a long purr (about 8 or 12 s, at random, made in comun/sonido.js); while she purrs and for 3 s after,
+  // touches do nothing. She goes quiet, with a short fade, when a sheet covers the sofa, when going into a game and
+  // when the app is not on view. The charla, to alternate with the purr, comes later.
+  const Ronroneo = (() => {
+    let libreDesde = 0, ocupada = false;
+    setTimeout(() => App.sonido.prepararRonroneo(), 2500);   // the first one is made ahead, once the room has settled
+    document.getElementById('hitGata').addEventListener('click', async () => {
+      if (abiertos.length || ocupada || performance.now() < libreDesde) return;
+      ocupada = true;
+      const dur = await App.sonido.ronronear();
+      libreDesde = performance.now() + dur * 1000 + 3000;
+      ocupada = false;
+    });
+    const callar = () => { App.sonido.callarRonroneo(); libreDesde = performance.now() + 1000; };
+    document.addEventListener('visibilitychange', () => { if (document.hidden) callar(); });
+    addEventListener('pagehide', callar);
+    return { callar };
+  })();
+
   // ---------- active objects ----------
   const flash = document.getElementById('flash');
   flash.addEventListener('animationend', () => flash.classList.remove('flash'));
@@ -528,6 +552,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   let lastHit = null;
   function show(id) {
     const sheet = document.getElementById(id);
+    Ronroneo.callar();   // the sheets cover the sofa
     if (id === 'sheetAudio') pintarAjustes();
     // a sheet opened over another one (the install steps over the settings) hides the one below
     if (abiertos.length) abiertos[abiertos.length - 1].classList.add('under');
@@ -550,7 +575,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     flash.classList.remove('flash'); void flash.getBoundingClientRect(); flash.classList.add('flash');
     lastHit = hit; fx('click');
     // an object that leads to a game goes there once the flash has shown
-    if (href) { setTimeout(() => App.ir(href), 260); return; }
+    if (href) { Ronroneo.callar(); setTimeout(() => App.ir(href), 260); return; }
     setTimeout(() => show(hit.dataset.open), 260);
   };
   document.querySelectorAll('.hit').forEach(hit => {
