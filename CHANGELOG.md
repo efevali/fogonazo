@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.25.0 — 13/11/2026
+
+- **La gata ronronea al tocarla** (S-45): un ronroneo largo, de unos 8 o 12 segundos, que se apaga de a poco. Mientras ronronea, y un ratito después, no hace caso a más toques. Se calla si se abren los ajustes, al entrar a un juego o con la app en segundo plano, y suena con el volumen de los efectos.
+
 ## 0.24.1 — 13/11/2026
 
 - **La gata ya no se estira por encima de la caja del mahjong:** en la punta derecha, las puntas de las patas pasan por detrás de la tapa abierta.

@@ -8,10 +8,11 @@
    - Los de Biblioteca (S-41, S-42): Taller como primo de dibujito de los 70, con la melodía silbada, y efectos con
      el sonido de cada objeto, una nota en do, silbidos y glockenspiel.
    - La lluvia de la sala: un colchón de ruido rosa apagado y gotitas en el vidrio.
+   - El ronroneo de la gata de la sala (S-45), armado armónico por armónico sobre las medidas de un ronroneo real.
    - Un solo juego de volúmenes para toda la colección (música, efectos y lluvia, de 0 a 10), guardado en Chrome.
    Vive en la página contenedora (index.html), así que no se corta al pasar de una pantalla a otra. */
 const Sound = (() => {
-  let ctx = null, master, sfxBus, musicBus, rainBus, noiseBuf, revIn;
+  let ctx = null, master, sfxBus, musicBus, rainBus, purrBus, noiseBuf, revIn;
   // volúmenes de 0 a 10; con los de entrada, los efectos y la música suenan como en el Fogonazo publicado (70 y 35 %)
   // y la lluvia queda de fondo
   const CLAVE = 'coleccion.sonido';
@@ -34,6 +35,8 @@ const Sound = (() => {
     comp.threshold.value = -14; comp.ratio.value = 4;
     sfxBus = ctx.createGain(); musicBus = ctx.createGain(); rainBus = ctx.createGain(); rainBus.gain.value = 0;
     sfxBus.connect(master); musicBus.connect(master); master.connect(comp); comp.connect(ctx.destination); rainBus.connect(ctx.destination);
+    // el ronroneo va directo, como la lluvia: por el compresor, sus graves le bajarían el volumen a todo lo demás
+    purrBus = ctx.createGain(); purrBus.connect(ctx.destination);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -59,6 +62,8 @@ const Sound = (() => {
     musicBus.gain.setTargetAtTime(set.music * 0.6 * m * (Music.ducked ? 0.3 : 1) * set.foco, ctx.currentTime, 0.3);
     if (set.music * m > 0) Music.resume(); else Music.halt();
     Rain.apply();
+    // con los efectos en 8 (los de entrada), al 75 %: el volumen de la prueba donde se aprobó
+    purrBus.gain.setTargetAtTime(set.sfx * m * 1.07, ctx.currentTime, 0.05);
   }
   function throttle(name, ms) {
     const now = performance.now();
@@ -811,6 +816,106 @@ const Sound = (() => {
     };
   })();
 
+  // ------------------------------------------------------------ el ronroneo (el de la gata de la sala)
+  // 0.25.0 (S-45): se arma armónico por armónico sobre las medidas de un ronroneo real (no usa su audio): unos 24
+  // pulsos por segundo, con la respiración alternando una fase corta y fuerte (más grave y redonda) y una larga y suave
+  // (la que más se oye en el parlante del teléfono), con una micropausa antes de la fuerte, y casi nada por encima de
+  // 800 Hz. Se le baja la nota más grave, que el teléfono no reproduce, para que lo que sí se oye pueda sonar más.
+  // Las tres últimas respiraciones bajan de a poco y los últimos 2,5 s se desvanecen. Dura unos 8 o 12 s, al azar, y
+  // cada uno sale un poco distinto. Se arma de a tramos, sin trabar la pantalla, y queda uno listo de antemano.
+  // Descartados en S-45: los ronroneos cortos, maullidos y otros ruiditos (sintetizados, sonaban falsos) y filtrar
+  // ruido (sonaba a lata o, muy filtrado, como debajo de un almohadón).
+  const Purr = (() => {
+    const SR = 44100, TAU = 2 * Math.PI;
+    const azar = (a, b) => a + Math.random() * (b - a);
+    const suave = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+    const db = x => Math.pow(10, x / 20);
+    // nivel de cada armónico (dB) según su frecuencia, medido en las dos fases del ronroneo real
+    const FUERTE = [[24, 0], [48, -13], [96, -22], [170, -42], [250, -45], [350, -48], [450, -47], [550, -51], [650, -55], [800, -59], [1000, -70]];
+    const SUAVE = [[24, -10], [48, -18], [96, -21], [170, -30], [250, -34], [350, -39], [450, -37], [550, -45], [650, -54], [800, -60], [1000, -71]];
+    const TELEFONO = [[24, -10], [48, -5], [96, 0], [2000, 0]];
+    function curva(t, f) {
+      if (f <= t[0][0]) return t[0][1];
+      for (let i = 1; i < t.length; i++) if (f <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * Math.log(f / t[i - 1][0]) / Math.log(t[i][0] / t[i - 1][0]);
+      return t[t.length - 1][1] - 12 * Math.log2(f / t[t.length - 1][0]);
+    }
+    const N = 44;   // armónicos: hasta unos 1100 Hz
+    // un ciclo de respiración: la micropausa, la fase fuerte y la suave, larga
+    const ciclo = (v = 1) => [{ dur: azar(0.04, 0.07), fuerte: 0, nivel: 0.05 * v }, { dur: azar(0.36, 0.45), fuerte: 1, nivel: v }, { dur: azar(0.78, 0.95), fuerte: 0, nivel: 0.9 * v }];
+    async function armar() {
+      const n = Math.random() < 0.5 ? 6 : 9;
+      const fases = Array.from({ length: n }, (_, i) => ciclo([0.45, 0.65, 0.85][n - 1 - i] ?? 1)).flat();
+      fases.push({ dur: 0.001, fuerte: 0, nivel: 0 });   // lleva el último pulso a silencio
+      const d = new Float32Array(Math.ceil((fases.reduce((s, f) => s + f.dur, 0) + 0.2) * SR));
+      const cf = new Float64Array(N + 1), sf = new Float64Array(N + 1);   // la fase de cada armónico, fija en cada ronroneo
+      for (let k = 1; k <= N; k++) { const f = k < 8 ? 0 : Math.random() * TAU; cf[k] = Math.cos(f); sf[k] = Math.sin(f); }
+      let tc = 0.03, prev = null;   // un solo reloj: los pulsos y las fases quedan pegados, sin huecos ni encimados
+      for (const fa of fases) {
+        const ini = tc;
+        while (tc - ini < fa.dur) {
+          const f0 = (fa.fuerte ? 25.8 : 24.2) * azar(0.97, 1.03), T = 1 / f0, p = (tc - ini) / fa.dur;
+          const env = fa.nivel * suave(p / 0.15) * suave((1 - p) / 0.2) * azar(0.92, 1.08), amp = new Float64Array(N + 1);
+          for (let k = 1; k <= N; k++) {
+            const f = k * f0;
+            amp[k] = env * db(fa.fuerte * curva(FUERTE, f) + (1 - fa.fuerte) * curva(SUAVE, f) + curva(TELEFONO, f) + (f > 150 ? azar(-2.5, 2.5) : 0));
+          }
+          // un período: cada armónico pasa del nivel del pulso anterior al de este, para que no haya saltos
+          const s0 = Math.round(tc * SR), ns = Math.round((tc + T) * SR) - s0;
+          for (let i = 0; i < ns && s0 + i < d.length; i++) {
+            const x = i / ns, c1 = Math.cos(TAU * x), s1 = Math.sin(TAU * x);
+            let ck = 1, sk = 0, v = 0;
+            for (let k = 1; k <= N; k++) {
+              const c = ck * c1 - sk * s1; sk = sk * c1 + ck * s1; ck = c;
+              v += (prev ? prev[k] + (amp[k] - prev[k]) * x : amp[k] * x) * (ck * cf[k] - sk * sf[k]);
+            }
+            d[s0 + i] += v;
+          }
+          prev = amp; tc += T;
+        }
+        await new Promise(r => setTimeout(r, 0));   // de a una fase por vez, sin trabar la pantalla
+      }
+      // los últimos 2,5 s se desvanecen; después, al nivel de la prueba (pico en 0,7)
+      let fin = d.length - 1;
+      while (fin > 0 && d[fin] === 0) fin--;
+      const i0 = Math.max(0, fin - Math.floor(2.5 * SR));
+      let pico = 0;
+      for (let i = 0; i <= fin; i++) {
+        if (i >= i0) d[i] *= Math.pow(Math.cos((i - i0) / (fin - i0) * Math.PI / 2), 1.5);
+        pico = Math.max(pico, Math.abs(d[i]));
+      }
+      if (pico) for (let i = 0; i < d.length; i++) d[i] *= 0.7 / pico;
+      return d;
+    }
+    let listo = null, armando = null, sonando = null;
+    function preparar() {
+      if (!listo && !armando) armando = armar().then(d => { listo = d; armando = null; });
+      return armando || Promise.resolve();
+    }
+    return {
+      preparar,
+      // suena un ronroneo; devuelve cuánto dura, en segundos (0 si no puede sonar)
+      async play() {
+        if (!ensure()) return 0;
+        if (!listo) await preparar();
+        if (!listo || sonando) return 0;
+        const d = listo; listo = null; setTimeout(preparar, 500);   // el próximo, distinto, ya se va armando
+        const buf = ctx.createBuffer(1, d.length, SR); buf.getChannelData(0).set(d);
+        const src = ctx.createBufferSource(), g = ctx.createGain();
+        src.buffer = buf; src.connect(g); g.connect(purrBus); src.start();
+        const yo = { src, g }; sonando = yo;
+        src.onended = () => { if (sonando === yo) sonando = null; };
+        return buf.duration;
+      },
+      // se calla con un fundido corto
+      stop() {
+        if (!sonando || !ctx) return;
+        const { src, g } = sonando; sonando = null;
+        try { g.gain.setTargetAtTime(0, ctx.currentTime, 0.12); src.stop(ctx.currentTime + 0.6); } catch (e) {}
+      },
+      get sonando() { return !!sonando; },
+    };
+  })();
+
   function setVolume(k, v) {
     if (!(k in vol)) return;
     vol[k] = Math.max(0, Math.min(10, Math.round(v)));
@@ -824,6 +929,10 @@ const Sound = (() => {
     music(track) { Music.want(track); },
     stopMusic() { Music.stop(); },
     rain(on) { Rain.want(on); },
+    purr() { return Purr.play(); },
+    stopPurr() { Purr.stop(); },
+    preparePurr() { Purr.preparar(); },
+    purring() { return Purr.sonando; },
     duck(on) { Music.duck(on); },
     focus(f) { set.foco = f; apply(); },
     nowPlaying() { return Music.current(); },

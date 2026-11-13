@@ -6,7 +6,7 @@
    2400 × 1080 píxeles, como el teléfono de referencia) y verifica el camino y el «atrás» de Android:
    sala → ajustes (LEDs y versión) → Fogonazo → sonido → manual → mapa → partida → pausa → mapa → … → sala. Después abre partidas
    puntuales (la nota, el contrarreloj, los obstáculos, los especiales, el fin de nivel y el zen) con un tablero fijo
-   (?semilla=…). En la sala, que la gata respire en el sillón. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
+   (?semilla=…). En la sala, que la gata respire en el sillón y ronronee al tocarla. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
    movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final (Fácil y Normal, con su puerta), Difícil con
    sus dos puertas y la ficha de sin lugar. Al final prueba que la
    app abra sin conexión. Si algo no da lo esperado, lo dice y termina con error. */
@@ -78,8 +78,17 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   ok(await pantalla().evaluate(() => [...document.querySelectorAll('#gata video')].map(v => v.src.split('/').pop()).join() === 'gata-respira.webm,gata-cola.webm,gata-estira.webm'),
     'la gata tiene sus tres gestos: respirar, la cola y estirarse');
   await foto('01-sala');
+  // tocar la gata (S-45): ronronea, en la punta donde duerme; mientras ronronea, otro toque no lo vuelve a empezar
+  ok(await pantalla().evaluate(() => { const z = document.getElementById('hitGata').getBBox(), x = +document.getElementById('gata').getAttribute('x');
+    return z.x > x && z.x + z.width < x + 207.07; }), 'la zona para tocar la gata está sobre ella');
+  await tocar('#hitGata');
+  await page.waitForFunction(() => Sound.purring(), null, { timeout: 8000 }).catch(() => {});
+  ok(await page.evaluate(() => Sound.purring()), 'al tocar la gata, ronronea');
+  ok(await page.evaluate(async () => await Sound.purr() === 0), 'mientras ronronea, no empieza otro');
   await tocar('#hitAudio'); await espera(300);
   ok(await abierto('#sheetAudio'), 'el equipo de audio abre los ajustes');
+  await espera(700);
+  ok(!await page.evaluate(() => Sound.purring()), 'los ajustes tapan el sillón: la gata deja de ronronear');
   ok(await abierto('#instRow'), 'en el navegador, los ajustes ofrecen instalar'); await foto('02-sala-ajustes');
   // el rack: un toque en el cuarto LED de la lluvia la deja en 4; otro toque en el mismo la baja a 3
   const lluvia = () => pantalla().evaluate(() => +document.querySelector('.meter[data-vol=lluvia]').getAttribute('aria-valuenow'));
