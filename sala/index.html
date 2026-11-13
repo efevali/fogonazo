@@ -219,6 +219,8 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       <mask id="mBiblioteca" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-biblioteca.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <mask id="mRain" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-rain.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <clipPath id="lavaGlass"><path d="M2181,583 C2178,593 2176.5,605 2176.5,618 C2176.5,633 2177.5,645 2179.5,655 L2195,655 C2197,645 2198,633 2198,618 C2198,605 2196.5,593 2193.5,583 Z"/></clipPath>
+      <!-- the mahjong box (open lid and body), on the coffee table in front of the sofa -->
+      <clipPath id="caja"><polygon points="1110,888 1255,888 1254,976 1256,1046 1110,1046"/></clipPath>
       <clipPath id="scopeScreen"><rect x="243" y="740" width="52" height="58" rx="7"/></clipPath>
       <filter id="goo" x="-60%" y="-60%" width="220%" height="220%">
         <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="b"/>
@@ -264,6 +266,12 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
         <video src="gata-estira.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
       </div>
     </foreignObject>
+    <!-- the box drawn again over the cat, with its highlight: at the right end, when she stretches, the tips of her paws
+         go behind the open lid (P-020) -->
+    <g clip-path="url(#caja)" pointer-events="none">
+      <image href="sala.jpg" x="0" y="0" width="2576" height="1438"/>
+      <image class="hl" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mTable)" style="animation-delay:1.7s"/>
+    </g>
 
     <!-- rain on the window (masked around the arc lamp) -->
     <g mask="url(#mRain)"><g id="streaks"></g><g id="drops"></g></g>
