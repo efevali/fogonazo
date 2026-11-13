@@ -6,7 +6,7 @@
    2400 × 1080 píxeles, como el teléfono de referencia) y verifica el camino y el «atrás» de Android:
    sala → ajustes (LEDs y versión) → Fogonazo → sonido → manual → mapa → partida → pausa → mapa → … → sala. Después abre partidas
    puntuales (la nota, el contrarreloj, los obstáculos, los especiales, el fin de nivel y el zen) con un tablero fijo
-   (?semilla=…). En la sala, que la gata respire en el sillón y ronronee al tocarla. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
+   (?semilla=…). En la sala, que la gata respire en el sillón, mire a los 10 s sin tocar nada y ronronee al tocarla. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
    movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final (Fácil y Normal, con su puerta), Difícil con
    sus dos puertas y la ficha de sin lugar. Al final prueba que la
    app abra sin conexión. Si algo no da lo esperado, lo dice y termina con error. */
@@ -26,7 +26,15 @@ function servidor() {
     if (p.endsWith('/')) p += 'index.html';
     const f = path.join(RAIZ, p);
     if (!f.startsWith(RAIZ) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end(); return; }
-    res.writeHead(200, { 'Content-Type': TIPOS[path.extname(f)] || 'application/octet-stream' });
+    const tipo = TIPOS[path.extname(f)] || 'application/octet-stream', largo = fs.statSync(f).size;
+    // pedidos por partes (Range), como GitHub Pages y el service worker: para adelantar los videos de la gata
+    const r = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (r) {
+      const ini = r[1] ? +r[1] : largo - +r[2], fin = r[1] && r[2] ? Math.min(+r[2], largo - 1) : largo - 1;
+      res.writeHead(206, { 'Content-Type': tipo, 'Content-Range': `bytes ${ini}-${fin}/${largo}`, 'Content-Length': fin - ini + 1, 'Accept-Ranges': 'bytes' });
+      fs.createReadStream(f, { start: ini, end: fin }).pipe(res); return;
+    }
+    res.writeHead(200, { 'Content-Type': tipo, 'Content-Length': largo, 'Accept-Ranges': 'bytes' });
     fs.createReadStream(f).pipe(res);
   });
   return new Promise(r => srv.listen(0, '127.0.0.1', () => r(srv)));
@@ -75,8 +83,15 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   await pantalla().waitForFunction(() => { const v = document.querySelector('#gata video'); return v && v.currentTime > 0.3 && !v.paused; }, null, { timeout: 8000 }).catch(() => {});
   ok(await pantalla().evaluate(() => { const v = document.querySelector('#gata video'); return ['izq', 'der'].includes(Gata.punta) && v.currentTime > 0.3 && !v.paused && v.playbackRate === 0.7; }),
     'la gata respira en el sillón (al 70 %)');
-  ok(await pantalla().evaluate(() => [...document.querySelectorAll('#gata video')].map(v => v.src.split('/').pop()).join() === 'gata-respira.webm,gata-cola.webm,gata-estira.webm'),
-    'la gata tiene sus tres gestos: respirar, la cola y estirarse');
+  ok(await pantalla().evaluate(() => [...document.querySelectorAll('#gata video')].map(v => v.src.split('/').pop()).join() === 'gata-respira.webm,gata-cola.webm,gata-estira.webm,gata-mira.webm'),
+    'la gata tiene sus cuatro gestos: respirar, la cola, estirarse y mirar');
+  // la mirada (P-021): sin tocar nada, a los 10 s levanta la cabeza; entra al video a los 2,9 s y se ve en la pantalla
+  await pantalla().waitForFunction(() => Gata.gesto === 'gata-mira.webm', null, { timeout: 16000 }).catch(() => {});
+  await espera(400);
+  ok(await pantalla().evaluate(() => { const v = document.querySelectorAll('#gata video')[3]; return Gata.gesto === 'gata-mira.webm' && !v.paused && v.currentTime > 2.9 && !v.classList.contains('oculto'); }),
+    'a los 10 s sin tocar nada, la gata levanta la cabeza y mira (desde los 2,9 s del video)');
+  ok(await pantalla().evaluate(() => [...document.querySelectorAll('#gata video')].filter(v => !v.paused).length === 1), 'mientras mira, el video de respirar queda en pausa');
+  await espera(1500); await foto('01b-sala-gata-mira');
   await foto('01-sala');
   // tocar la gata (S-45): ronronea, en la punta donde duerme; mientras ronronea, otro toque no lo vuelve a empezar
   ok(await pantalla().evaluate(() => { const z = document.getElementById('hitGata').getBBox(), x = +document.getElementById('gata').getAttribute('x');

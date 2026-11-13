@@ -264,6 +264,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
         <video src="gata-respira.webm" muted="" playsinline="" preload="auto"></video>
         <video src="gata-cola.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
         <video src="gata-estira.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
+        <video src="gata-mira.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
       </div>
     </foreignObject>
     <!-- the box drawn again over the cat, with its highlight: at the right end, when she stretches, the tips of her paws
@@ -472,16 +473,23 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   // All start and end in the same pose, so one follows the other without a jump. The one that comes next starts under
   // the one on view and takes its place when its first frame is painted.
   // She sleeps at one end of the sofa or the other: at random when the app opens, and one time in three she has changed
-  // ends when the room comes back into view (from a game, or when the settings rack closes).
+  // ends when the room comes back from a game (not from the settings rack: opening it doesn't move her).
+  // A fourth video, the look (P-021, at 85 %), is not part of the draw: she raises her head and looks at the camera
+  // when nothing has been touched for 10 s (see Quietud, below), and goes back to sleep. To answer without the 3 s of
+  // stillness the video starts with, it goes in at 2.92 s (just before she opens her eyes), at one of the moments of
+  // the breathing where the cat matches that frame (measured), so the switch doesn't show; from the tail or the
+  // stretch, when they end.
   const Gata = (() => {
     const fo = document.getElementById('gata'), caja = fo.firstElementChild;
-    const [resp, cola, estira] = caja.querySelectorAll('video');
-    resp.muted = cola.muted = estira.muted = true;   // muted, Chrome lets them play on their own
+    const [resp, cola, estira, mira] = caja.querySelectorAll('video');
+    resp.muted = cola.muted = estira.muted = mira.muted = true;   // muted, Chrome lets them play on their own
     // the box is wider than the curled-up cat, to fit the stretch: these put her in the same place at either end
     const X = { der: 1232.2, izq: 771.1 }, CLAVE = 'sala.gata';
     // where to touch her: the curled-up cat (measured on the first frame of the breathing video), with a small margin
     const zona = document.getElementById('hitGata'), ZONA = { der: 1253, izq: 778 };
-    const VEL = new Map([[resp, 0.7], [cola, 0.85], [estira, 0.7]]);
+    const VEL = new Map([[resp, 0.7], [cola, 0.85], [estira, 0.7], [mira, 0.85]]);
+    // the look's entry frame, and the moments of the breathing video (in its own time) where the cat matches it
+    const ENTRADA = 2.92, PAUSAS = [0.04, 0.42, 1.83, 2.58, 4.87, 6.08, 7.0, 8.12, 9.87];
     const quieta = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let punta = null, quedan = 0, colas = 0;
     try { punta = sessionStorage.getItem(CLAVE); } catch (e) {}
@@ -496,23 +504,50 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     const sorteo = () => 2 + Math.floor(Math.random() * 3);        // breaths before a gesture: 2 to 4
     const sorteoColas = () => 2 + Math.floor(Math.random() * 2);   // tails before a stretch: 2 or 3
     let actual = resp;
-    function arrancar(v) {
+    let mirar = false;   // the look was asked for: at the next pause of the breathing, or when the gesture ends
+    function arrancar(v, t0 = 0) {
       const r = VEL.get(v);
-      v.defaultPlaybackRate = r; v.playbackRate = r; v.currentTime = 0;
+      v.defaultPlaybackRate = r; v.playbackRate = r;
+      if (Math.abs(v.currentTime - t0) > 0.02) v.currentTime = t0;
       const p = v.play(); if (p) p.catch(() => {});
     }
-    function pasarA(v) {
-      if (v === actual) { arrancar(v); return; }
+    function pasarA(v, t0 = 0) {
+      if (v === actual) { arrancar(v, t0); return; }
       const antes = actual; actual = v;
-      const mostrar = () => { v.classList.remove('oculto'); antes.classList.add('oculto'); };
+      // the look can cut in mid-breath: the one left behind is paused, or its 'ended' would fire later and cut the look
+      const mostrar = () => { v.classList.remove('oculto'); antes.classList.add('oculto'); antes.pause(); };
       if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(mostrar); else v.addEventListener('playing', mostrar, { once: true });
-      arrancar(v);
+      arrancar(v, t0);
     }
     function gesto() {
       if (colas > 0) { colas--; pasarA(cola); } else { colas = sorteoColas(); pasarA(estira); }
     }
-    resp.addEventListener('ended', () => { if (--quedan > 0) pasarA(resp); else gesto(); });
-    for (const v of [cola, estira]) v.addEventListener('ended', () => { quedan = sorteo(); pasarA(resp); });
+    // the look waits paused on its entry frame, so it starts at once (the service worker answers the seek, also offline)
+    function listaMira() { if (actual === mira) return; mira.pause(); if (Math.abs(mira.currentTime - ENTRADA) > 0.02) mira.currentTime = ENTRADA; }
+    if (mira.readyState >= 1) listaMira(); else mira.addEventListener('loadedmetadata', listaMira, { once: true });
+    const aMirar = () => { mirar = false; pasarA(mira, ENTRADA); };
+    resp.addEventListener('ended', () => {
+      if (actual !== resp) return;
+      if (mirar) aMirar(); else if (--quedan > 0) pasarA(resp); else gesto();
+    });
+    for (const v of [cola, estira]) v.addEventListener('ended', () => { if (mirar) aMirar(); else { quedan = sorteo(); pasarA(resp); } });
+    mira.addEventListener('ended', () => {
+      if (actual !== mira) return;
+      quedan = sorteo(); pasarA(resp); setTimeout(listaMira, 300);
+    });
+    function pedirMirada() {
+      if (quieta || mirar || actual === mira) return;
+      mirar = true;
+      if (actual !== resp) return;   // the tail or the stretch: when it ends
+      const sig = PAUSAS.find(p => p > resp.currentTime + 0.03);
+      if (sig === undefined) return;   // past the last pause: when this breath ends
+      const chequear = () => {
+        if (!mirar || actual !== resp) return;
+        if (resp.currentTime >= sig) { aMirar(); return; }
+        if (resp.requestVideoFrameCallback) resp.requestVideoFrameCallback(chequear); else setTimeout(chequear, 30);
+      };
+      chequear();
+    }
     colas = sorteoColas();
     if (!quieta) { quedan = sorteo(); arrancar(resp); }
     // when the room is not on view (the app in the background), she stops; going into a game removes the room
@@ -520,7 +555,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       if (quieta) return;
       if (document.hidden) actual.pause(); else { const p = actual.play(); if (p) p.catch(() => {}); }
     });
-    return { quizasCambiar() { if (Math.random() < 1 / 3) poner(otra()); }, get punta() { return punta; } };
+    return { pedirMirada, get punta() { return punta; }, get gesto() { return actual.src.split('/').pop(); } };
   })();
   window.Gata = Gata;   // for the screenshots (herramientas/capturas.js)
 
@@ -529,19 +564,37 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   // touches do nothing. She goes quiet, with a short fade, when a sheet covers the sofa, when going into a game and
   // when the app is not on view. The charla, to alternate with the purr, comes later.
   const Ronroneo = (() => {
-    let libreDesde = 0, ocupada = false;
+    let libreDesde = 0, ocupada = false, hasta = 0;   // hasta: when the purr on now ends (for Quietud)
     setTimeout(() => App.sonido.prepararRonroneo(), 2500);   // the first one is made ahead, once the room has settled
     document.getElementById('hitGata').addEventListener('click', async () => {
       if (abiertos.length || ocupada || performance.now() < libreDesde) return;
       ocupada = true;
       const dur = await App.sonido.ronronear();
-      libreDesde = performance.now() + dur * 1000 + 3000;
+      hasta = performance.now() + dur * 1000;
+      libreDesde = hasta + 3000;
       ocupada = false;
     });
-    const callar = () => { App.sonido.callarRonroneo(); libreDesde = performance.now() + 1000; };
+    const callar = () => { App.sonido.callarRonroneo(); libreDesde = performance.now() + 1000; hasta = Math.min(hasta, performance.now()); };
     document.addEventListener('visibilitychange', () => { if (document.hidden) callar(); });
     addEventListener('pagehide', callar);
-    return { callar };
+    return { callar, get hasta() { return ocupada ? Infinity : hasta; } };
+  })();
+
+  // ---------- 10 s without touching anything: the cat looks up, once (P-021) ----------
+  // Any touch in the room starts the count again; after a purr, it counts from when the purr ends. It doesn't count
+  // while a sheet is open or the app is not on view (and going into a game leaves the room: it starts again on coming
+  // back). Once she has looked, she doesn't again until something is touched and another 10 s go by.
+  const Quietud = (() => {
+    const ESPERA = 10000;
+    let desde = performance.now(), armada = true;
+    const reiniciar = () => { desde = performance.now(); armada = true; };
+    document.addEventListener('pointerdown', reiniciar, true);
+    document.addEventListener('keydown', reiniciar, true);
+    setInterval(() => {
+      if (document.hidden || abiertos.length) { desde = performance.now(); return; }
+      if (armada && performance.now() - Math.max(desde, Ronroneo.hasta) >= ESPERA) { armada = false; Gata.pedirMirada(); }
+    }, 250);
+    return { get armada() { return armada; } };
   })();
 
   // ---------- active objects ----------
@@ -561,8 +614,6 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     const f = sheet.querySelector('[role=slider], input, button:not(:disabled)'); if (f) f.focus({ preventScroll: true });
   }
   function hide() {
-    // the settings rack covers the sofa: closing it, the cat may have changed ends meanwhile
-    if (abiertos.length === 1) Gata.quizasCambiar();
     const sheet = abiertos.pop(); if (!sheet) return;
     sheet.hidden = true;
     if (abiertos.length) abiertos[abiertos.length - 1].classList.remove('under');

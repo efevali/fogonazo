@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.26.0 — 13/11/2026
+
+- **La gata te mira** (P-021): si en la sala no se toca nada durante 10 segundos, levanta la cabeza, mira a cámara y se vuelve a dormir. Lo hace una sola vez, hasta que se toque algo y pasen otros 10 segundos; después de un ronroneo, cuenta desde que termina.
+- **Abrir los ajustes ya no cambia a la gata de punta:** solo puede aparecer en la otra punta al volver de un juego.
+
 ## 0.25.0 — 13/11/2026
 
 - **La gata ronronea al tocarla** (S-45): un ronroneo largo, de unos 8 o 12 segundos, que se apaga de a poco. Mientras ronronea, y un ratito después, no hace caso a más toques. Se calla si se abren los ajustes, al entrar a un juego o con la app en segundo plano, y suena con el volumen de los efectos.
