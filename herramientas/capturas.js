@@ -6,7 +6,7 @@
    2400 × 1080 píxeles, como el teléfono de referencia) y verifica el camino y el «atrás» de Android:
    sala → ajustes (LEDs y versión) → Fogonazo → sonido → manual → mapa → partida → pausa → mapa → … → sala. Después abre partidas
    puntuales (la nota, el contrarreloj, los obstáculos, los especiales, el fin de nivel y el zen) con un tablero fijo
-   (?semilla=…). Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
+   (?semilla=…). En la sala, que la gata respire en el sillón. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
    movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final (Fácil y Normal, con su puerta), Difícil con
    sus dos puertas y la ficha de sin lugar. Al final prueba que la
    app abra sin conexión. Si algo no da lo esperado, lo dice y termina con error. */
@@ -18,7 +18,7 @@ const { abrir } = require('./navegador');
 const RAIZ = path.join(__dirname, '..');
 const SALIDA = path.resolve(process.argv[2] || path.join(RAIZ, 'dist', 'capturas'));
 const TIPOS = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
-  '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
+  '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.webm': 'video/webm' };
 
 function servidor() {
   const srv = http.createServer((req, res) => {
@@ -70,7 +70,12 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   console.log('Sala');
   await page.goto(URL0); await listo();
   ok(ruta().startsWith('sala/'), 'arranca en la sala');
-  ok(await abierto('#salir'), 'la sala tiene «Salir», abajo a la derecha'); await foto('01-sala');
+  ok(await abierto('#salir'), 'la sala tiene «Salir», abajo a la derecha');
+  // la gata (S-44): duerme en una punta del sillón y respira; el video está andando
+  await pantalla().waitForFunction(() => { const v = document.querySelector('#gata video'); return v && v.currentTime > 0.3 && !v.paused; }, null, { timeout: 8000 }).catch(() => {});
+  ok(await pantalla().evaluate(() => { const v = document.querySelector('#gata video'); return ['izq', 'der'].includes(Gata.punta) && v.currentTime > 0.3 && !v.paused && v.playbackRate === 0.7; }),
+    'la gata respira en el sillón (al 70 %)');
+  await foto('01-sala');
   await tocar('#hitAudio'); await espera(300);
   ok(await abierto('#sheetAudio'), 'el equipo de audio abre los ajustes');
   ok(await abierto('#instRow'), 'en el navegador, los ajustes ofrecen instalar'); await foto('02-sala-ajustes');
@@ -297,6 +302,8 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   await ctx.setOffline(true);
   await page.reload(); await listo();
   ok(ruta().startsWith('sala/'), 'sin conexión, la app abre en la sala');
+  await pantalla().waitForFunction(() => document.querySelector('#gata video').currentTime > 0.3, null, { timeout: 8000 }).catch(() => {});
+  ok(await pantalla().evaluate(() => document.querySelector('#gata video').currentTime > 0.3), 'sin conexión, la gata sigue durmiendo (los videos están guardados)');
   await tocar('#hitTable'); await listo(); await tocar('.tarjeta[data-id="mariposa"]'); await mj();
   ok(ruta() === 'mahjong/partida.html' && await pantalla().evaluate(() => document.fonts.check('700 20px "Mahjong JP"')), 'sin conexión, el mahjong abre, con su letra');
   await tocar('#volver'); await listo(); await atras(); await listo();

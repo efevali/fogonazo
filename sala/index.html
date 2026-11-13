@@ -91,6 +91,13 @@ body { margin: 0; background: var(--night); color: var(--chip-fg); overflow: hid
 #luzArco.titila { animation: titila 1.1s linear 1; }
 @keyframes titila { 0% { opacity: 0; } 6% { opacity: .85; } 12% { opacity: .1; } 20% { opacity: .7; } 26% { opacity: 0; } 34% { opacity: .95; } 60% { opacity: .6; } 100% { opacity: 0; } }
 
+/* the cat on the sofa (S-44): Gemini videos, unaltered, one after another; the shadow comes inside each frame */
+#gata { pointer-events: none; }
+.gata { position: relative; width: 100%; height: 100%; }
+.gata video { position: absolute; inset: 0; width: 100%; height: 100%; filter: brightness(.92); }
+.gata.izq video { transform: scaleX(-1); }
+.gata video.oculto { visibility: hidden; }
+
 @media (prefers-reduced-motion: reduce) {
   .streak, .drop, .blob, .spin, .breathe, .vu, .blink, .trace, .steam, .hl, .fl { animation: none !important; }
 }
@@ -246,6 +253,14 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     <image class="hl" id="hlCuadro" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mCuadro)" style="animation-delay:5.1s"/>
     <image class="hl" id="hlBiblioteca" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mBiblioteca)" style="animation-delay:6.8s"/>
     <image class="fl" id="flash" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mBench)"/>
+
+    <!-- the cat, asleep on the sofa: breathes and now and then moves her tail; changes end while nobody looks -->
+    <foreignObject id="gata" x="1246.1" y="843.4" width="192.45" height="120.85">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="gata">
+        <video src="gata-respira.webm" muted="" playsinline="" preload="auto"></video>
+        <video src="gata-cola.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
+      </div>
+    </foreignObject>
 
     <!-- rain on the window (masked around the arc lamp) -->
     <g mask="url(#mRain)"><g id="streaks"></g><g id="drops"></g></g>
@@ -438,6 +453,54 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   // touch zones, to check them: sala/?zonas
   if (new URLSearchParams(location.search).has('zonas')) svg.classList.add('zones');
 
+  // ---------- the cat (S-44) ----------
+  // Two Gemini videos, played as they are: breathing (at 70 %) two to four times, at random, and then the tail (at 85 %).
+  // Both start and end in the same pose, so one follows the other without a jump. The one that comes next starts under
+  // the one on view and takes its place when its first frame is painted.
+  // She sleeps at one end of the sofa or the other: at random when the app opens, and one time in three she has changed
+  // ends when the room comes back into view (from a game, or when the settings rack closes).
+  const Gata = (() => {
+    const fo = document.getElementById('gata'), caja = fo.firstElementChild;
+    const [resp, cola] = caja.querySelectorAll('video');
+    resp.muted = cola.muted = true;   // muted, Chrome lets them play on their own
+    const X = { der: 1246.1, izq: 771.8 }, CLAVE = 'sala.gata';
+    const quieta = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let punta = null, quedan = 0;
+    try { punta = sessionStorage.getItem(CLAVE); } catch (e) {}
+    function poner(p) {
+      punta = p; fo.setAttribute('x', X[p]); caja.classList.toggle('izq', p === 'izq');
+      try { sessionStorage.setItem(CLAVE, p); } catch (e) {}
+    }
+    const otra = () => punta === 'izq' ? 'der' : 'izq';
+    if (punta !== 'izq' && punta !== 'der') poner(Math.random() < 0.5 ? 'izq' : 'der');
+    else poner(Math.random() < 1 / 3 ? otra() : punta);
+
+    const sorteo = () => 2 + Math.floor(Math.random() * 3);
+    let actual = resp;
+    function arrancar(v) {
+      const r = v === resp ? 0.7 : 0.85;
+      v.defaultPlaybackRate = r; v.playbackRate = r; v.currentTime = 0;
+      const p = v.play(); if (p) p.catch(() => {});
+    }
+    function pasarA(v) {
+      if (v === actual) { arrancar(v); return; }
+      const antes = actual; actual = v;
+      const mostrar = () => { v.classList.remove('oculto'); antes.classList.add('oculto'); };
+      if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(mostrar); else v.addEventListener('playing', mostrar, { once: true });
+      arrancar(v);
+    }
+    resp.addEventListener('ended', () => { if (--quedan > 0) pasarA(resp); else pasarA(cola); });
+    cola.addEventListener('ended', () => { quedan = sorteo(); pasarA(resp); });
+    if (!quieta) { quedan = sorteo(); arrancar(resp); }
+    // when the room is not on view (the app in the background), she stops; going into a game removes the room
+    document.addEventListener('visibilitychange', () => {
+      if (quieta) return;
+      if (document.hidden) actual.pause(); else { const p = actual.play(); if (p) p.catch(() => {}); }
+    });
+    return { quizasCambiar() { if (Math.random() < 1 / 3) poner(otra()); }, get punta() { return punta; } };
+  })();
+  window.Gata = Gata;   // for the screenshots (herramientas/capturas.js)
+
   // ---------- active objects ----------
   const flash = document.getElementById('flash');
   flash.addEventListener('animationend', () => flash.classList.remove('flash'));
@@ -454,6 +517,8 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     const f = sheet.querySelector('[role=slider], input, button:not(:disabled)'); if (f) f.focus({ preventScroll: true });
   }
   function hide() {
+    // the settings rack covers the sofa: closing it, the cat may have changed ends meanwhile
+    if (abiertos.length === 1) Gata.quizasCambiar();
     const sheet = abiertos.pop(); if (!sheet) return;
     sheet.hidden = true;
     if (abiertos.length) abiertos[abiertos.length - 1].classList.remove('under');

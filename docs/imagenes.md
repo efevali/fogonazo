@@ -46,7 +46,29 @@ Cómo se piden, se revisan y se montan las imágenes de la colección. Las regla
 | P-013 | Los nueve adornos | Gemini, a la primera, con más volumen que el P-012; las láminas siguientes lo tomaron de referencia | [`biblioteca/arte/P-013_adornos.jpg`](biblioteca/arte/P-013_adornos.jpg) |
 | P-014 | Los seis casetes y las dos llaves | Gemini, a la primera; los huecos de los carretes vinieron en magenta y se rellenan al recortar | [`biblioteca/arte/P-014_casetes-llaves.jpg`](biblioteca/arte/P-014_casetes-llaves.jpg) |
 | P-015 | La puerta de vidrio (solo el marco) y la reja | Gemini, casi cuadradas en vez de apaisadas: se llevaron a mano a la proporción del casillero, con la cerradura sin deformar | [`biblioteca/arte/P-015_puertas.jpg`](biblioteca/arte/P-015_puertas.jpg) |
+| P-017 | La gata de la sala: calicó, dormida y ovillada, sobre magenta, con la sala adjunta de referencia de estilo y luz | Gemini, a la primera | [`sala/arte/P-017_gata.jpg`](sala/arte/P-017_gata.jpg) |
+| P-018 | La gata moviendo la cola (video de 10 s) | Gemini, sobre el primer cuadro de un video anterior. El primero (la gata del P-017 animada) se movía demasiado y no cerraba en el mismo cuadro: se descartó | [`sala/arte/P-018_gata-cola.mp4`](sala/arte/P-018_gata-cola.mp4) |
+| P-019 | La gata solo respirando (video de 10 s) | Gemini, a la primera, desde la misma imagen que el P-018; respiraba algo rápido y se pasa al 70 % | [`sala/arte/P-019_gata-respira.mp4`](sala/arte/P-019_gata-respira.mp4) |
 | P-016 | El fondo de la entrada de Biblioteca | Gemini, a la primera y en su lugar al píxel, con tres referencias juntas en una lámina (la sala, el despertador y la cámara, la madera). El 12/11, Producto le pidió en la misma línea la versión sin el despertador ni la cámara, idéntica en todo lo demás: desde la 0.22.1 esos dos son las piezas del P-013, encima | [`biblioteca/arte/P-016_fondo-entrada.jpg`](biblioteca/arte/P-016_fondo-entrada.jpg) |
+
+## Videos
+
+Gemini anima una imagen y entrega un video de 10 s, de 1280 × 720, a 24 cuadros por segundo (desde el P-018, la gata de la sala).
+
+- **Todos desde la misma imagen, la misma pose al empezar y al terminar,** para encadenarlos sin salto. Un movimiento por video.
+- **Se usan tal cual:** sin cortarlos, sin fundidos y sin animación por código encima (una imagen fija con respiración por código, debajo, se notaba). Si se mueve rápido, se reproduce más lento. Desarrollo solo quita el magenta, entona y suma la sombra (`herramientas/sala/gata.py`).
+- **El texto del P-019,** como modelo (con la imagen de partida adjunta):
+
+> Animá esta imagen exactamente como está: misma gata, mismas manchas, mismo tamaño y posición, mismo fondo magenta liso.
+>
+> Movimiento: la gata duerme profundamente y solo respira. El lomo y el costado suben y bajan despacio, con respiraciones lentas y tranquilas, como una gata dormida de verdad. La cabeza, las patas, las orejas y la cola quedan quietas. Nada más se mueve.
+>
+> Reglas:
+> - El video empieza y termina en la imagen adjunta, idéntica: el último cuadro tiene que ser igual al primero, para repetirlo en bucle sin salto.
+> - Cámara fija: sin zoom, sin paneo, sin cambio de luz.
+> - El fondo queda magenta parejo todo el video.
+> - La respiración es suave pero visible.
+> - Sin sonido.
 
 ## Un pedido que salió a la primera
 
