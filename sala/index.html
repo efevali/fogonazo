@@ -11,6 +11,7 @@
 @font-face { font-family: "Barlow Semi Condensed"; font-weight: 500; src: url(../comun/fuentes/barlow-semi-condensed-latin-500-normal.woff2) format('woff2'); }
 @font-face { font-family: "Barlow Semi Condensed"; font-weight: 600; src: url(../comun/fuentes/barlow-semi-condensed-latin-600-normal.woff2) format('woff2'); }
 @font-face { font-family: "IBM Plex Mono"; font-weight: 600; src: url(../comun/fuentes/ibm-plex-mono-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: "PT Serif"; font-weight: 400; src: url(../comun/fuentes/pt-serif-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: "Barlow Semi Condensed"; font-weight: 700; src: url(../comun/fuentes/barlow-semi-condensed-latin-700-normal.woff2) format('woff2'); }
 /* Layout: one full-bleed illustrated room (Gemini) with an SVG layer in image coordinates; five active objects: bench, coffee table, hi-fi, painting, low bookcase. */
 :root {
@@ -99,6 +100,13 @@ body { margin: 0; background: var(--night); color: var(--chip-fg); overflow: hid
 /* the ones waiting their turn, all but invisible rather than hidden: Chrome on Android stops painting a hidden video,
    and when it is shown again the first frame comes late (the cat blinks out) */
 .gata video.oculto { opacity: 0.001; }
+/* the cat's thought cloud (S-46): the little balls one by one, then the cloud, grown from near her head */
+#nube { pointer-events: none; }
+#nube .bola, #nube .cuerpo { opacity: 0; transform: scale(.6); transform-box: fill-box; transform-origin: center;
+  transition: opacity .22s ease-out, transform .28s cubic-bezier(.3,1.5,.5,1); }
+#nube .cuerpo { transform-origin: var(--ox, 50%) 100%; }
+#nube .bola.ver, #nube.ver .cuerpo { opacity: 1; transform: scale(1); }
+#nube.chau .bola, #nube.chau .cuerpo { opacity: 0; transform: scale(1); transition: opacity .5s ease-in; }
 
 @media (prefers-reduced-motion: reduce) {
   .streak, .drop, .blob, .spin, .breathe, .vu, .blink, .trace, .steam, .hl, .fl { animation: none !important; }
@@ -212,6 +220,18 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
 <div id="stage">
   <svg id="scene" viewBox="0 120 2576 1200" preserveAspectRatio="xMidYMid slice" aria-label="Living de los 70 de noche, con lluvia: banco de electrónica, sillón con mesa ratona y mahjong, equipo de audio el cuadro del arcoíris y la biblioteca baja">
     <defs>
+      <!-- the thought cloud (S-46): a soft shadow on the room, and a light from the upper left over a blurred copy of
+           its shape for a pillowy volume (flat areas keep their colour: the 1.3 cancels the light's sin 50°) -->
+      <filter id="nubeSombra" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+      <filter id="nubeRelieve" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="11" result="alto"/>
+        <feDiffuseLighting in="alto" surfaceScale="7" diffuseConstant="1" lighting-color="#ffffff" result="luz"><feDistantLight azimuth="225" elevation="50"/></feDiffuseLighting>
+        <feSpecularLighting in="alto" surfaceScale="7" specularConstant=".55" specularExponent="14" lighting-color="#fffaf0" result="brillo"><feDistantLight azimuth="225" elevation="50"/></feSpecularLighting>
+        <feComposite in="SourceGraphic" in2="luz" operator="arithmetic" k1="1.3" k2="0" k3="0" k4="0" result="sombreado"/>
+        <feComposite in="brillo" in2="SourceAlpha" operator="in" result="brilloIn"/>
+        <feComposite in="sombreado" in2="brilloIn" operator="arithmetic" k1="0" k2="1" k3=".45" k4="0" result="todo"/>
+        <feComposite in="todo" in2="SourceAlpha" operator="in"/>
+      </filter>
       <mask id="mBench" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-bench.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <mask id="mTable" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-table.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
       <mask id="mAudio" maskUnits="userSpaceOnUse" x="0" y="0" width="2576" height="1438"><image href="mask-audio.png" width="2576" height="1438" preserveAspectRatio="none"/></mask>
@@ -342,6 +362,9 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       <ellipse class="vu" cx="1735" cy="921" rx="24" ry="12" fill="url(#vuGlow)" style="animation-delay:-.48s"/>
       <ellipse class="vu" cx="502" cy="806" rx="16" ry="6" fill="url(#vuGlow)" style="animation-duration:2.3s"/>
     </g>
+
+    <!-- the cat's thought cloud (S-46), drawn by Michi; it doesn't take touches -->
+    <g id="nube" pointer-events="none"></g>
 
     <!-- tap zones -->
     <path class="hit" id="hitBench" data-href="fogonazo/instrumento.html" data-hl="hlBench" role="button" tabindex="0" aria-label="Abrir Fogonazo"
@@ -479,6 +502,8 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   // stillness the video starts with, it goes in at 2.92 s (just before she opens her eyes), at one of the moments of
   // the breathing where the cat matches that frame (measured), so the switch doesn't show; from the tail or the
   // stretch, when they end.
+  // The tail also answers a touch, as «she ignores you» (S-46): it starts moving on its very first frame, so it cuts in
+  // at the moments of the breathing where the cat matches that frame (measured, as close as the approved joins).
   const Gata = (() => {
     const fo = document.getElementById('gata'), caja = fo.firstElementChild;
     const [resp, cola, estira, mira] = caja.querySelectorAll('video');
@@ -490,6 +515,8 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     const VEL = new Map([[resp, 0.7], [cola, 0.85], [estira, 0.7], [mira, 0.85]]);
     // the look's entry frame, and the moments of the breathing video (in its own time) where the cat matches it
     const ENTRADA = 2.92, PAUSAS = [0.04, 0.42, 1.83, 2.58, 4.87, 6.08, 7.0, 8.12, 9.87];
+    // the tail's cut-in moments: [breathing time, tail time]
+    const ENTRADAS_COLA = [[0.04, 0], [1.92, 0], [2.5, 0], [4.83, 0], [6.21, 0], [7.0, 0.08], [8.25, 0], [9.92, 0]];
     const quieta = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let punta = null, quedan = 0, colas = 0;
     try { punta = sessionStorage.getItem(CLAVE); } catch (e) {}
@@ -505,6 +532,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     const sorteoColas = () => 2 + Math.floor(Math.random() * 2);   // tails before a stretch: 2 or 3
     let actual = resp;
     let mirar = false;   // the look was asked for: at the next pause of the breathing, or when the gesture ends
+    let colaPedida = false, finCola = null;   // the tail as an answer, and what to do when it ends
     function arrancar(v, t0 = 0) {
       const r = VEL.get(v);
       v.defaultPlaybackRate = r; v.playbackRate = r;
@@ -528,9 +556,12 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     const aMirar = () => { mirar = false; pasarA(mira, ENTRADA); };
     resp.addEventListener('ended', () => {
       if (actual !== resp) return;
-      if (mirar) aMirar(); else if (--quedan > 0) pasarA(resp); else gesto();
+      if (mirar) aMirar(); else if (colaPedida) { colaPedida = false; pasarA(cola); } else if (--quedan > 0) pasarA(resp); else gesto();
     });
-    for (const v of [cola, estira]) v.addEventListener('ended', () => { if (mirar) aMirar(); else { quedan = sorteo(); pasarA(resp); } });
+    for (const v of [cola, estira]) v.addEventListener('ended', () => {
+      if (mirar) aMirar(); else { quedan = sorteo(); pasarA(resp); }
+      if (v === cola && finCola) { const f = finCola; finCola = null; f(); }
+    });
     mira.addEventListener('ended', () => {
       if (actual !== mira) return;
       quedan = sorteo(); pasarA(resp); setTimeout(listaMira, 300);
@@ -548,6 +579,20 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       };
       chequear();
     }
+    // the tail, now (from the breathing only): false if it can't, so the touch gets another answer
+    function pedirCola(fin) {
+      if (quieta || actual !== resp || mirar || colaPedida) return false;
+      colaPedida = true; finCola = fin;
+      const sig = ENTRADAS_COLA.find(e => e[0] > resp.currentTime + 0.03);
+      if (sig === undefined) return true;   // past the last moment: when this breath ends
+      const chequear = () => {
+        if (!colaPedida || actual !== resp) return;
+        if (resp.currentTime >= sig[0]) { colaPedida = false; pasarA(cola, sig[1]); return; }
+        if (resp.requestVideoFrameCallback) resp.requestVideoFrameCallback(chequear); else setTimeout(chequear, 30);
+      };
+      chequear();
+      return true;
+    }
     colas = sorteoColas();
     if (!quieta) { quedan = sorteo(); arrancar(resp); }
     // when the room is not on view (the app in the background), she stops; going into a game removes the room
@@ -555,33 +600,238 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       if (quieta) return;
       if (document.hidden) actual.pause(); else { const p = actual.play(); if (p) p.catch(() => {}); }
     });
-    return { pedirMirada, get punta() { return punta; }, get gesto() { return actual.src.split('/').pop(); } };
+    return { pedirMirada, pedirCola, get punta() { return punta; }, get enGesto() { return actual !== resp; }, get gesto() { return actual.src.split('/').pop(); } };
   })();
   window.Gata = Gata;   // for the screenshots (herramientas/capturas.js)
 
-  // ---------- touching the cat: she purrs (S-45) ----------
-  // Each touch, a long purr (about 8 or 12 s, at random, made in comun/sonido.js); while she purrs and for 3 s after,
-  // touches do nothing. She goes quiet, with a short fade, when a sheet covers the sofa, when going into a game and
-  // when the app is not on view. The charla, to alternate with the purr, comes later.
+  const CLAVE_JUEGO = 'sala.juego';   // the game the room was left for: the cat's first thought on coming back may be about it
+
+  // ---------- touching the cat: the purr (S-45) ----------
+  // A long purr (about 8 or 12 s, at random, made in comun/sonido.js). She goes quiet, with a short fade, when a sheet
+  // covers the sofa, when going into a game and when the app is not on view. What a touch does is decided by Michi.
   const Ronroneo = (() => {
-    let libreDesde = 0, ocupada = false, hasta = 0;   // hasta: when the purr on now ends (for Quietud)
     setTimeout(() => App.sonido.prepararRonroneo(), 2500);   // the first one is made ahead, once the room has settled
-    document.getElementById('hitGata').addEventListener('click', async () => {
-      if (abiertos.length || ocupada || performance.now() < libreDesde) return;
-      ocupada = true;
-      const dur = await App.sonido.ronronear();
-      hasta = performance.now() + dur * 1000;
-      libreDesde = hasta + 3000;
-      ocupada = false;
-    });
-    const callar = () => { App.sonido.callarRonroneo(); libreDesde = performance.now() + 1000; hasta = Math.min(hasta, performance.now()); };
+    const callar = () => App.sonido.callarRonroneo();
     document.addEventListener('visibilitychange', () => { if (document.hidden) callar(); });
     addEventListener('pagehide', callar);
-    return { callar, get hasta() { return ocupada ? Infinity : hasta; } };
+    return { ronronear: () => App.sonido.ronronear(), callar };   // ronronear resolves with its length in seconds
   })();
 
+  // ---------- the talk with the cat (S-46) ----------
+  // She pays attention when she feels like it. Each touch draws: she thinks something (60 %), purrs (25 %) or ignores
+  // you with a flick of her tail (15 %). Touch her again within 12 s of an answer and the talk goes on: she answers
+  // 85 % of the time, less and less if it goes on (80, 70, 60, 50 %), and from the fourth answer in a row she
+  // sometimes gets tired of it. Touching again after a purr or a tail is insisting: she answers 65 %, now and then
+  // annoyed. While she reacts and for 3 s after, touches do nothing.
+  // Her thoughts come out in a thought cloud, in silence, with her eyes closed; only the phrases that need a gesture
+  // (marked ^) bring the look along, which arrives while you read. Phrases don't come back until their whole group has
+  // come out; 2 in 10 depend on the time of day, and the first one after coming back from a game is, 7 in 10 times,
+  // about that game.
+  const Michi = (() => {
+    const FRASES = {
+      general: [
+        'Estaba soñando con una sardina. Gracias, eh.',
+        '¿Qué hora es? No me digas. No me importa.',
+        'Justo en la mejor parte del sueño.',
+        'Estaba durmiendo. Profesionalmente.',
+        '^Ah, sos vos.',
+        '^Te atiendo después de la siesta. La de las seis.',
+        'Sacá número. Ya te llamo.',
+        '^Mmm. No.',
+        'Hoy no hice nada. Y me salió perfecto.',
+        'Llueve. Ni pienso moverme.',
+        'Mi agenda de hoy: esto.',
+        '^El sillón es mío. Vos estás de visita.',
+        'Pensé en levantarme. Se me pasó.',
+        'Las fichas del mahjong las tiraría al piso. Una por una.',
+        'El de la biblioteca ordena todo. Qué necesidad.',
+        '^Vos mirás colores. Yo veo en la oscuridad.',
+        'Ese banco de electrónica zumba. No me deja dormir.',
+        'La lámpara hongo da un calorcito bárbaro.',
+        'Bueno, un poco más. Pero no te acostumbres.',
+        '^Me caés bien. No se lo digas a nadie.',
+        'Podés quedarte. Pero en silencio.',
+        '^Te extrañé. Un poquito. Casi nada.',
+      ],
+      seguir: [
+        'No te emociones. Es una charla, no una amistad.',
+        '¿Y entonces? ¿Qué más?',
+        'Bueno, pero hablá vos un rato.',
+        'Esto ya parece una conversación. Qué raro.',
+        'Te escucho. Con los ojos cerrados, pero te escucho.',
+        '^¿Seguís ahí?',
+        'Hablamos mucho hoy. Voy a necesitar otra siesta.',
+      ],
+      insiste: [
+        'Una vez estaba bien.',
+        '^¿No tenías un juego para jugar?',
+        'Sigo acá. Sigo durmiendo.',
+        '^Si me tocás de nuevo, cobro.',
+        'Ya está. Ya me tocaste.',
+        'Insistir no te va a funcionar.',
+      ],
+      dormida: ['Mmm… cinco minutos más.', 'Zzz… sardina…', '…no estoy.', 'Mmmrf.', '…después.', '…ahí voy. Mentira.'],
+      madrugada: ['^{hora}. ¿Vos no dormís?', 'A esta hora solo andan despiertos los gatos. Y vos.'],
+      manana: ['Muy temprano para tener opiniones.', '¿Ya es de día? Avisame cuando sea de tarde.'],
+      siesta: ['Hora de la siesta. Como todas.', 'La siesta no se interrumpe. Es ley.'],
+      tarde: ['La tarde es para dormir. La noche también.', 'Atardece. Mi hora favorita para no hacer nada.'],
+      noche: ['De noche me despierto. Más tarde. Ahora no.', 'Ya es de noche. Recién estoy entrando en calor.'],
+      fogonazo: ['^Sentí olor a quemado. ¿Fuiste vos?', 'Tanto chispazo me despeina.'],
+      mahjong: ['¿Ganaste? Igual las fichas son mías.', 'Tanto ruido de fichas. Y yo acá, durmiendo.'],
+      buenojo: ['^Volviste con ojos de pintor. A mí no me retratás.', '¿Acertaste el color? Yo los veo todos medio grises.'],
+      biblioteca: ['¿Ordenaste todo? Bien. Ahora lo tiro al piso.', 'Tanto acomodar. Los libros estaban bien en el piso.'],
+    };
+    const bolsas = {};
+    function sacar(grupo) {
+      if (!bolsas[grupo] || !bolsas[grupo].length) bolsas[grupo] = [...FRASES[grupo]].sort(() => Math.random() - 0.5);
+      return bolsas[grupo].pop();
+    }
+    // the game she was left for (set when going into one); read once
+    let juego = null;
+    try { juego = sessionStorage.getItem(CLAVE_JUEGO); sessionStorage.removeItem(CLAVE_JUEGO); } catch (e) {}
+    if (!FRASES[juego]) juego = null;
+    const NUM = ['', 'una', 'dos', 'tres', 'cuatro', 'cinco', 'seis'];
+    const grupoHora = h => h < 6 ? 'madrugada' : h < 12 ? 'manana' : h < 17 ? 'siesta' : h < 20 ? 'tarde' : 'noche';
+    // modo: 'normal' (a fresh touch), 'charla' (she answered and you touched again), 'insiste' (after a purr or a tail)
+    function elegir(modo, racha) {
+      if (modo === 'charla') {
+        if (racha >= 4 && Math.random() < 0.5) return sacar('insiste');
+        return sacar(Math.random() < 0.4 ? 'seguir' : 'general');
+      }
+      if (modo === 'insiste') return sacar(Math.random() < 0.6 ? 'insiste' : 'general');
+      if (juego) { const j = juego; juego = null; if (Math.random() < 0.7) return sacar(j); }
+      if (Math.random() < 0.2) {
+        const h = new Date().getHours();
+        return sacar(grupoHora(h)).replace('{hora}', h === 0 ? 'Es medianoche pasada' : h === 1 ? 'Es la una de la mañana' : 'Son las ' + NUM[h] + ' de la mañana');
+      }
+      return sacar(Math.random() < 0.2 ? 'dormida' : 'general');
+    }
+
+    // ---- the cloud: cream, a little translucent, with a soft volume (a light from the upper left), in PT Serif.
+    // It comes out toward the outer side of the sofa, just above her, with three little balls up from her head.
+    const nube = document.getElementById('nube'), NS = 'http://www.w3.org/2000/svg';
+    if (document.fonts) document.fonts.load("46px 'PT Serif'").catch(() => {});   // measured before drawing
+    const CABEZA = { der: [1297, 858], izq: [913, 858] };   // her head, in room coordinates
+    const el = (tag, at, padre) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); if (padre) padre.appendChild(e); return e; };
+    function partir(txt, max) {
+      const lin = [''];
+      for (const p of txt.split(' ')) { const l = lin[lin.length - 1]; if (l && (l + ' ' + p).length > max) lin.push(p); else lin[lin.length - 1] = l ? l + ' ' + p : p; }
+      return lin;
+    }
+    // the cloud's shape (big balls around an ellipse) plus the little balls, as circles: [x, y, r]
+    function forma(padre, piezas, fill, dx = 0, dy = 0, extra = 0) {
+      const g = el('g', { fill, transform: `translate(${dx},${dy})` }, padre);
+      for (const p of piezas) {
+        if (p.length === 3) el('circle', { cx: p[0], cy: p[1], r: p[2] + extra }, g);
+        else el('ellipse', { cx: p[0], cy: p[1], rx: p[2] + extra, ry: p[3] + extra }, g);
+      }
+      return g;
+    }
+    function dibujar(padre, piezas) {
+      const s = forma(padre, piezas, '#1a100a', 6, 12); s.setAttribute('filter', 'url(#nubeSombra)'); s.setAttribute('opacity', 0.45);
+      const capa = el('g', { opacity: 0.9 }, padre);
+      forma(capa, piezas, '#7d6648', 0, 0, 2.5);                                    // thin rim
+      forma(capa, piezas, '#f3e9d6').setAttribute('filter', 'url(#nubeRelieve)');   // body, with volume
+    }
+    let timer = null;
+    function quitarNube() { clearTimeout(timer); nube.textContent = ''; nube.className.baseVal = ''; }
+    function mostrarNube(txt, chica, alIrse, extra = 0) {
+      quitarNube();
+      const fs = chica ? 40 : 46, lh = fs * 1.18;
+      const [hx, hy] = CABEZA[Gata.punta], lado = Gata.punta === 'der' ? 1 : -1;
+      const lineas = partir(txt, chica ? 16 : 20);
+      const t = el('text', { 'font-size': fs, fill: '#3a2c24', 'text-anchor': 'middle', 'font-family': "'PT Serif', serif" }, nube);
+      lineas.forEach((l, i) => { el('tspan', { x: 0, dy: i ? lh : 0 }, t).textContent = l; });
+      let w = 0; for (const s of t.children) w = Math.max(w, s.getComputedTextLength());
+      nube.removeChild(t);
+      const h = lh * lineas.length, rx = w / 2 + (chica ? 34 : 42), ry = h / 2 + (chica ? 26 : 32);
+      const cx = hx + lado * (rx * 0.55 + 40), cy = hy - (chica ? 76 : 95) - ry;
+      const per = Math.PI * (3 * (rx + ry) - Math.sqrt((3 * rx + ry) * (rx + 3 * ry)));
+      const n = Math.max(8, Math.round(per / (chica ? 46 : 54)));
+      const piezas = [[cx, cy, rx, ry]];
+      for (let i = 0; i < n; i++) {
+        const a = i / n * 2 * Math.PI;
+        piezas.push([cx + (rx - 6) * Math.cos(a), cy + (ry - 6) * Math.sin(a), (chica ? 24 : 29) + 7 * Math.sin(i * 2.7 + n)]);
+      }
+      const bx = cx - lado * rx * 0.55, by = cy + ry + 10;
+      const chicas = [[0.2, chica ? 7 : 8], [0.5, chica ? 10 : 12], [0.8, chica ? 14 : 17]].map(([f, r]) => {
+        const g = el('g', { class: 'bola' }, nube);
+        dibujar(g, [[hx + (bx - hx) * f, hy - 30 + (by - (hy - 30)) * f, r]]);
+        return g;
+      });
+      const cuerpo = el('g', { class: 'cuerpo' }, nube);
+      cuerpo.style.setProperty('--ox', (50 - lado * 30) + '%');
+      dibujar(cuerpo, piezas);
+      t.setAttribute('transform', `translate(${cx},${cy - h / 2 + fs * 0.86})`);
+      cuerpo.appendChild(t);
+      // in: the balls one by one, then the cloud; out: all together, after time to read it
+      void nube.getBoundingClientRect();
+      chicas.forEach((g, i) => setTimeout(() => g.classList.add('ver'), i * 110));
+      timer = setTimeout(() => {
+        nube.className.baseVal = 'ver';
+        const leer = Math.max(chica ? 2.8 : 3.6, 1.4 + 0.07 * txt.length) * 1000 + extra;
+        timer = setTimeout(() => {
+          nube.className.baseVal = 'chau';
+          timer = setTimeout(() => { quitarNube(); alIrse(); }, 520);
+        }, leer);
+      }, 330);
+    }
+
+    // ---- what a touch does ----
+    const DESCANSO = 3000, VENTANA = 12000, P_CHARLA = [0.85, 0.8, 0.7, 0.6, 0.5];
+    let reaccion = null, turno = 0, libreDesde = 0, finUltima = -1e9, ultima = null, racha = 0, espera = null;
+    let forzada = null;   // the next answer, for the screenshots (herramientas/capturas.js)
+    function sortear(modo) {
+      const pp = modo === 'charla' ? P_CHARLA[Math.min(racha - 1, P_CHARLA.length - 1)] : modo === 'insiste' ? 0.65 : 0.6;
+      const pi = modo === 'charla' ? 0.05 : modo === 'insiste' ? 0.1 : 0.15;
+      const r = Math.random();
+      return r < pp ? 'piensa' : r < pp + pi ? 'ignora' : 'ronronea';
+    }
+    function terminar(t) {
+      if (t !== turno || !reaccion) return;
+      ultima = reaccion; reaccion = null;
+      finUltima = performance.now(); libreDesde = finUltima + DESCANSO;
+    }
+    async function ronronear(t) {
+      reaccion = 'ronronea'; racha = 0;
+      const dur = await Ronroneo.ronronear();
+      if (t !== turno) return;
+      espera = setTimeout(() => terminar(t), dur * 1000);
+    }
+    document.getElementById('hitGata').addEventListener('click', () => {
+      const ahora = performance.now();
+      if (abiertos.length || reaccion || ahora < libreDesde) return;
+      const t = ++turno;
+      const modo = ahora - finUltima >= VENTANA ? 'normal' : ultima === 'piensa' ? 'charla' : 'insiste';
+      if (modo !== 'charla') racha = 0;
+      let r = forzada || sortear(modo); forzada = null;
+      if (r === 'ignora') {
+        reaccion = 'ignora'; racha = 0;
+        if (Gata.pedirCola(() => terminar(t))) return;
+        r = 'ronronea';   // already moving, or the motion is reduced: a tail wouldn't read
+      }
+      if (r === 'ronronea') { ronronear(t); return; }
+      reaccion = 'piensa'; racha++;
+      let txt = elegir(modo, racha);
+      const conMirada = txt.startsWith('^'), chica = FRASES.dormida.includes(txt);
+      if (conMirada) { txt = txt.slice(1); if (!Gata.enGesto) Gata.pedirMirada(); }
+      // with the look, the cloud stays until she is back asleep
+      espera = setTimeout(() => mostrarNube(txt, chica, () => terminar(t), conMirada ? 2500 : 0), 250);
+    });
+    // a sheet over the sofa, going into a game or the app out of view: everything stops at once
+    function callar() {
+      Ronroneo.callar(); clearTimeout(espera); quitarNube();
+      if (reaccion) { turno++; ultima = reaccion; reaccion = null; finUltima = performance.now(); }
+      libreDesde = Math.max(libreDesde, performance.now() + 1000);
+    }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) callar(); });
+    // hasta: when the reaction on now ended (for Quietud: the 10 s count from there)
+    return { callar, forzar(r) { forzada = r; }, get hasta() { return reaccion ? Infinity : finUltima; } };
+  })();
+  window.Michi = Michi;   // for the screenshots
+
   // ---------- 10 s without touching anything: the cat looks up, once (P-021) ----------
-  // Any touch in the room starts the count again; after a purr, it counts from when the purr ends. It doesn't count
+  // Any touch in the room starts the count again; after a purr or a thought, it counts from when it ends. It doesn't count
   // while a sheet is open or the app is not on view (and going into a game leaves the room: it starts again on coming
   // back). Once she has looked, she doesn't again until something is touched and another 10 s go by.
   const Quietud = (() => {
@@ -592,7 +842,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     document.addEventListener('keydown', reiniciar, true);
     setInterval(() => {
       if (document.hidden || abiertos.length) { desde = performance.now(); return; }
-      if (armada && performance.now() - Math.max(desde, Ronroneo.hasta) >= ESPERA) { armada = false; Gata.pedirMirada(); }
+      if (armada && performance.now() - Math.max(desde, Michi.hasta) >= ESPERA) { armada = false; Gata.pedirMirada(); }
     }, 250);
     return { get armada() { return armada; } };
   })();
@@ -605,7 +855,7 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   let lastHit = null;
   function show(id) {
     const sheet = document.getElementById(id);
-    Ronroneo.callar();   // the sheets cover the sofa
+    Michi.callar();   // the sheets cover the sofa
     if (id === 'sheetAudio') pintarAjustes();
     // a sheet opened over another one (the install steps over the settings) hides the one below
     if (abiertos.length) abiertos[abiertos.length - 1].classList.add('under');
@@ -626,7 +876,11 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     flash.classList.remove('flash'); void flash.getBoundingClientRect(); flash.classList.add('flash');
     lastHit = hit; fx('click');
     // an object that leads to a game goes there once the flash has shown
-    if (href) { Ronroneo.callar(); setTimeout(() => App.ir(href), 260); return; }
+    if (href) {
+      Michi.callar();
+      try { sessionStorage.setItem(CLAVE_JUEGO, href.split('/')[0]); } catch (e) {}
+      setTimeout(() => App.ir(href), 260); return;
+    }
     setTimeout(() => show(hit.dataset.open), 260);
   };
   document.querySelectorAll('.hit').forEach(hit => {

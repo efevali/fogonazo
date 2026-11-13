@@ -6,7 +6,7 @@
    2400 × 1080 píxeles, como el teléfono de referencia) y verifica el camino y el «atrás» de Android:
    sala → ajustes (LEDs y versión) → Fogonazo → sonido → manual → mapa → partida → pausa → mapa → … → sala. Después abre partidas
    puntuales (la nota, el contrarreloj, los obstáculos, los especiales, el fin de nivel y el zen) con un tablero fijo
-   (?semilla=…). En la sala, que la gata respire en el sillón, mire a los 10 s sin tocar nada y ronronee al tocarla. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
+   (?semilla=…). En la sala, que la gata respire en el sillón, mire a los 10 s sin tocar nada, piense algo en su nube y ronronee al tocarla. Después, el mahjong: el estuche, la partida, la pausa, el final y las dos tortugas; y Biblioteca: la entrada, una
    movida arrastrando, deshacer, la pausa, una partida resuelta hasta el final (Fácil y Normal, con su puerta), Difícil con
    sus dos puertas y la ficha de sin lugar. Al final prueba que la
    app abra sin conexión. Si algo no da lo esperado, lo dice y termina con error. */
@@ -96,6 +96,19 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   // tocar la gata (S-45): ronronea, en la punta donde duerme; mientras ronronea, otro toque no lo vuelve a empezar
   ok(await pantalla().evaluate(() => { const z = document.getElementById('hitGata').getBBox(), x = +document.getElementById('gata').getAttribute('x');
     return z.x > x && z.x + z.width < x + 207.07; }), 'la zona para tocar la gata está sobre ella');
+  // la charla (S-46): al tocarla piensa algo; la nube sale enseguida, del lado de afuera del sillón y sin tapar su cabeza
+  await pantalla().evaluate(() => Michi.forzar('piensa'));
+  await tocar('#hitGata');
+  await pantalla().waitForFunction(() => document.getElementById('nube').classList.contains('ver'), null, { timeout: 4000 }).catch(() => {});
+  ok(await pantalla().evaluate(() => { const n = document.getElementById('nube'); if (!n.classList.contains('ver')) return false;
+    const c = n.querySelector('.cuerpo').getBBox(), x = +document.getElementById('gata').getAttribute('x'), der = Gata.punta === 'der';
+    return (der ? c.x + c.width / 2 > x + 65 : c.x + c.width / 2 < x + 142) && c.y + c.height < 858 && n.querySelector('text').textContent.length > 0; }),
+    'al tocarla, la gata piensa: la nube sale del lado de afuera, arriba de su cabeza');
+  ok(!await page.evaluate(() => Sound.purring()), 'pensar es en silencio');
+  await espera(700); await foto('01c-sala-gata-piensa');
+  await pantalla().evaluate(() => Michi.callar()); await espera(1200);
+  ok(await pantalla().evaluate(() => !document.getElementById('nube').childElementCount), 'la nube se va si se la interrumpe');
+  await pantalla().evaluate(() => Michi.forzar('ronronea'));
   await tocar('#hitGata');
   await page.waitForFunction(() => Sound.purring(), null, { timeout: 8000 }).catch(() => {});
   ok(await page.evaluate(() => Sound.purring()), 'al tocar la gata, ronronea');
