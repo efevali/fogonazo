@@ -2,6 +2,10 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.27.0 — 13/11/2026
+
+- **La gata piensa** (S-46): al tocarla, a veces piensa algo en una nubecita, a veces ronronea y a veces te ignora moviendo la cola. Si le seguís el juego enseguida, sigue la charla, hasta que se cansa. Son pensamientos en silencio, con el humor de una gata de sillón: algunos dependen de la hora o del juego del que volvés, y los que lo piden vienen con una mirada.
+
 ## 0.26.0 — 13/11/2026
 
 - **La gata te mira** (P-021): si en la sala no se toca nada durante 10 segundos, levanta la cabeza, mira a cámara y se vuelve a dormir. Lo hace una sola vez, hasta que se toque algo y pasen otros 10 segundos; después de un ronroneo, cuenta desde que termina.
