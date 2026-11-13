@@ -2,7 +2,7 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
-## 0.24.1 — sin publicar
+## 0.24.1 — 13/11/2026
 
 - **La gata ya no se estira por encima de la caja del mahjong:** en la punta derecha, las puntas de las patas pasan por detrás de la tapa abierta.
 
