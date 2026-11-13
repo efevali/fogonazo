@@ -2,14 +2,17 @@
 
    python3 herramientas/sala/gata.py entrada.mp4 salida.webm
 
-La entrada es un video de Gemini de la gata sobre magenta (P-018, P-019 y los que sigan), de 1280 x 720, que empieza y
+La entrada es un video de Gemini de la gata sobre magenta (P-018 a P-020 y los que sigan), de 1280 x 720, que empieza y
 termina en la misma pose. El video no se corta ni se cambia de tiempo: a cada cuadro se le quita el magenta, se lo
 entona a la luz de la sala (menos saturado, más cálido y tenue, más oscuro hacia el apoyo) y se le hornea su propia
-sombra de contacto, para que la sombra acompañe a la cola cuando se mueve. Sale un VP9 con transparencia de 500 x 314
-(la gata en 420 de ancho, más 40 de margen para la sombra), que Chrome reproduce en la sala.
+sombra de contacto, para que la sombra acompañe a la cola cuando se mueve. Sale un VP9 con transparencia de 538 x 342
+(el recorte en 458 de ancho, más 40 de margen para la sombra), que Chrome reproduce en la sala.
 
-Todos los videos usan el mismo recorte (CAJA), medido sobre el primer cuadro del P-018: la gata está en el mismo lugar
-en todos, así que se encadenan sin saltos. Si un video nuevo la trae corrida, hay que pedírselo de nuevo a la IA.
+Todos los videos usan el mismo recorte (CAJA): la gata está en el mismo lugar en todos, así que se encadenan sin saltos.
+Es el lugar que ocupa ovillada (108, 72, 1175, 663, medido sobre el primer cuadro del P-018) agrandado para que entre el
+estiramiento del P-020, que llega con las patas casi al borde izquierdo y con las orejas al de arriba. Si se cambia,
+hay que rehacer todos los videos y mover la gata en sala/index.html para que quede en el mismo lugar. Si un video nuevo
+la trae corrida, o se sale del recorte, hay que pedírselo de nuevo a la IA.
 
 Necesita ffmpeg con libvpx-vp9, numpy y Pillow. """
 import glob
@@ -21,8 +24,8 @@ import tempfile
 import numpy as np
 from PIL import Image, ImageFilter
 
-CAJA = (108, 72, 1175, 663)   # x0, y0, x1, y1 en el video de 1280 x 720
-ANCHO = 420                   # la gata, en la app
+CAJA = (16, 0, 1180, 663)     # x0, y0, x1, y1 en el video de 1280 x 720
+ANCHO = 458                   # el recorte, en la app (la gata ovillada, en 420)
 MARGEN = 40                   # alrededor, para la sombra
 SOMBRA = np.array([38, 16, 8], np.float32) / 255
 

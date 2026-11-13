@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.24.0 — sin publicar
+
+- **La gata de la sala se estira** (P-020): cada tanto, en lugar de mover la cola, bosteza, estira las patas delanteras y vuelve a acomodarse. Pasa después de dos o tres colas, así que es esporádico.
+- **Sin pestañeo al cambiar de gesto** en Chrome para Android: la gata ya no puede desaparecer un instante cuando pasa de un video al otro.
+
 ## 0.23.0 — 12/11/2026
 
 - **Una gata duerme en el sillón de la sala** (S-44): una calicó ovillada en una punta, delante del almohadón chico, que respira y de vez en cuando mueve la cola. Son videos pintados (P-018 y P-019), entonados a la luz de la sala y con su sombra, que se encadenan al azar. A veces, al volver a la sala, está en la otra punta. Funciona sin conexión.
