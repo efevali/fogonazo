@@ -53,5 +53,5 @@ Las referencias de estilo de terceros (ilustraciones isométricas, fotos de livi
 
 ## Por definir
 
-- La gata: la charla al tocarla, intercalada con el ronroneo, para que no responda siempre a cada toque («te presta atención cuando tiene ganas»), y quizás más gestos (la oreja).
+- La gata: la charla al tocarla, intercalada con el ronroneo, para que no responda siempre a cada toque («te presta atención cuando tiene ganas»). **Lo primero:** Producto trae un video nuevo de Gemini de la gata levantando la cabeza y mirando a cámara, para acompañar la charla; se prueba en la página de prueba de la gata antes de llevarlo a la app. Quizás más gestos (la oreja).
 - La transición de la sala a cada juego. Para la 0.1.0, un fundido corto, provisorio.
