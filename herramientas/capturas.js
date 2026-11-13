@@ -75,6 +75,8 @@ const ok = (cond, msg) => { console.log((cond ? '  ✓ ' : '  ✗ ') + msg); if 
   await pantalla().waitForFunction(() => { const v = document.querySelector('#gata video'); return v && v.currentTime > 0.3 && !v.paused; }, null, { timeout: 8000 }).catch(() => {});
   ok(await pantalla().evaluate(() => { const v = document.querySelector('#gata video'); return ['izq', 'der'].includes(Gata.punta) && v.currentTime > 0.3 && !v.paused && v.playbackRate === 0.7; }),
     'la gata respira en el sillón (al 70 %)');
+  ok(await pantalla().evaluate(() => [...document.querySelectorAll('#gata video')].map(v => v.src.split('/').pop()).join() === 'gata-respira.webm,gata-cola.webm,gata-estira.webm'),
+    'la gata tiene sus tres gestos: respirar, la cola y estirarse');
   await foto('01-sala');
   await tocar('#hitAudio'); await espera(300);
   ok(await abierto('#sheetAudio'), 'el equipo de audio abre los ajustes');

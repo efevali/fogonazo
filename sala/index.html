@@ -96,7 +96,9 @@ body { margin: 0; background: var(--night); color: var(--chip-fg); overflow: hid
 .gata { position: relative; width: 100%; height: 100%; }
 .gata video { position: absolute; inset: 0; width: 100%; height: 100%; filter: brightness(.92); }
 .gata.izq video { transform: scaleX(-1); }
-.gata video.oculto { visibility: hidden; }
+/* the ones waiting their turn, all but invisible rather than hidden: Chrome on Android stops painting a hidden video,
+   and when it is shown again the first frame comes late (the cat blinks out) */
+.gata video.oculto { opacity: 0.001; }
 
 @media (prefers-reduced-motion: reduce) {
   .streak, .drop, .blob, .spin, .breathe, .vu, .blink, .trace, .steam, .hl, .fl { animation: none !important; }
@@ -255,10 +257,11 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     <image class="fl" id="flash" href="sala-luz.jpg" width="2576" height="1438" mask="url(#mBench)"/>
 
     <!-- the cat, asleep on the sofa: breathes and now and then moves her tail; changes end while nobody looks -->
-    <foreignObject id="gata" x="1246.1" y="843.4" width="192.45" height="120.85">
+    <foreignObject id="gata" x="1232.2" y="832.5" width="207.07" height="131.64">
       <div xmlns="http://www.w3.org/1999/xhtml" class="gata">
         <video src="gata-respira.webm" muted="" playsinline="" preload="auto"></video>
         <video src="gata-cola.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
+        <video src="gata-estira.webm" class="oculto" muted="" playsinline="" preload="auto"></video>
       </div>
     </foreignObject>
 
@@ -454,18 +457,21 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
   if (new URLSearchParams(location.search).has('zonas')) svg.classList.add('zones');
 
   // ---------- the cat (S-44) ----------
-  // Two Gemini videos, played as they are: breathing (at 70 %) two to four times, at random, and then the tail (at 85 %).
-  // Both start and end in the same pose, so one follows the other without a jump. The one that comes next starts under
+  // Three Gemini videos, played as they are: breathing (at 70 %) two to four times, at random, and then a gesture: the
+  // tail (at 85 %) or, after two or three tails (at random), the stretch (at 70 %) in its place, so it stays sporadic.
+  // All start and end in the same pose, so one follows the other without a jump. The one that comes next starts under
   // the one on view and takes its place when its first frame is painted.
   // She sleeps at one end of the sofa or the other: at random when the app opens, and one time in three she has changed
   // ends when the room comes back into view (from a game, or when the settings rack closes).
   const Gata = (() => {
     const fo = document.getElementById('gata'), caja = fo.firstElementChild;
-    const [resp, cola] = caja.querySelectorAll('video');
-    resp.muted = cola.muted = true;   // muted, Chrome lets them play on their own
-    const X = { der: 1246.1, izq: 771.8 }, CLAVE = 'sala.gata';
+    const [resp, cola, estira] = caja.querySelectorAll('video');
+    resp.muted = cola.muted = estira.muted = true;   // muted, Chrome lets them play on their own
+    // the box is wider than the curled-up cat, to fit the stretch: these put her in the same place at either end
+    const X = { der: 1232.2, izq: 771.1 }, CLAVE = 'sala.gata';
+    const VEL = new Map([[resp, 0.7], [cola, 0.85], [estira, 0.7]]);
     const quieta = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let punta = null, quedan = 0;
+    let punta = null, quedan = 0, colas = 0;
     try { punta = sessionStorage.getItem(CLAVE); } catch (e) {}
     function poner(p) {
       punta = p; fo.setAttribute('x', X[p]); caja.classList.toggle('izq', p === 'izq');
@@ -475,10 +481,11 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
     if (punta !== 'izq' && punta !== 'der') poner(Math.random() < 0.5 ? 'izq' : 'der');
     else poner(Math.random() < 1 / 3 ? otra() : punta);
 
-    const sorteo = () => 2 + Math.floor(Math.random() * 3);
+    const sorteo = () => 2 + Math.floor(Math.random() * 3);        // breaths before a gesture: 2 to 4
+    const sorteoColas = () => 2 + Math.floor(Math.random() * 2);   // tails before a stretch: 2 or 3
     let actual = resp;
     function arrancar(v) {
-      const r = v === resp ? 0.7 : 0.85;
+      const r = VEL.get(v);
       v.defaultPlaybackRate = r; v.playbackRate = r; v.currentTime = 0;
       const p = v.play(); if (p) p.catch(() => {});
     }
@@ -489,8 +496,12 @@ ol.steps .n { width: 24px; height: 24px; border-radius: 50%; background: #2a2622
       if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(mostrar); else v.addEventListener('playing', mostrar, { once: true });
       arrancar(v);
     }
-    resp.addEventListener('ended', () => { if (--quedan > 0) pasarA(resp); else pasarA(cola); });
-    cola.addEventListener('ended', () => { quedan = sorteo(); pasarA(resp); });
+    function gesto() {
+      if (colas > 0) { colas--; pasarA(cola); } else { colas = sorteoColas(); pasarA(estira); }
+    }
+    resp.addEventListener('ended', () => { if (--quedan > 0) pasarA(resp); else gesto(); });
+    for (const v of [cola, estira]) v.addEventListener('ended', () => { quedan = sorteo(); pasarA(resp); });
+    colas = sorteoColas();
     if (!quieta) { quedan = sorteo(); arrancar(resp); }
     // when the room is not on view (the app in the background), she stops; going into a game removes the room
     document.addEventListener('visibilitychange', () => {
