@@ -2,6 +2,11 @@
 
 Las versiones publicadas de la colección, de la más nueva a la más vieja. Sigue el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado semántico del [README](README.md#versiones). Cada versión se encuentra en el historial por el título de su commit, que empieza con el número.
 
+## 0.27.1 — 15/11/2026
+
+- **El registro de partidas cuida el espacio que comparte con Kasa:** las dos apps viven en el mismo sitio y el navegador les da un solo lugar para guardar. Ahora cada lista del registro tiene, además de su tope de partidas, un tope de tamaño; entre todas usan menos de un tercio del espacio, así que el avance de Kasa siempre tiene lugar.
+- **Una dirección con una dificultad inexistente ya no rompe la partida** de Buen ojo ni de Biblioteca: se juega con la dificultad elegida.
+
 ## 0.27.0 — 13/11/2026
 
 - **La gata piensa** (S-46): al tocarla, a veces piensa algo en una nubecita, a veces ronronea y a veces te ignora moviendo la cola. Si le seguís el juego enseguida, sigue la charla, hasta que se cansa. Son pensamientos en silencio, con el humor de una gata de sillón: algunos dependen de la hora o del juego del que volvés, y los que lo piden vienen con una mirada.

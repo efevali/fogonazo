@@ -56,7 +56,7 @@ Desde la 0.16.0, cada juego anota en el teléfono lo que se juega, para calibrar
 - **Biblioteca**, por partida: dificultad, el reparto (su semilla), cada movida (de qué casillero y lugar a cuál, si juntó un trío y en qué segundo), cuántas veces deshizo, se trabó o pausó, las movidas, el tiempo y el resultado (ganada, reinicio o abandono). Las ganadas sin deshacer se vuelven a jugar enteras sobre su reparto.
 - **La app:** cada apertura y cada pantalla que se abre, y cuándo la app queda escondida o vuelve, para medir las sesiones.
 
-Cada evento lleva la hora y la versión. Si la app se cierra en medio de una partida, queda anotada como «interrumpida» la próxima vez que se abre. Cada lista tiene un tope (2500 partidas de Fogonazo, 600 del mahjong, 600 de Buen ojo, 600 de Biblioteca, 1500 eventos de la app): al pasarlo se van las más viejas. Una partida de Fogonazo ocupa unos cientos de bytes.
+Cada evento lleva la hora y la versión. Si la app se cierra en medio de una partida, queda anotada como «interrumpida» la próxima vez que se abre. Cada lista tiene un tope (2500 partidas de Fogonazo, 600 del mahjong, 600 de Buen ojo, 600 de Biblioteca, 1500 eventos de la app) y, desde la 0.27.1, un presupuesto de caracteres (650 000 para Fogonazo, 120 000 para el mahjong, 150 000 para Buen ojo, 400 000 para Biblioteca y 100 000 para la app): al pasar cualquiera de los dos se van las más viejas. El presupuesto existe porque el sitio es el mismo de Kasa y el navegador les da un solo espacio, de unos 5 millones de caracteres: entre todas las listas usan menos de un tercio. Una partida de Fogonazo ocupa unos 550 caracteres (entran unas 1100) y una de Biblioteca, entre 1300 y 2000 (entran unas 200 o 300); conviene exportar antes de llegar ahí.
 
 ## Publicación
 

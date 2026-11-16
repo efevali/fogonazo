@@ -170,7 +170,7 @@
 
   const q = new URLSearchParams(location.search);
   const PRACTICA = q.has('practica');
-  const DIF = Est.DIFICULTADES[q.get('d')] ? q.get('d') : Est.dificultad;
+  const DIF = Object.hasOwn(Est.DIFICULTADES, q.get('d')) ? q.get('d') : Est.dificultad;   // solo una de las tres (un nombre raro en la dirección no rompe la partida)
   const SEGUNDOS = Est.DIFICULTADES[DIF].segundos;
   const RONDAS = 5;
   const INICIO = () => C.inicio(G.objetivo);   // each round, from a random place, far from the color in one or two of the three (#61)

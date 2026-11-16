@@ -261,7 +261,7 @@
   /* Un reparto para una dificultad: { bib, puertas, solucion, semilla }. Sin semilla, una al azar. Un reparto no
      arranca con casilleros vacíos ni sin movidas. */
   function repartir(dif, semilla) {
-    const D = DIFICULTADES[dif] || DIFICULTADES.normal;
+    const D = Object.hasOwn(DIFICULTADES, dif) ? DIFICULTADES[dif] : DIFICULTADES.normal;
     if (semilla === undefined) semilla = Math.floor(Math.random() * 2 ** 31);
     const M = D.meta || {};
     for (let k = 0; k < 6000; k++) {
