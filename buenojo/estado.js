@@ -7,12 +7,12 @@ window.Estado = (() => {
   const blank = () => ({ dificultad: 'normal', records: {} });
   let st = blank();
   try { const raw = JSON.parse(localStorage.getItem(KEY)); if (raw && raw.records) st = Object.assign(blank(), raw); } catch (e) {}
-  if (!DIFICULTADES[st.dificultad]) st.dificultad = 'normal';
+  if (!Object.hasOwn(DIFICULTADES, st.dificultad)) st.dificultad = 'normal';
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
   return {
     DIFICULTADES,
     get dificultad() { return st.dificultad; },
-    set dificultad(d) { if (DIFICULTADES[d]) { st.dificultad = d; save(); } },
+    set dificultad(d) { if (Object.hasOwn(DIFICULTADES, d)) { st.dificultad = d; save(); } },
     record: d => st.records[d] || 0,
     // una partida terminada: devuelve si es récord y cuál era el anterior
     terminada(d, total) {

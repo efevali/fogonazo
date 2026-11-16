@@ -171,7 +171,7 @@
   fit();
 
   const q = new URLSearchParams(location.search);
-  const DIF = R.DIFICULTADES[q.get('d')] ? q.get('d') : Est.dificultad;
+  const DIF = Object.hasOwn(R.DIFICULTADES, q.get('d')) ? q.get('d') : Est.dificultad;   // solo una de las tres (un nombre raro en la dirección no rompe la partida)
   const D = R.DIFICULTADES[DIF];
   const SEMILLA = q.has('semilla') ? Number(q.get('semilla')) : undefined;   // para las pruebas: un reparto fijo
 
